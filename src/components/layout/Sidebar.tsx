@@ -3,13 +3,13 @@ import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { cn } from '@/lib/utils';
 import { 
-  layout-dashboard as LayoutDashboard,
-  kanban as Kanban,
-  calendar as Calendar,
-  users as Users,
-  folder as Folder,
-  user as User,
-  chevron-left as ChevronLeft
+  LayoutDashboard,
+  Kanban,
+  Calendar,
+  Users,
+  Folder,
+  User,
+  ChevronLeft
 } from 'lucide-react';
 
 interface SidebarProps {
