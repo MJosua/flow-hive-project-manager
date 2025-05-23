@@ -7,9 +7,9 @@ import { Progress } from '@/components/ui/progress';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { 
-  folder as Folder,
-  users as Users,
-  calendar as Calendar,
+  Folder,
+  Users,
+  Calendar,
   CheckCircle
 } from 'lucide-react';
 

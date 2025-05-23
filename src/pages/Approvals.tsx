@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { useApp } from '@/contexts/AppContext';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -7,6 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { CheckCircle, XCircle, Clock, FileText } from 'lucide-react';
 import { format } from 'date-fns';
+import { Users } from 'lucide-react';
 
 const Approvals = () => {
   const { approvals, users, updateApproval } = useApp();
