@@ -17,6 +17,7 @@ import Team from "./pages/Team";
 import Approvals from "./pages/Approvals";
 import NotFound from "./pages/NotFound";
 import { useState } from "react";
+import Register from "./pages/Register";
 
 const queryClient = new QueryClient();
 
@@ -28,6 +29,7 @@ function AppContent() {
       {!user ? (
         <Routes>
           <Route path="*" element={<Login />} />
+          <Route path="/register" element={<Register />} />
         </Routes>
       ) : (
         <Layout>

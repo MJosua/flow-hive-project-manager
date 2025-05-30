@@ -9,12 +9,15 @@ import { Loader2, Lock, Mail } from 'lucide-react';
 import { useApp } from '@/contexts/AppContext';
 
 import { useAuth } from '@/contexts/AuthContext';
+import { useNavigate } from 'react-router-dom';
 
 const Login = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const { aplicationName } = useApp();
+
+  const navigate = useNavigate()
 
   const { user, logout, login, isLoading } = useAuth();
 
@@ -95,8 +98,19 @@ const Login = () => {
                   ' Sign In'
                 )}
               </Button>
-            </form>
 
+
+
+            </form>
+            <Button
+              className="w-full mt-2 bg-gray-500 hover:bg-gray-300 hover:text-black text-white"
+              type="register"
+              onClick={() => {
+                navigate( "/register " );
+              }}
+            >
+              Register
+            </Button>
 
           </CardContent>
         </Card>
