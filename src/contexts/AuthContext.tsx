@@ -34,7 +34,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     
     // Simulate API call - replace with your actual authentication logic
     await new Promise(resolve => setTimeout(resolve, 1000));
-    
     // For demo purposes, accept any email/password combination
     // Replace this with your actual authentication logic
     if (email && password) {
@@ -56,6 +55,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const logout = () => {
     setUser(null);
+    console.log("trying to log out")
     localStorage.removeItem('user');
   };
 

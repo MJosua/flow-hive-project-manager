@@ -11,6 +11,7 @@ import {
   User,
   ChevronLeft
 } from 'lucide-react';
+import { useApp } from '@/contexts/AppContext';
 
 interface SidebarProps {
   isCollapsed: boolean;
@@ -26,6 +27,9 @@ const navigation = [
   { name: 'Approvals', href: '/approvals', icon: User },
 ];
 
+const { aplicationName } = useApp();
+
+
 export const Sidebar: React.FC<SidebarProps> = ({ isCollapsed, onToggle }) => {
   const location = useLocation();
 
@@ -37,7 +41,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ isCollapsed, onToggle }) => {
       {/* Header */}
       <div className="p-4 border-b border-gray-200 flex items-center justify-between">
         {!isCollapsed && (
-          <h2 className="text-xl font-bold text-gray-900">ProjectHub</h2>
+          <h2 className="text-xl font-bold text-gray-900">{aplicationName}</h2>
         )}
         <button
           onClick={onToggle}

@@ -13,7 +13,7 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from '@/components/ui/sidebar';
-import { 
+import {
   LayoutDashboard,
   Kanban,
   Calendar,
@@ -35,17 +35,20 @@ const navigation = [
   { name: 'Approvals', href: '/approvals', icon: User },
 ];
 
+
+
+
 export function AppSidebar() {
   const location = useLocation();
-  const { notifications } = useApp();
+  const { notifications, aplicationName } = useApp();
   const unreadCount = notifications.filter(n => !n.read).length;
 
   return (
     <Sidebar>
       <SidebarHeader className="p-4">
-        <h2 className="text-xl font-bold text-gray-900">ProjectHub</h2>
+        <h2 className="text-xl font-bold text-gray-900">{aplicationName}</h2>
       </SidebarHeader>
-      
+
       <SidebarContent>
         <SidebarGroup>
           <SidebarGroupLabel>Application</SidebarGroupLabel>
@@ -73,13 +76,13 @@ export function AppSidebar() {
           </SidebarGroupContent>
         </SidebarGroup>
       </SidebarContent>
-      
+
       <SidebarFooter className="p-4">
         <div className="flex items-center space-x-3">
           <Avatar className="h-8 w-8">
-            <AvatarImage 
-              src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=32&h=32&fit=crop&crop=face" 
-              alt="John Smith" 
+            <AvatarImage
+              src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=32&h=32&fit=crop&crop=face"
+              alt="John Smith"
             />
             <AvatarFallback>JS</AvatarFallback>
           </Avatar>

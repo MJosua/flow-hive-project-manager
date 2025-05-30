@@ -31,6 +31,8 @@ export const useApp = () => {
 
 export const AppProvider = ({ children }: { children: ReactNode }) => {
   const [users] = useState<User[]>(mockUsers);
+  const [aplicationName] = useState("KanCaBoard");
+
   const [projects, setProjects] = useState<Project[]>(mockProjects);
   const [tasks, setTasks] = useState<Task[]>(mockTasks);
   const [approvals, setApprovals] = useState<Approval[]>(mockApprovals);
@@ -39,13 +41,13 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
   const [currentUser] = useState<User>(mockUsers[0]); // Current logged-in user
 
   const updateTask = (taskId: string, updates: Partial<Task>) => {
-    setTasks(prev => prev.map(task => 
+    setTasks(prev => prev.map(task =>
       task.id === taskId ? { ...task, ...updates } : task
     ));
   };
 
   const updateProject = (projectId: string, updates: Partial<Project>) => {
-    setProjects(prev => prev.map(project => 
+    setProjects(prev => prev.map(project =>
       project.id === projectId ? { ...project, ...updates } : project
     ));
   };
@@ -67,15 +69,17 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
   };
 
   const updateApproval = (approvalId: string, status: 'approved' | 'rejected', notes?: string) => {
-    setApprovals(prev => prev.map(approval => 
-      approval.id === approvalId 
+    setApprovals(prev => prev.map(approval =>
+      approval.id === approvalId
         ? { ...approval, status, notes, resolvedAt: new Date() }
         : approval
     ));
   };
 
+
   return (
     <AppContext.Provider value={{
+      aplicationName,
       currentUser,
       users,
       projects,

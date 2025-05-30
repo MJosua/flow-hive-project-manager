@@ -31,7 +31,7 @@ export const MetricCard: React.FC<MetricCardProps> = ({
   return (
     <Card className="hover:shadow-lg transition-shadow">
       <CardContent className="p-6">
-        <div className="flex items-center justify-between">
+        <div className="flex select-none items-center justify-between">
           <div className="flex-1">
             <p className="text-sm font-medium text-gray-600 mb-1">{title}</p>
             <p className="text-3xl font-bold text-gray-900">{value}</p>
