@@ -43,19 +43,21 @@ function AppContent() {
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
-    <TooltipProvider>
-      <Toaster />
-      <Sonner />
-      <AuthProvider>
-        <AppProvider>
+    <AuthProvider>
+      <AppProvider>
+        <TooltipProvider>
           <BrowserRouter>
-            <ProtectedRoute>
-              <AppContent />
-            </ProtectedRoute>
+            <div className="min-h-screen flex w-full">
+              <Toaster />
+              <Sonner />
+              <ProtectedRoute>
+                <AppContent />
+              </ProtectedRoute>
+            </div>
           </BrowserRouter>
-        </AppProvider>
-      </AuthProvider>
-    </TooltipProvider>
+        </TooltipProvider>
+      </AppProvider>
+    </AuthProvider>
   </QueryClientProvider>
 );
 
