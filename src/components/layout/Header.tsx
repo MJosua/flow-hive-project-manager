@@ -1,14 +1,17 @@
 
 import React from 'react';
 import { useApp } from '@/contexts/AppContext';
-import { Bell, Search } from 'lucide-react';
+import { useAuth } from '@/contexts/AuthContext';
+import { Bell, Search, LogOut } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { SidebarTrigger } from '@/components/ui/sidebar';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 
 export const Header: React.FC = () => {
   const { notifications } = useApp();
+  const { user, logout } = useAuth();
   const unreadCount = notifications.filter(n => !n.read).length;
 
   return (
@@ -46,6 +49,30 @@ export const Header: React.FC = () => {
           <Button size="sm" className="bg-yellow-500 hover:bg-yellow-600 text-black">
             New Project
           </Button>
+
+          {/* User Profile and Logout */}
+          <div className="flex items-center space-x-3">
+            <Avatar className="h-8 w-8">
+              <AvatarImage 
+                src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=32&h=32&fit=crop&crop=face" 
+                alt={user?.name || 'User'} 
+              />
+              <AvatarFallback>
+                {user?.name?.charAt(0).toUpperCase() || 'U'}
+              </AvatarFallback>
+            </Avatar>
+            <div className="hidden sm:block">
+              <p className="text-sm font-medium text-gray-900">{user?.name}</p>
+            </div>
+            <Button 
+              variant="ghost" 
+              size="sm" 
+              onClick={logout}
+              className="text-gray-600 hover:text-gray-900"
+            >
+              <LogOut className="h-4 w-4" />
+            </Button>
+          </div>
         </div>
       </div>
     </header>
