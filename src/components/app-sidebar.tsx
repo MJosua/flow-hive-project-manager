@@ -35,18 +35,15 @@ const navigation = [
   { name: 'Approvals', href: '/approvals', icon: User },
 ];
 
-
-
-
 export function AppSidebar() {
   const location = useLocation();
-  const { notifications, aplicationName } = useApp();
+  const { notifications, applicationName } = useApp();
   const unreadCount = notifications.filter(n => !n.read).length;
 
   return (
     <Sidebar>
       <SidebarHeader className="p-4">
-        <h2 className="text-xl font-bold text-gray-900">{aplicationName}</h2>
+        <h2 className="text-xl font-bold text-gray-900">{applicationName}</h2>
       </SidebarHeader>
 
       <SidebarContent>

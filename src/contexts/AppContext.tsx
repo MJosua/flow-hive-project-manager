@@ -32,7 +32,7 @@ export const useApp = () => {
 
 export const AppProvider = ({ children }: { children: ReactNode }) => {
   const [users] = useState<User[]>(mockUsers);
-  const [applicationName] = useState("KanCaBoard");
+  const [applicationName] = useState("Template Application Name");
   const [projects, setProjects] = useState<Project[]>(mockProjects);
   const [tasks, setTasks] = useState<Task[]>(mockTasks);
   const [approvals, setApprovals] = useState<Approval[]>(mockApprovals);

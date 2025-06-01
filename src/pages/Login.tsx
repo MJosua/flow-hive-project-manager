@@ -15,7 +15,7 @@ const Login = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
-  const { aplicationName } = useApp();
+  const { applicationName } = useApp();
 
   const navigate = useNavigate()
 
@@ -42,7 +42,7 @@ const Login = () => {
         <Card className="w-full max-w-md ">
           <CardHeader className="text-center">
             <CardTitle className="text-2xl font-bold text-gray-900">
-              Welcome to {aplicationName}
+              Welcome to {applicationName}
             </CardTitle>
 
           </CardHeader>
@@ -99,14 +99,11 @@ const Login = () => {
                 )}
               </Button>
 
-
-
             </form>
             <Button
               className="w-full mt-2 bg-gray-500 hover:bg-gray-300 hover:text-black text-white"
-              type="register"
               onClick={() => {
-                navigate( "/register " );
+                navigate("/register");
               }}
             >
               Register
