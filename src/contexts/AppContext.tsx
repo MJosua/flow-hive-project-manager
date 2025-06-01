@@ -4,6 +4,7 @@ import { User, Project, Task, Approval, Notification } from '@/types';
 import { mockUsers, mockProjects, mockTasks, mockApprovals, mockNotifications } from '@/data/mockData';
 
 interface AppContextType {
+  applicationName: string;
   currentUser: User;
   users: User[];
   projects: Project[];
@@ -31,8 +32,7 @@ export const useApp = () => {
 
 export const AppProvider = ({ children }: { children: ReactNode }) => {
   const [users] = useState<User[]>(mockUsers);
-  const [aplicationName] = useState("KanCaBoard");
-
+  const [applicationName] = useState("KanCaBoard");
   const [projects, setProjects] = useState<Project[]>(mockProjects);
   const [tasks, setTasks] = useState<Task[]>(mockTasks);
   const [approvals, setApprovals] = useState<Approval[]>(mockApprovals);
@@ -76,10 +76,9 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
     ));
   };
 
-
   return (
     <AppContext.Provider value={{
-      aplicationName,
+      applicationName,
       currentUser,
       users,
       projects,

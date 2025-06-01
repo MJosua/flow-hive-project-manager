@@ -2,12 +2,14 @@
 import React from 'react';
 import { useApp } from '@/contexts/AppContext';
 import { KanbanBoard } from '@/components/kanban/KanbanBoard';
+import { TaskAssignmentDialog } from '@/components/tasks/TaskAssignmentDialog';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Button } from '@/components/ui/button';
-import { Filter, Plus } from 'lucide-react';
+import { Filter } from 'lucide-react';
 
 const Kanban = () => {
-  const { projects, selectedProject, setSelectedProject } = useApp();
+  const { projects, selectedProject, setSelectedProject, currentUser } = useApp();
+  const isTeamLead = currentUser.role === 'admin' || currentUser.role === 'manager';
 
   return (
     <div className="h-full flex flex-col space-y-6">
@@ -44,10 +46,7 @@ const Kanban = () => {
             Filter
           </Button>
           
-          <Button size="sm" className="bg-yellow-500 hover:bg-yellow-600 text-black">
-            <Plus className="h-4 w-4 mr-2" />
-            Add Task
-          </Button>
+          {isTeamLead && <TaskAssignmentDialog />}
         </div>
       </div>
 

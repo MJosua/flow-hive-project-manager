@@ -14,6 +14,7 @@ import Projects from "./pages/Projects";
 import Kanban from "./pages/Kanban";
 import Gantt from "./pages/Gantt";
 import Team from "./pages/Team";
+import TaskManagement from "./pages/TaskManagement";
 import Approvals from "./pages/Approvals";
 import NotFound from "./pages/NotFound";
 import { useState } from "react";
@@ -39,6 +40,7 @@ function AppContent() {
             <Route path="/kanban" element={<Kanban />} />
             <Route path="/gantt" element={<Gantt />} />
             <Route path="/team" element={<Team />} />
+            <Route path="/tasks" element={<TaskManagement />} />
             <Route path="/approvals" element={<Approvals />} />
           </Routes>
         </Layout>
