@@ -6,11 +6,13 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Calendar, DollarSign, Plus, Users } from 'lucide-react';
+import { Calendar, DollarSign, Plus, Users, ExternalLink } from 'lucide-react';
 import { format } from 'date-fns';
+import { useNavigate } from 'react-router-dom';
 
 const Projects = () => {
   const { projects, users } = useApp();
+  const navigate = useNavigate();
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -160,6 +162,17 @@ const Projects = () => {
                     )}
                   </div>
                 )}
+
+                {/* Open Project Button */}
+                <div className="pt-2 border-t">
+                  <Button 
+                    className="w-full bg-blue-500 hover:bg-blue-600 text-white"
+                    onClick={() => navigate(`/project/${project.id}`)}
+                  >
+                    <ExternalLink className="h-4 w-4 mr-2" />
+                    Open Project
+                  </Button>
+                </div>
               </CardContent>
             </Card>
           );

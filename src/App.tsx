@@ -11,6 +11,7 @@ import ProtectedRoute from "@/components/ProtectedRoute";
 import Login from "./pages/Login";
 import Dashboard from "./pages/Dashboard";
 import Projects from "./pages/Projects";
+import ProjectDetail from "./pages/ProjectDetail";
 import Kanban from "./pages/Kanban";
 import Gantt from "./pages/Gantt";
 import Team from "./pages/Team";
@@ -37,6 +38,7 @@ function AppContent() {
           <Routes>
             <Route path="/" element={<Dashboard />} />
             <Route path="/projects" element={<Projects />} />
+            <Route path="/project/:projectId" element={<ProjectDetail />} />
             <Route path="/kanban" element={<Kanban />} />
             <Route path="/gantt" element={<Gantt />} />
             <Route path="/team" element={<Team />} />
