@@ -2,6 +2,7 @@
 import React from 'react';
 import { DragDropContext, Droppable, Draggable, DropResult } from '@hello-pangea/dnd';
 import { useApp } from '@/contexts/AppContext';
+import { useSearch } from '@/contexts/SearchContext';
 import { Task } from '@/types';
 import { TaskCard } from './TaskCard';
 import { Button } from '@/components/ui/button';
@@ -15,14 +16,30 @@ const columns = [
 ];
 
 export const KanbanBoard: React.FC = () => {
-  const { tasks, updateTask, selectedProject } = useApp();
+  const { tasks, updateTask, selectedProject, users } = useApp();
+  const { searchQuery } = useSearch();
   
   const filteredTasks = selectedProject 
     ? tasks.filter(task => task.projectId === selectedProject.id)
     : tasks;
 
+  // Apply search filtering
+  const searchFilteredTasks = searchQuery.trim() 
+    ? filteredTasks.filter(task => {
+        const assignee = users.find(u => u.id === task.assigneeId);
+        const searchLower = searchQuery.toLowerCase();
+        
+        return task.title.toLowerCase().includes(searchLower) ||
+               task.description.toLowerCase().includes(searchLower) ||
+               task.status.toLowerCase().includes(searchLower) ||
+               task.priority.toLowerCase().includes(searchLower) ||
+               task.tags.some(tag => tag.toLowerCase().includes(searchLower)) ||
+               (assignee && assignee.name.toLowerCase().includes(searchLower));
+      })
+    : filteredTasks;
+
   const tasksByStatus = columns.reduce((acc, column) => {
-    acc[column.id] = filteredTasks.filter(task => task.status === column.id);
+    acc[column.id] = searchFilteredTasks.filter(task => task.status === column.id);
     return acc;
   }, {} as Record<string, Task[]>);
 

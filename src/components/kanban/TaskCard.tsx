@@ -2,6 +2,7 @@
 import React from 'react';
 import { Task } from '@/types';
 import { useApp } from '@/contexts/AppContext';
+import { useSearch } from '@/contexts/SearchContext';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -14,6 +15,7 @@ interface TaskCardProps {
 
 export const TaskCard: React.FC<TaskCardProps> = ({ task }) => {
   const { users } = useApp();
+  const { searchQuery, highlightText } = useSearch();
   const assignee = users.find(user => user.id === task.assigneeId);
 
   const getPriorityColor = (priority: Task['priority']) => {
@@ -43,20 +45,24 @@ export const TaskCard: React.FC<TaskCardProps> = ({ task }) => {
         <div className="flex items-start justify-between mb-3">
           <div className={`w-3 h-3 rounded-full ${getPriorityColor(task.priority)}`} />
           <Badge variant="outline" className={`text-xs ${getPriorityTextColor(task.priority)}`}>
-            {task.priority}
+            {highlightText(task.priority, searchQuery)}
           </Badge>
         </div>
 
         {/* Task title and description */}
-        <h4 className="font-semibold text-gray-900 mb-2 line-clamp-2">{task.title}</h4>
-        <p className="text-sm text-gray-600 mb-4 line-clamp-2">{task.description}</p>
+        <h4 className="font-semibold text-gray-900 mb-2 line-clamp-2">
+          {highlightText(task.title, searchQuery)}
+        </h4>
+        <p className="text-sm text-gray-600 mb-4 line-clamp-2">
+          {highlightText(task.description, searchQuery)}
+        </p>
 
         {/* Tags */}
         {task.tags.length > 0 && (
           <div className="flex flex-wrap gap-1 mb-3">
             {task.tags.slice(0, 2).map((tag) => (
               <Badge key={tag} variant="secondary" className="text-xs">
-                {tag}
+                {highlightText(tag, searchQuery)}
               </Badge>
             ))}
             {task.tags.length > 2 && (

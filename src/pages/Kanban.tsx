@@ -1,6 +1,7 @@
 
 import React from 'react';
 import { useApp } from '@/contexts/AppContext';
+import { useSearch } from '@/contexts/SearchContext';
 import { KanbanBoard } from '@/components/kanban/KanbanBoard';
 import { TaskAssignmentDialog } from '@/components/tasks/TaskAssignmentDialog';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -9,6 +10,7 @@ import { Filter } from 'lucide-react';
 
 const Kanban = () => {
   const { projects, selectedProject, setSelectedProject, currentUser } = useApp();
+  const { searchQuery } = useSearch();
   const isTeamLead = currentUser.role === 'admin' || currentUser.role === 'manager';
 
   return (
@@ -17,7 +19,14 @@ const Kanban = () => {
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-4 sm:space-y-0">
         <div>
           <h1 className="text-2xl font-bold text-gray-900">Kanban Board</h1>
-          <p className="text-gray-600">Manage tasks with drag-and-drop interface</p>
+          <p className="text-gray-600">
+            Manage tasks with drag-and-drop interface
+            {searchQuery && (
+              <span className="ml-2 text-sm text-yellow-600">
+                • Filtering by: "{searchQuery}"
+              </span>
+            )}
+          </p>
         </div>
         
         <div className="flex items-center space-x-3">

@@ -1,70 +1,48 @@
-
-import { Toaster } from "@/components/ui/toaster";
-import { Toaster as Sonner } from "@/components/ui/sonner";
-import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
-import { AppProvider } from "@/contexts/AppContext";
-import { AuthProvider, useAuth } from "@/contexts/AuthContext";
-import { Layout } from "@/components/layout/Layout";
-import ProtectedRoute from "@/components/ProtectedRoute";
-import Login from "./pages/Login";
-import Dashboard from "./pages/Dashboard";
-import Projects from "./pages/Projects";
-import ProjectDetail from "./pages/ProjectDetail";
-import Kanban from "./pages/Kanban";
-import Gantt from "./pages/Gantt";
-import Team from "./pages/Team";
-import TaskManagement from "./pages/TaskManagement";
-import Approvals from "./pages/Approvals";
-import NotFound from "./pages/NotFound";
-import { useState } from "react";
-import Register from "./pages/Register";
+import { AuthProvider } from "./contexts/AuthContext";
+import { AppProvider } from "./contexts/AppContext";
+import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
+import Dashboard from './pages/Dashboard';
+import Projects from './pages/Projects';
+import Kanban from './pages/Kanban';
+import Tasks from './pages/Tasks';
+import Approvals from './pages/Approvals';
+import Team from './pages/Team';
+import Reports from './pages/Reports';
+import Settings from './pages/Settings';
+import Login from './pages/Login';
+import Register from './pages/Register';
+import { SearchProvider } from '@/contexts/SearchContext';
 
 const queryClient = new QueryClient();
 
-function AppContent() {
-  const { user } = useAuth();
-
+function App() {
   return (
-    <BrowserRouter>
-      {!user ? (
-        <Routes>
-          <Route path="*" element={<Login />} />
-          <Route path="/register" element={<Register />} />
-        </Routes>
-      ) : (
-        <Layout>
-          <Routes>
-            <Route path="/" element={<Dashboard />} />
-            <Route path="/projects" element={<Projects />} />
-            <Route path="/project/:projectId" element={<ProjectDetail />} />
-            <Route path="/kanban" element={<Kanban />} />
-            <Route path="/gantt" element={<Gantt />} />
-            <Route path="/team" element={<Team />} />
-            <Route path="/tasks" element={<TaskManagement />} />
-            <Route path="/approvals" element={<Approvals />} />
-          </Routes>
-        </Layout>
-      )}
-    </BrowserRouter>
+    <QueryClientProvider client={queryClient}>
+      <AuthProvider>
+        <AppProvider>
+          <SearchProvider>
+            <Router>
+              <div className="min-h-screen bg-gray-50">
+                <Routes>
+                  <Route path="/login" element={<Login />} />
+                  <Route path="/register" element={<Register />} />
+                  <Route path="/" element={<Dashboard />} />
+                  <Route path="/projects" element={<Projects />} />
+                  <Route path="/kanban" element={<Kanban />} />
+                  <Route path="/tasks" element={<Tasks />} />
+                  <Route path="/approvals" element={<Approvals />} />
+                  <Route path="/team" element={<Team />} />
+                  <Route path="/reports" element={<Reports />} />
+                  <Route path="/settings" element={<Settings />} />
+                </Routes>
+              </div>
+            </Router>
+          </SearchProvider>
+        </AppProvider>
+      </AuthProvider>
+    </QueryClientProvider>
   );
 }
-
-const App = () => (
-  <QueryClientProvider client={queryClient}>
-    <AppProvider>
-      <AuthProvider>
-        <TooltipProvider>
-          <div className="min-h-screen flex w-full">
-            <Toaster />
-            <Sonner />
-            <AppContent />
-          </div>
-        </TooltipProvider>
-      </AuthProvider>
-    </AppProvider>
-  </QueryClientProvider>
-);
 
 export default App;
