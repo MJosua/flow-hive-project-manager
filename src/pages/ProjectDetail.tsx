@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useApp } from '@/contexts/AppContext';
@@ -20,6 +19,15 @@ import {
   Circle
 } from 'lucide-react';
 import { format } from 'date-fns';
+
+// Import all modal components
+import AddTaskModal from '@/components/modals/AddTaskModal';
+import AddMemberModal from '@/components/modals/AddMemberModal';
+import EditProjectModal from '@/components/modals/EditProjectModal';
+import BudgetSettingsModal from '@/components/modals/BudgetSettingsModal';
+import ManageCategoriesModal from '@/components/modals/ManageCategoriesModal';
+import TimelineSettingsModal from '@/components/modals/TimelineSettingsModal';
+import DeleteProjectModal from '@/components/modals/DeleteProjectModal';
 
 // Dummy task data for now
 const dummyTasks = [
@@ -70,6 +78,25 @@ const ProjectDetail = () => {
   const navigate = useNavigate();
   const { projects, users } = useApp();
   const [activeTab, setActiveTab] = useState('overview');
+  
+  // Modal states
+  const [modals, setModals] = useState({
+    addTask: false,
+    addMember: false,
+    editProject: false,
+    budgetSettings: false,
+    manageCategories: false,
+    timelineSettings: false,
+    deleteProject: false
+  });
+
+  const openModal = (modalName: keyof typeof modals) => {
+    setModals({ ...modals, [modalName]: true });
+  };
+
+  const closeModal = (modalName: keyof typeof modals) => {
+    setModals({ ...modals, [modalName]: false });
+  };
 
   const project = projects.find(p => p.id === projectId);
 
@@ -258,7 +285,10 @@ const ProjectDetail = () => {
         <TabsContent value="tasks" className="space-y-6">
           <div className="flex justify-between items-center">
             <h2 className="text-xl font-semibold">Tasks</h2>
-            <Button className="bg-yellow-500 hover:bg-yellow-600 text-black">
+            <Button 
+              className="bg-yellow-500 hover:bg-yellow-600 text-black"
+              onClick={() => openModal('addTask')}
+            >
               <Plus className="h-4 w-4 mr-2" />
               Add Task
             </Button>
@@ -315,7 +345,10 @@ const ProjectDetail = () => {
         <TabsContent value="team" className="space-y-6">
           <div className="flex justify-between items-center">
             <h2 className="text-xl font-semibold">Team Members</h2>
-            <Button className="bg-yellow-500 hover:bg-yellow-600 text-black">
+            <Button 
+              className="bg-yellow-500 hover:bg-yellow-600 text-black"
+              onClick={() => openModal('addMember')}
+            >
               <Plus className="h-4 w-4 mr-2" />
               Add Member
             </Button>
@@ -377,18 +410,86 @@ const ProjectDetail = () => {
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="grid grid-cols-2 gap-4">
-                <Button variant="outline">Edit Project Details</Button>
-                <Button variant="outline">Manage Categories</Button>
-                <Button variant="outline">Budget Settings</Button>
-                <Button variant="outline">Timeline Settings</Button>
+                <Button 
+                  variant="outline"
+                  onClick={() => openModal('editProject')}
+                >
+                  Edit Project Details
+                </Button>
+                <Button 
+                  variant="outline"
+                  onClick={() => openModal('manageCategories')}
+                >
+                  Manage Categories
+                </Button>
+                <Button 
+                  variant="outline"
+                  onClick={() => openModal('budgetSettings')}
+                >
+                  Budget Settings
+                </Button>
+                <Button 
+                  variant="outline"
+                  onClick={() => openModal('timelineSettings')}
+                >
+                  Timeline Settings
+                </Button>
               </div>
               <div className="pt-4 border-t">
-                <Button variant="destructive">Delete Project</Button>
+                <Button 
+                  variant="destructive"
+                  onClick={() => openModal('deleteProject')}
+                >
+                  Delete Project
+                </Button>
               </div>
             </CardContent>
           </Card>
         </TabsContent>
       </Tabs>
+
+      {/* All Modal Components */}
+      <AddTaskModal
+        open={modals.addTask}
+        onOpenChange={(open) => setModals({ ...modals, addTask: open })}
+        projectId={projectId!}
+      />
+      
+      <AddMemberModal
+        open={modals.addMember}
+        onOpenChange={(open) => setModals({ ...modals, addMember: open })}
+        projectId={projectId!}
+      />
+      
+      <EditProjectModal
+        open={modals.editProject}
+        onOpenChange={(open) => setModals({ ...modals, editProject: open })}
+        projectId={projectId!}
+      />
+      
+      <BudgetSettingsModal
+        open={modals.budgetSettings}
+        onOpenChange={(open) => setModals({ ...modals, budgetSettings: open })}
+        projectId={projectId!}
+      />
+      
+      <ManageCategoriesModal
+        open={modals.manageCategories}
+        onOpenChange={(open) => setModals({ ...modals, manageCategories: open })}
+        projectId={projectId!}
+      />
+      
+      <TimelineSettingsModal
+        open={modals.timelineSettings}
+        onOpenChange={(open) => setModals({ ...modals, timelineSettings: open })}
+        projectId={projectId!}
+      />
+      
+      <DeleteProjectModal
+        open={modals.deleteProject}
+        onOpenChange={(open) => setModals({ ...modals, deleteProject: open })}
+        projectId={projectId!}
+      />
     </div>
   );
 };

@@ -1,5 +1,4 @@
-
-import React from 'react';
+import React, { useState } from 'react';
 import { useApp } from '@/contexts/AppContext';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -9,10 +8,12 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Calendar, DollarSign, Plus, Users, ExternalLink } from 'lucide-react';
 import { format } from 'date-fns';
 import { useNavigate } from 'react-router-dom';
+import NewProjectModal from '@/components/modals/NewProjectModal';
 
 const Projects = () => {
   const { projects, users } = useApp();
   const navigate = useNavigate();
+  const [newProjectModalOpen, setNewProjectModalOpen] = useState(false);
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -44,7 +45,10 @@ const Projects = () => {
           <p className="text-gray-600">Manage and track all your projects</p>
         </div>
         
-        <Button className="bg-yellow-500 hover:bg-yellow-600 text-black">
+        <Button 
+          className="bg-yellow-500 hover:bg-yellow-600 text-black"
+          onClick={() => setNewProjectModalOpen(true)}
+        >
           <Plus className="h-4 w-4 mr-2" />
           New Project
         </Button>
@@ -178,6 +182,12 @@ const Projects = () => {
           );
         })}
       </div>
+
+      {/* New Project Modal */}
+      <NewProjectModal
+        open={newProjectModalOpen}
+        onOpenChange={setNewProjectModalOpen}
+      />
     </div>
   );
 };
