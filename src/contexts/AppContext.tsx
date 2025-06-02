@@ -1,7 +1,6 @@
-
 import React, { createContext, useContext, useState, ReactNode } from 'react';
-import { User, Project, Task, Approval, Notification } from '@/types';
-import { mockUsers, mockProjects, mockTasks, mockApprovals, mockNotifications } from '@/data/mockData';
+import { User, Project, Task, Approval, Notification, ProjectRole } from '@/types';
+import { mockUsers, mockProjects, mockTasks, mockApprovals, mockNotifications, mockProjectRoles } from '@/data/mockData';
 
 interface AppContextType {
   applicationName: string;
@@ -11,6 +10,7 @@ interface AppContextType {
   tasks: Task[];
   approvals: Approval[];
   notifications: Notification[];
+  projectRoles: ProjectRole[];
   selectedProject: Project | null;
   setSelectedProject: (project: Project | null) => void;
   updateTask: (taskId: string, updates: Partial<Task>) => void;
@@ -18,6 +18,8 @@ interface AppContextType {
   createProject: (project: Omit<Project, 'id'>) => void;
   createTask: (task: Omit<Task, 'id'>) => void;
   updateApproval: (approvalId: string, status: 'approved' | 'rejected', notes?: string) => void;
+  updateProjectRole: (userId: string, projectId: string, updates: Partial<ProjectRole>) => void;
+  addProjectRole: (role: Omit<ProjectRole, 'id'>) => void;
 }
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
@@ -37,6 +39,7 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
   const [tasks, setTasks] = useState<Task[]>(mockTasks);
   const [approvals, setApprovals] = useState<Approval[]>(mockApprovals);
   const [notifications] = useState<Notification[]>(mockNotifications);
+  const [projectRoles, setProjectRoles] = useState<ProjectRole[]>(mockProjectRoles);
   const [selectedProject, setSelectedProject] = useState<Project | null>(null);
   const [currentUser] = useState<User>(mockUsers[0]); // Current logged-in user
 
@@ -76,6 +79,21 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
     ));
   };
 
+  const updateProjectRole = (userId: string, projectId: string, updates: Partial<ProjectRole>) => {
+    setProjectRoles(prev => prev.map(role =>
+      role.userId === userId && role.projectId === projectId 
+        ? { ...role, ...updates } 
+        : role
+    ));
+  };
+
+  const addProjectRole = (roleData: Omit<ProjectRole, 'id'>) => {
+    const newRole: ProjectRole = {
+      ...roleData
+    };
+    setProjectRoles(prev => [...prev, newRole]);
+  };
+
   return (
     <AppContext.Provider value={{
       applicationName,
@@ -85,13 +103,16 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
       tasks,
       approvals,
       notifications,
+      projectRoles,
       selectedProject,
       setSelectedProject,
       updateTask,
       updateProject,
       createProject,
       createTask,
-      updateApproval
+      updateApproval,
+      updateProjectRole,
+      addProjectRole
     }}>
       {children}
     </AppContext.Provider>

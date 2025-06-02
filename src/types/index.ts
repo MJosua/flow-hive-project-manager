@@ -1,4 +1,3 @@
-
 export interface User {
   id: string;
   name: string;
@@ -7,6 +6,15 @@ export interface User {
   role: 'admin' | 'manager' | 'developer' | 'designer' | 'tester';
   department: string;
   status: 'active' | 'inactive';
+}
+
+export interface ProjectRole {
+  userId: string;
+  projectId: string;
+  role: string; // Custom role name (e.g., "Lead Developer", "UI Designer", "QA Lead")
+  hierarchy: number; // 1 = highest (project lead), 2 = senior, 3 = regular, etc.
+  color: string; // Custom hex color for the badge
+  permissions: string[]; // List of permissions for this role
 }
 
 export interface Project {
@@ -23,6 +31,7 @@ export interface Project {
   budget: number;
   tags: string[];
   color: string;
+  roleColors: { [roleName: string]: string }; // Custom colors for project roles
 }
 
 export interface Task {

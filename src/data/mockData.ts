@@ -1,5 +1,4 @@
-
-import { User, Project, Task, Approval, Notification } from '@/types';
+import { User, Project, Task, Approval, Notification, ProjectRole } from '@/types';
 import { addDays, subDays } from 'date-fns';
 
 export const mockUsers: User[] = [
@@ -64,7 +63,13 @@ export const mockProjects: Project[] = [
     teamMembers: ['2', '3', '4', '5'],
     budget: 150000,
     tags: ['React', 'Node.js', 'E-commerce'],
-    color: '#10B981'
+    color: '#10B981',
+    roleColors: {
+      'Project Lead': '#DC2626',
+      'Senior Developer': '#2563EB',
+      'UI Designer': '#7C3AED',
+      'Developer': '#059669'
+    }
   },
   {
     id: 'proj-2',
@@ -79,7 +84,12 @@ export const mockProjects: Project[] = [
     teamMembers: ['4', '5'],
     budget: 80000,
     tags: ['Mobile', 'UI/UX', 'Design'],
-    color: '#F59E0B'
+    color: '#F59E0B',
+    roleColors: {
+      'Design Lead': '#EC4899',
+      'UX Designer': '#8B5CF6',
+      'Frontend Developer': '#10B981'
+    }
   },
   {
     id: 'proj-3',
@@ -94,7 +104,100 @@ export const mockProjects: Project[] = [
     teamMembers: ['3', '5'],
     budget: 120000,
     tags: ['Analytics', 'Dashboard', 'BI'],
-    color: '#EF4444'
+    color: '#EF4444',
+    roleColors: {
+      'Tech Lead': '#DC2626',
+      'Data Engineer': '#2563EB',
+      'Full Stack Developer': '#059669'
+    }
+  }
+];
+
+export const mockProjectRoles: ProjectRole[] = [
+  // E-commerce Platform team
+  {
+    userId: '2',
+    projectId: 'proj-1',
+    role: 'Project Lead',
+    hierarchy: 1,
+    color: '#DC2626',
+    permissions: ['manage_team', 'approve_tasks', 'edit_project']
+  },
+  {
+    userId: '3',
+    projectId: 'proj-1',
+    role: 'Senior Developer',
+    hierarchy: 2,
+    color: '#2563EB',
+    permissions: ['create_tasks', 'review_code']
+  },
+  {
+    userId: '4',
+    projectId: 'proj-1',
+    role: 'UI Designer',
+    hierarchy: 2,
+    color: '#7C3AED',
+    permissions: ['create_designs', 'review_ui']
+  },
+  {
+    userId: '5',
+    projectId: 'proj-1',
+    role: 'Developer',
+    hierarchy: 3,
+    color: '#059669',
+    permissions: ['complete_tasks']
+  },
+  
+  // Mobile App Redesign team
+  {
+    userId: '2',
+    projectId: 'proj-2',
+    role: 'Design Lead',
+    hierarchy: 1,
+    color: '#EC4899',
+    permissions: ['manage_team', 'approve_designs']
+  },
+  {
+    userId: '4',
+    projectId: 'proj-2',
+    role: 'UX Designer',
+    hierarchy: 2,
+    color: '#8B5CF6',
+    permissions: ['create_designs', 'user_research']
+  },
+  {
+    userId: '5',
+    projectId: 'proj-2',
+    role: 'Frontend Developer',
+    hierarchy: 2,
+    color: '#10B981',
+    permissions: ['implement_designs', 'review_code']
+  },
+  
+  // Data Analytics Dashboard team
+  {
+    userId: '1',
+    projectId: 'proj-3',
+    role: 'Tech Lead',
+    hierarchy: 1,
+    color: '#DC2626',
+    permissions: ['manage_team', 'approve_architecture']
+  },
+  {
+    userId: '3',
+    projectId: 'proj-3',
+    role: 'Data Engineer',
+    hierarchy: 2,
+    color: '#2563EB',
+    permissions: ['design_data_models', 'optimize_queries']
+  },
+  {
+    userId: '5',
+    projectId: 'proj-3',
+    role: 'Full Stack Developer',
+    hierarchy: 3,
+    color: '#059669',
+    permissions: ['implement_features', 'write_tests']
   }
 ];
 
@@ -241,5 +344,3 @@ export const mockNotifications: Notification[] = [
     createdAt: subDays(new Date(), 1)
   }
 ];
-
-
