@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { useApp } from '@/contexts/AppContext';
 import { useSearch } from '@/contexts/SearchContext';
@@ -7,6 +6,7 @@ import { TaskAssignmentDialog } from '@/components/tasks/TaskAssignmentDialog';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Button } from '@/components/ui/button';
 import { Filter } from 'lucide-react';
+import { Layout } from '@/components/layout/Layout';
 
 const Kanban = () => {
   const { projects, selectedProject, setSelectedProject, currentUser } = useApp();
@@ -14,7 +14,7 @@ const Kanban = () => {
   const isTeamLead = currentUser.role === 'admin' || currentUser.role === 'manager';
 
   return (
-    <div className="h-full flex flex-col space-y-6">
+    <Layout>
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-4 sm:space-y-0">
         <div>
@@ -63,7 +63,7 @@ const Kanban = () => {
       <div className="flex-1 min-h-0">
         <KanbanBoard />
       </div>
-    </div>
+    </Layout>
   );
 };
 

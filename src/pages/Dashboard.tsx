@@ -1,4 +1,3 @@
-
 import { useApp } from '@/contexts/AppContext';
 import { MetricCard } from '@/components/dashboard/MetricCard';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -11,6 +10,7 @@ import {
   Calendar,
   CheckCircle
 } from 'lucide-react';
+import { Layout } from '@/components/layout/Layout';
 
 const Dashboard = () => {
   const { projects, tasks, users, notifications } = useApp();
@@ -24,9 +24,9 @@ const Dashboard = () => {
   const recentTasks = tasks.slice(0, 8);
 
   return (
-    <div className="space-y-6">
+    <Layout>
       {/* Metrics Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+      <div className="space-y-6">
         <MetricCard
           title="Active Projects"
           value={activeProjects}
@@ -133,7 +133,7 @@ const Dashboard = () => {
           </CardContent>
         </Card>
       </div>
-    </div>
+    </Layout>
   );
 };
 

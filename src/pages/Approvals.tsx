@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useApp } from '@/contexts/AppContext';
 import { Badge } from '@/components/ui/badge';
@@ -7,6 +6,7 @@ import PendingApprovalCard from '@/components/approvals/PendingApprovalCard';
 import ProcessedApprovalCard from '@/components/approvals/ProcessedApprovalCard';
 import ApprovalConfirmationModal from '@/components/modals/ApprovalConfirmationModal';
 import { Approval } from '@/types';
+import { Layout } from '@/components/layout/Layout';
 
 const Approvals = () => {
   const { approvals, users, updateApproval } = useApp();
@@ -43,7 +43,7 @@ const Approvals = () => {
   const processedApprovals = approvals.filter(a => a.status !== 'pending');
 
   return (
-    <div className="space-y-6">
+    <Layout>
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
@@ -112,7 +112,7 @@ const Approvals = () => {
         requesterName={users.find(u => u.id === confirmationModal.approval?.requesterId)?.name}
         onConfirm={confirmApproval}
       />
-    </div>
+    </Layout>
   );
 };
 

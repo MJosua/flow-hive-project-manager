@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useApp } from '@/contexts/AppContext';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -6,6 +5,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Mail, Plus, UserPlus, Crown, Star, User, Settings } from 'lucide-react';
+import { Layout } from '@/components/layout/Layout';
 
 const Team = () => {
   const { users, tasks, projects, projectRoles } = useApp();
@@ -71,7 +71,7 @@ const Team = () => {
   const projectTeams = getProjectTeams();
 
   return (
-    <div className="space-y-6">
+    <Layout>
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-4 sm:space-y-0">
         <div>
@@ -247,7 +247,7 @@ const Team = () => {
           </div>
         </CardContent>
       </Card>
-    </div>
+    </Layout>
   );
 };
 

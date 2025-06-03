@@ -9,6 +9,7 @@ import { Calendar, DollarSign, Plus, Users, ExternalLink } from 'lucide-react';
 import { format } from 'date-fns';
 import { useNavigate } from 'react-router-dom';
 import NewProjectModal from '@/components/modals/NewProjectModal';
+import { Layout } from '@/components/layout/Layout';
 
 const Projects = () => {
   const { projects, users } = useApp();
@@ -37,7 +38,7 @@ const Projects = () => {
   };
 
   return (
-    <div className="space-y-6">
+    <Layout>
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-4 sm:space-y-0">
         <div>
@@ -188,7 +189,7 @@ const Projects = () => {
         open={newProjectModalOpen}
         onOpenChange={setNewProjectModalOpen}
       />
-    </div>
+    </Layout>
   );
 };
 
