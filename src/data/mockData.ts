@@ -325,13 +325,23 @@ export const mockApprovals: Approval[] = [
     approverId: '1',
     status: 'approved',
     details: {
-      taskId: 'task-3',
-      assigneeId: '5',
-      reason: 'Best fit for API development'
+      userId: '5',
+      projectId: 'proj-2',
+      role: 'Frontend Developer'
     },
-    createdAt: subDays(new Date(), 5),
-    resolvedAt: subDays(new Date(), 3),
-    notes: 'Approved - good match for skills'
+    createdAt: subDays(new Date(), 10)
+  },
+  {
+    id: 'app-3',
+    type: 'task_approval',
+    requesterId: '3',
+    approverId: '2',
+    status: 'rejected',
+    details: {
+      taskId: 'task-2',
+      reason: 'Security review not completed'
+    },
+    createdAt: subDays(new Date(), 5)
   }
 ];
 
