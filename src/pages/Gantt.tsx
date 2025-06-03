@@ -1,6 +1,7 @@
 
 import React, { useMemo } from 'react';
 import { useApp } from '@/contexts/AppContext';
+import { useSearch } from '@/contexts/SearchContext';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -9,15 +10,31 @@ import { Layout } from '@/components/layout/Layout';
 
 const Gantt = () => {
   const { projects, tasks, users, selectedProject, setSelectedProject } = useApp();
+  const { searchQuery, highlightText } = useSearch();
 
   const currentMonth = new Date();
   const monthStart = startOfMonth(currentMonth);
   const monthEnd = endOfMonth(currentMonth);
   const days = eachDayOfInterval({ start: monthStart, end: monthEnd });
 
-  const filteredTasks = selectedProject 
+  const projectFilteredTasks = selectedProject 
     ? tasks.filter(task => task.projectId === selectedProject.id)
     : tasks;
+
+  // Apply search filtering
+  const filteredTasks = searchQuery.trim()
+    ? projectFilteredTasks.filter(task => {
+        const assignee = users.find(u => u.id === task.assigneeId);
+        const searchLower = searchQuery.toLowerCase();
+        
+        return task.title.toLowerCase().includes(searchLower) ||
+               task.description.toLowerCase().includes(searchLower) ||
+               task.status.toLowerCase().includes(searchLower) ||
+               task.priority.toLowerCase().includes(searchLower) ||
+               task.tags.some(tag => tag.toLowerCase().includes(searchLower)) ||
+               (assignee && assignee.name.toLowerCase().includes(searchLower));
+      })
+    : projectFilteredTasks;
 
   const getTaskPosition = (task: any) => {
     const taskStart = new Date(task.startDate);
@@ -45,7 +62,14 @@ const Gantt = () => {
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-4 sm:space-y-0">
           <div>
             <h1 className="text-2xl font-bold text-gray-900">Gantt Chart</h1>
-            <p className="text-gray-600">Timeline view of project tasks and milestones</p>
+            <p className="text-gray-600">
+              Timeline view of project tasks and milestones
+              {searchQuery && (
+                <span className="ml-2 text-sm text-yellow-600">
+                  • Filtering by: "{searchQuery}" ({filteredTasks.length} tasks)
+                </span>
+              )}
+            </p>
           </div>
           
           <Select 
@@ -123,16 +147,20 @@ const Gantt = () => {
                       <div className="w-64 flex-shrink-0 pr-4">
                         <div className="flex items-center space-x-2">
                           <div className="flex-1 min-w-0">
-                            <p className="font-medium text-gray-900 truncate">{task.title}</p>
+                            <p className="font-medium text-gray-900 truncate">
+                              {highlightText(task.title, searchQuery)}
+                            </p>
                             <div className="flex items-center space-x-2 mt-1">
                               <Badge 
                                 variant="outline" 
                                 className={`text-xs ${getStatusColor(task.status)} text-white border-0`}
                               >
-                                {task.status.replace('-', ' ')}
+                                {highlightText(task.status.replace('-', ' '), searchQuery)}
                               </Badge>
                               {assignee && (
-                                <span className="text-xs text-gray-500">{assignee.name}</span>
+                                <span className="text-xs text-gray-500">
+                                  {highlightText(assignee.name, searchQuery)}
+                                </span>
                               )}
                             </div>
                           </div>
@@ -157,6 +185,11 @@ const Gantt = () => {
                     </div>
                   );
                 })}
+                {filteredTasks.length === 0 && searchQuery && (
+                  <div className="text-center text-gray-500 py-8">
+                    No tasks found matching "{searchQuery}"
+                  </div>
+                )}
               </div>
             </div>
           </CardContent>

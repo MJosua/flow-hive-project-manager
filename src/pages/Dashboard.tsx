@@ -1,4 +1,6 @@
+
 import { useApp } from '@/contexts/AppContext';
+import { useSearch } from '@/contexts/SearchContext';
 import { MetricCard } from '@/components/dashboard/MetricCard';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
@@ -14,17 +16,57 @@ import { Layout } from '@/components/layout/Layout';
 
 const Dashboard = () => {
   const { projects, tasks, users, notifications } = useApp();
+  const { searchQuery, highlightText } = useSearch();
 
   const activeProjects = projects.filter(p => p.status === 'active').length;
   const completedTasks = tasks.filter(t => t.status === 'done').length;
   const totalTasks = tasks.length;
   const pendingApprovals = notifications.filter(n => !n.read && n.type === 'warning').length;
 
-  const recentProjects = projects.slice(0, 5);
-  const recentTasks = tasks.slice(0, 8);
+  // Apply search filtering
+  const filteredProjects = searchQuery.trim() 
+    ? projects.filter(project => {
+        const searchLower = searchQuery.toLowerCase();
+        const manager = users.find(u => u.id === project.managerId);
+        
+        return project.name.toLowerCase().includes(searchLower) ||
+               project.description.toLowerCase().includes(searchLower) ||
+               project.status.toLowerCase().includes(searchLower) ||
+               project.priority.toLowerCase().includes(searchLower) ||
+               project.tags.some(tag => tag.toLowerCase().includes(searchLower)) ||
+               (manager && manager.name.toLowerCase().includes(searchLower));
+      })
+    : projects;
+
+  const filteredTasks = searchQuery.trim()
+    ? tasks.filter(task => {
+        const assignee = users.find(u => u.id === task.assigneeId);
+        const searchLower = searchQuery.toLowerCase();
+        
+        return task.title.toLowerCase().includes(searchLower) ||
+               task.description.toLowerCase().includes(searchLower) ||
+               task.status.toLowerCase().includes(searchLower) ||
+               task.priority.toLowerCase().includes(searchLower) ||
+               task.tags.some(tag => tag.toLowerCase().includes(searchLower)) ||
+               (assignee && assignee.name.toLowerCase().includes(searchLower));
+      })
+    : tasks;
+
+  const recentProjects = filteredProjects.slice(0, 5);
+  const recentTasks = filteredTasks.slice(0, 8);
 
   return (
     <Layout>
+      {/* Search indicator */}
+      {searchQuery && (
+        <div className="mb-4 p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
+          <p className="text-sm text-yellow-700">
+            Showing results for: "<span className="font-medium">{searchQuery}</span>"
+            {" "}({filteredProjects.length} projects, {filteredTasks.length} tasks)
+          </p>
+        </div>
+      )}
+
       {/* Metrics Grid */}
       <div className="space-y-6">
         <MetricCard
@@ -67,20 +109,22 @@ const Dashboard = () => {
           <CardHeader>
             <CardTitle className="flex items-center space-x-2">
               <Folder className="h-5 w-5" />
-              <span>Recent Projects</span>
+              <span>Recent Projects {searchQuery && `(${recentProjects.length})`}</span>
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
             {recentProjects.map((project) => (
               <div key={project.id} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
                 <div className="flex-1">
-                  <h4 className="font-medium text-gray-900">{project.name}</h4>
+                  <h4 className="font-medium text-gray-900">
+                    {highlightText(project.name, searchQuery)}
+                  </h4>
                   <div className="flex items-center space-x-2 mt-1">
                     <Badge 
                       variant={project.status === 'active' ? 'default' : 'secondary'}
                       className="text-xs"
                     >
-                      {project.status}
+                      {highlightText(project.status, searchQuery)}
                     </Badge>
                     <span className="text-xs text-gray-500">
                       Due: {project.endDate.toLocaleDateString()}
@@ -94,6 +138,9 @@ const Dashboard = () => {
                 </div>
               </div>
             ))}
+            {recentProjects.length === 0 && searchQuery && (
+              <p className="text-center text-gray-500 py-4">No projects found matching "{searchQuery}"</p>
+            )}
           </CardContent>
         </Card>
 
@@ -102,7 +149,7 @@ const Dashboard = () => {
           <CardHeader>
             <CardTitle className="flex items-center space-x-2">
               <CheckCircle className="h-5 w-5" />
-              <span>Recent Tasks</span>
+              <span>Recent Tasks {searchQuery && `(${recentTasks.length})`}</span>
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-3">
@@ -116,7 +163,9 @@ const Dashboard = () => {
                     task.status === 'review' ? 'bg-purple-500' : 'bg-gray-400'
                   }`} />
                   <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium text-gray-900 truncate">{task.title}</p>
+                    <p className="text-sm font-medium text-gray-900 truncate">
+                      {highlightText(task.title, searchQuery)}
+                    </p>
                     <p className="text-xs text-gray-500">{task.projectId}</p>
                   </div>
                   {assignee && (
@@ -130,6 +179,9 @@ const Dashboard = () => {
                 </div>
               );
             })}
+            {recentTasks.length === 0 && searchQuery && (
+              <p className="text-center text-gray-500 py-4">No tasks found matching "{searchQuery}"</p>
+            )}
           </CardContent>
         </Card>
       </div>
