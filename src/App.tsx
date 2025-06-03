@@ -6,6 +6,7 @@ import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 import Dashboard from './pages/Dashboard';
 import Projects from './pages/Projects';
 import Kanban from './pages/Kanban';
+import Gantt from './pages/Gantt';
 import Approvals from './pages/Approvals';
 import Team from './pages/Team';
 import Login from './pages/Login';
@@ -28,6 +29,7 @@ function App() {
                   <Route path="/" element={<Dashboard />} />
                   <Route path="/projects" element={<Projects />} />
                   <Route path="/kanban" element={<Kanban />} />
+                  <Route path="/gantt" element={<Gantt />} />
                   <Route path="/approvals" element={<Approvals />} />
                   <Route path="/team" element={<Team />} />
                 </Routes>
