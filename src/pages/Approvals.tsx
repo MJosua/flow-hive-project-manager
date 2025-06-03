@@ -30,7 +30,6 @@ const Approvals = () => {
         const searchLower = searchQuery.toLowerCase();
         
         return approval.type.toLowerCase().includes(searchLower) ||
-               approval.description.toLowerCase().includes(searchLower) ||
                approval.status.toLowerCase().includes(searchLower) ||
                (approval.notes && approval.notes.toLowerCase().includes(searchLower)) ||
                (requester && requester.name.toLowerCase().includes(searchLower));
@@ -97,11 +96,7 @@ const Approvals = () => {
               return (
                 <PendingApprovalCard
                   key={approval.id}
-                  approval={{
-                    ...approval,
-                    type: highlightText(approval.type, searchQuery),
-                    description: highlightText(approval.description, searchQuery)
-                  }}
+                  approval={approval}
                   requester={requester}
                   onApprove={(id) => handleApprovalAction(id, 'approve')}
                   onReject={(id) => handleApprovalAction(id, 'reject')}
@@ -125,12 +120,7 @@ const Approvals = () => {
             return (
               <ProcessedApprovalCard
                 key={approval.id}
-                approval={{
-                  ...approval,
-                  type: highlightText(approval.type, searchQuery),
-                  description: highlightText(approval.description, searchQuery),
-                  notes: approval.notes ? highlightText(approval.notes, searchQuery) : approval.notes
-                }}
+                approval={approval}
                 requester={requester}
               />
             );

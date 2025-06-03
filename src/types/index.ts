@@ -6,6 +6,10 @@ export interface User {
   role: 'admin' | 'manager' | 'developer' | 'designer' | 'tester';
   department: string;
   status: 'active' | 'inactive';
+  phone: string;
+  joinDate: Date;
+  skills: string[];
+  workload: number;
 }
 
 export interface ProjectRole {

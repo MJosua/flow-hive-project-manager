@@ -1,20 +1,18 @@
 
-import React, { useState } from 'react';
+import React from 'react';
 import { useApp } from '@/contexts/AppContext';
 import { useSearch } from '@/contexts/SearchContext';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Plus, Mail, Phone, Calendar, MapPin } from 'lucide-react';
+import { Mail, Phone, Calendar, MapPin, Users } from 'lucide-react';
 import { format } from 'date-fns';
-import AddMemberModal from '@/components/modals/AddMemberModal';
 import { Layout } from '@/components/layout/Layout';
 
 const Team = () => {
   const { users, currentUser } = useApp();
   const { searchQuery, highlightText } = useSearch();
-  const [addMemberModalOpen, setAddMemberModalOpen] = useState(false);
   
   const isTeamLead = currentUser.role === 'admin' || currentUser.role === 'manager';
 
@@ -65,16 +63,6 @@ const Team = () => {
             )}
           </p>
         </div>
-        
-        {isTeamLead && (
-          <Button 
-            className="bg-yellow-500 hover:bg-yellow-600 text-black"
-            onClick={() => setAddMemberModalOpen(true)}
-          >
-            <Plus className="h-4 w-4 mr-2" />
-            Add Member
-          </Button>
-        )}
       </div>
 
       {/* Team Grid */}
@@ -196,12 +184,6 @@ const Team = () => {
           </p>
         </div>
       )}
-
-      {/* Add Member Modal */}
-      <AddMemberModal
-        open={addMemberModalOpen}
-        onOpenChange={setAddMemberModalOpen}
-      />
     </Layout>
   );
 };
