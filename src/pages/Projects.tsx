@@ -1,5 +1,7 @@
+
 import React, { useState } from 'react';
 import { useApp } from '@/contexts/AppContext';
+import { useSearch } from '@/contexts/SearchContext';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -13,8 +15,24 @@ import { Layout } from '@/components/layout/Layout';
 
 const Projects = () => {
   const { projects, users } = useApp();
+  const { searchQuery, highlightText } = useSearch();
   const navigate = useNavigate();
   const [newProjectModalOpen, setNewProjectModalOpen] = useState(false);
+
+  // Apply search filtering
+  const filteredProjects = searchQuery.trim()
+    ? projects.filter(project => {
+        const searchLower = searchQuery.toLowerCase();
+        const manager = users.find(u => u.id === project.managerId);
+        
+        return project.name.toLowerCase().includes(searchLower) ||
+               project.description.toLowerCase().includes(searchLower) ||
+               project.status.toLowerCase().includes(searchLower) ||
+               project.priority.toLowerCase().includes(searchLower) ||
+               project.tags.some(tag => tag.toLowerCase().includes(searchLower)) ||
+               (manager && manager.name.toLowerCase().includes(searchLower));
+      })
+    : projects;
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -43,7 +61,14 @@ const Projects = () => {
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-4 sm:space-y-0">
         <div>
           <h1 className="text-2xl font-bold text-gray-900">Projects</h1>
-          <p className="text-gray-600">Manage and track all your projects</p>
+          <p className="text-gray-600">
+            Manage and track all your projects
+            {searchQuery && (
+              <span className="ml-2 text-sm text-yellow-600">
+                • Filtering by: "{searchQuery}" ({filteredProjects.length} projects)
+              </span>
+            )}
+          </p>
         </div>
         
         <Button 
@@ -57,7 +82,7 @@ const Projects = () => {
 
       {/* Projects Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {projects.map((project) => {
+        {filteredProjects.map((project) => {
           const manager = users.find(u => u.id === project.managerId);
           const teamMembers = users.filter(u => project.teamMembers.includes(u.id));
           
@@ -67,14 +92,14 @@ const Projects = () => {
                 <div className="flex items-start justify-between">
                   <div className="flex-1">
                     <CardTitle className="text-lg font-semibold text-gray-900 mb-2">
-                      {project.name}
+                      {highlightText(project.name, searchQuery)}
                     </CardTitle>
                     <div className="flex items-center space-x-2">
                       <Badge className={getStatusColor(project.status)}>
-                        {project.status.replace('-', ' ')}
+                        {highlightText(project.status.replace('-', ' '), searchQuery)}
                       </Badge>
                       <Badge variant="outline" className="text-xs">
-                        {project.priority}
+                        {highlightText(project.priority, searchQuery)}
                       </Badge>
                     </div>
                   </div>
@@ -82,7 +107,9 @@ const Projects = () => {
               </CardHeader>
 
               <CardContent className="space-y-4">
-                <p className="text-sm text-gray-600 line-clamp-2">{project.description}</p>
+                <p className="text-sm text-gray-600 line-clamp-2">
+                  {highlightText(project.description, searchQuery)}
+                </p>
 
                 {/* Progress */}
                 <div className="space-y-2">
@@ -129,7 +156,9 @@ const Projects = () => {
                             {manager.name.split(' ').map(n => n[0]).join('')}
                           </AvatarFallback>
                         </Avatar>
-                        <span className="text-xs text-gray-600 font-medium">Manager</span>
+                        <span className="text-xs text-gray-600 font-medium">
+                          {highlightText('Manager', searchQuery)}
+                        </span>
                       </div>
                     )}
                     
@@ -157,7 +186,7 @@ const Projects = () => {
                   <div className="flex flex-wrap gap-1">
                     {project.tags.slice(0, 3).map((tag) => (
                       <Badge key={tag} variant="secondary" className="text-xs">
-                        {tag}
+                        {highlightText(tag, searchQuery)}
                       </Badge>
                     ))}
                     {project.tags.length > 3 && (
@@ -183,6 +212,19 @@ const Projects = () => {
           );
         })}
       </div>
+
+      {/* No results message */}
+      {filteredProjects.length === 0 && searchQuery && (
+        <div className="text-center py-12">
+          <div className="text-gray-400 mb-4">
+            <ExternalLink className="h-16 w-16 mx-auto" />
+          </div>
+          <h3 className="text-lg font-medium text-gray-900 mb-2">No projects found</h3>
+          <p className="text-gray-600">
+            No projects match your search for "{searchQuery}". Try adjusting your search terms.
+          </p>
+        </div>
+      )}
 
       {/* New Project Modal */}
       <NewProjectModal

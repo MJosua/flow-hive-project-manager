@@ -9,7 +9,11 @@ export const mockUsers: User[] = [
     avatar: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=32&h=32&fit=crop&crop=face',
     role: 'admin',
     department: 'IT',
-    status: 'active'
+    status: 'active',
+    phone: '+1 (555) 123-4567',
+    joinDate: subDays(new Date(), 1825), // 5 years ago
+    skills: ['Leadership', 'Project Management', 'System Architecture', 'DevOps'],
+    workload: 85
   },
   {
     id: '2',
@@ -18,7 +22,11 @@ export const mockUsers: User[] = [
     avatar: 'https://images.unsplash.com/photo-1494790108755-2616b612b5bb?w=32&h=32&fit=crop&crop=face',
     role: 'manager',
     department: 'Development',
-    status: 'active'
+    status: 'active',
+    phone: '+1 (555) 234-5678',
+    joinDate: subDays(new Date(), 1095), // 3 years ago
+    skills: ['Team Management', 'Agile', 'React', 'Node.js'],
+    workload: 75
   },
   {
     id: '3',
@@ -27,7 +35,11 @@ export const mockUsers: User[] = [
     avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=32&h=32&fit=crop&crop=face',
     role: 'developer',
     department: 'Development',
-    status: 'active'
+    status: 'active',
+    phone: '+1 (555) 345-6789',
+    joinDate: subDays(new Date(), 730), // 2 years ago
+    skills: ['JavaScript', 'TypeScript', 'React', 'Python', 'SQL'],
+    workload: 90
   },
   {
     id: '4',
@@ -36,7 +48,11 @@ export const mockUsers: User[] = [
     avatar: 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=32&h=32&fit=crop&crop=face',
     role: 'designer',
     department: 'Design',
-    status: 'active'
+    status: 'active',
+    phone: '+1 (555) 456-7890',
+    joinDate: subDays(new Date(), 545), // 1.5 years ago
+    skills: ['UI/UX Design', 'Figma', 'Adobe Creative Suite', 'Prototyping'],
+    workload: 70
   },
   {
     id: '5',
@@ -45,7 +61,11 @@ export const mockUsers: User[] = [
     avatar: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=32&h=32&fit=crop&crop=face',
     role: 'developer',
     department: 'Development',
-    status: 'active'
+    status: 'active',
+    phone: '+1 (555) 567-8901',
+    joinDate: subDays(new Date(), 365), // 1 year ago
+    skills: ['JavaScript', 'React', 'Node.js', 'MongoDB', 'Docker'],
+    workload: 95
   }
 ];
 
