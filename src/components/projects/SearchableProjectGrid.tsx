@@ -4,7 +4,7 @@ import { useApp } from '@/contexts/AppContext';
 import { useSearch } from '@/contexts/SearchContext';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Avatar, AvatarGroup, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
+import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 import { Progress } from '@/components/ui/progress';
 import { Calendar, Users, DollarSign } from 'lucide-react';
 import { format } from 'date-fns';
@@ -108,7 +108,7 @@ export const SearchableProjectGrid: React.FC = () => {
                   <Users className="h-4 w-4 text-gray-500" />
                   <span className="text-sm text-gray-600">Team</span>
                 </div>
-                <AvatarGroup className="flex -space-x-2">
+                <div className="flex -space-x-2">
                   {teamMembers.slice(0, 3).map((member) => (
                     <Avatar key={member.id} className="h-6 w-6 border-2 border-white">
                       <AvatarImage src={member.avatar} alt={member.name} />
@@ -122,7 +122,7 @@ export const SearchableProjectGrid: React.FC = () => {
                       <span className="text-xs text-gray-600">+{teamMembers.length - 3}</span>
                     </div>
                   )}
-                </AvatarGroup>
+                </div>
               </div>
 
               {project.tags.length > 0 && (

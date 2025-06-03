@@ -1,3 +1,4 @@
+
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { AuthProvider } from "./contexts/AuthContext";
 import { AppProvider } from "./contexts/AppContext";
@@ -5,11 +6,8 @@ import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 import Dashboard from './pages/Dashboard';
 import Projects from './pages/Projects';
 import Kanban from './pages/Kanban';
-import Tasks from './pages/Tasks';
 import Approvals from './pages/Approvals';
 import Team from './pages/Team';
-import Reports from './pages/Reports';
-import Settings from './pages/Settings';
 import Login from './pages/Login';
 import Register from './pages/Register';
 import { SearchProvider } from '@/contexts/SearchContext';
@@ -30,11 +28,8 @@ function App() {
                   <Route path="/" element={<Dashboard />} />
                   <Route path="/projects" element={<Projects />} />
                   <Route path="/kanban" element={<Kanban />} />
-                  <Route path="/tasks" element={<Tasks />} />
                   <Route path="/approvals" element={<Approvals />} />
                   <Route path="/team" element={<Team />} />
-                  <Route path="/reports" element={<Reports />} />
-                  <Route path="/settings" element={<Settings />} />
                 </Routes>
               </div>
             </Router>
