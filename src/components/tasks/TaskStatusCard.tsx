@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -22,10 +21,11 @@ export const TaskStatusCard: React.FC<TaskStatusCardProps> = ({
   const { users, updateTask, currentUser } = useApp();
   const [isUpdating, setIsUpdating] = useState(false);
   
-  const assignee = users.find(user => user.id === task.assigneeId);
+  const assignee = users.find(user => user.user_id === task.assigneeId);
   const project = task.projectId;
   
-  const canUpdateStatus = isAssignedToCurrentUser || currentUser.role === 'admin' || currentUser.role === 'manager';
+  const canUpdateStatus = isAssignedToCurrentUser || 
+    (currentUser && (currentUser.role_id === 'admin' || currentUser.role_id === 'manager'));
 
   const getPriorityColor = (priority: Task['priority']) => {
     switch (priority) {

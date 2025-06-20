@@ -13,7 +13,7 @@ const Kanban = () => {
   const { projects, selectedProject, setSelectedProject, currentUser } = useApp();
   const { searchQuery } = useSearch();
   
-  // Add null check and default role check
+  // Add null check and default role check using role_id
   const isTeamLead = currentUser && (currentUser.role_id === 'admin' || currentUser.role_id === 'manager');
 
   return (
