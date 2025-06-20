@@ -62,7 +62,7 @@ const TaskList = () => {
           return `${project.id}:${project.name}`;
         })
     )
-  ).map(projectStr => {
+  ).map((projectStr: string) => {
     const [id, name] = projectStr.split(':');
     return { id: parseInt(id), name };
   });
