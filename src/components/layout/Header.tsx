@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { useApp } from '@/contexts/AppContext';
 import { useSearch } from '@/contexts/SearchContext';
@@ -71,12 +72,20 @@ export const Header: React.FC = () => {
             <div className="flex items-center space-x-3">
               <Avatar className="h-8 w-8">
                 <AvatarImage
-                  src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=32&h=32&fit=crop&crop=face"
+                  src={user?.avatar || "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=32&h=32&fit=crop&crop=face"}
+                  alt={user?.name || "User"}
                 />
                 <AvatarFallback>
+                  {user?.name ? user.name.charAt(0).toUpperCase() : 'U'}
                 </AvatarFallback>
               </Avatar>
               <div className="hidden sm:block">
+                <p className="text-sm font-medium text-gray-900">
+                  {user?.name || 'Unknown User'}
+                </p>
+                <p className="text-xs text-gray-500">
+                  {user?.email || 'No email'}
+                </p>
               </div>
               <Button
                 variant="ghost"
@@ -102,25 +111,21 @@ export const Header: React.FC = () => {
 
           <div className="p-4">
             <div
-              // ref={containerRef}
               className="flex flex-col space-y-2 max-h-96 overflow-y-auto"
             >
-              {/* {notifications.map(...)} */}
-
-              <div className="bg-blue-500/10 text-blue-800 border  border-blue-300 p-4 rounded shadow">
+              <div className="bg-blue-500/10 text-blue-800 border border-blue-300 p-4 rounded shadow">
                 <p className="text-sm font-bold">New comment on your task</p>
                 <p className="text-sm truncate w-full">
                   New comment on your task that is really long and should be truncated
                 </p>
               </div>
 
-              <div className="bg-red-500/10 text-red-800 border  border-red-300 p-4 rounded shadow">
+              <div className="bg-red-500/10 text-red-800 border border-red-300 p-4 rounded shadow">
                 <p className="text-sm font-bold">New comment on your task</p>
                 <p className="text-sm truncate w-full">
                   New comment on your task that is really long and should be truncated
                 </p>
               </div>
-
             </div>
           </div>
         </DrawerContent>

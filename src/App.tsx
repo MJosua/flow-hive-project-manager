@@ -11,6 +11,8 @@ import Approvals from './pages/Approvals';
 import Team from './pages/Team';
 import Login from './pages/Login';
 import Register from './pages/Register';
+import DivisionManagement from './pages/DivisionManagement';
+import UserManagement from './pages/UserManagement';
 import { SearchProvider } from '@/contexts/SearchContext';
 
 const queryClient = new QueryClient();
@@ -32,6 +34,8 @@ function App() {
                   <Route path="/gantt" element={<Gantt />} />
                   <Route path="/approvals" element={<Approvals />} />
                   <Route path="/team" element={<Team />} />
+                  <Route path="/admin/divisions" element={<DivisionManagement />} />
+                  <Route path="/admin/users" element={<UserManagement />} />
                 </Routes>
               </div>
             </Router>

@@ -20,13 +20,16 @@ import {
   Users,
   Folder,
   User,
-  Bell
+  Bell,
+  Settings,
+  Building2
 } from 'lucide-react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { useApp } from '@/contexts/AppContext';
+import { useAuth } from '@/contexts/AuthContext';
 import { Badge } from '@/components/ui/badge';
 
-const navigation = [
+const mainNavigation = [
   { name: 'Dashboard', href: '/', icon: LayoutDashboard },
   { name: 'Projects', href: '/projects', icon: Folder },
   { name: 'Kanban', href: '/kanban', icon: Kanban },
@@ -35,9 +38,16 @@ const navigation = [
   { name: 'Approvals', href: '/approvals', icon: User },
 ];
 
+const administrationNavigation = [
+  { name: 'Division Management', href: '/admin/divisions', icon: Building2 },
+  { name: 'User Management', href: '/admin/users', icon: Users },
+  { name: 'Settings', href: '/admin/settings', icon: Settings },
+];
+
 export function AppSidebar() {
   const location = useLocation();
   const { notifications, applicationName } = useApp();
+  const { user } = useAuth();
   const unreadCount = notifications.filter(n => !n.read).length;
 
   return (
@@ -51,7 +61,7 @@ export function AppSidebar() {
           <SidebarGroupLabel>Application</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
-              {navigation.map((item) => {
+              {mainNavigation.map((item) => {
                 const isActive = location.pathname === item.href;
                 return (
                   <SidebarMenuItem key={item.name}>
@@ -72,20 +82,47 @@ export function AppSidebar() {
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
+
+        <SidebarGroup>
+          <SidebarGroupLabel>Administration</SidebarGroupLabel>
+          <SidebarGroupContent>
+            <SidebarMenu>
+              {administrationNavigation.map((item) => {
+                const isActive = location.pathname === item.href;
+                return (
+                  <SidebarMenuItem key={item.name}>
+                    <SidebarMenuButton asChild isActive={isActive}>
+                      <Link to={item.href}>
+                        <item.icon />
+                        <span>{item.name}</span>
+                      </Link>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                );
+              })}
+            </SidebarMenu>
+          </SidebarGroupContent>
+        </SidebarGroup>
       </SidebarContent>
 
       <SidebarFooter className="p-4">
         <div className="flex items-center space-x-3">
           <Avatar className="h-8 w-8">
             <AvatarImage
-              src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=32&h=32&fit=crop&crop=face"
-              alt="John Smith"
+              src={user?.avatar || "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=32&h=32&fit=crop&crop=face"}
+              alt={user?.name || "User"}
             />
-            <AvatarFallback>JS</AvatarFallback>
+            <AvatarFallback>
+              {user?.name ? user.name.charAt(0).toUpperCase() : 'U'}
+            </AvatarFallback>
           </Avatar>
           <div className="flex-1 min-w-0">
-            <p className="text-sm font-medium text-gray-900 truncate">John Smith</p>
-            <p className="text-xs text-gray-500">Administrator</p>
+            <p className="text-sm font-medium text-gray-900 truncate">
+              {user?.name || 'Unknown User'}
+            </p>
+            <p className="text-xs text-gray-500">
+              {user?.email || 'No email'}
+            </p>
           </div>
         </div>
       </SidebarFooter>
