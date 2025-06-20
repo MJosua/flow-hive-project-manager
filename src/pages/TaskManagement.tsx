@@ -248,12 +248,26 @@ const TaskManagement = () => {
         <TabsContent value="kanban" className="space-y-4">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
             {Object.entries(tasksByStatus).map(([status, tasks]) => (
-              <TaskStatusCard
-                key={status}
-                status={status as any}
-                tasks={tasks}
-                title={status.charAt(0).toUpperCase() + status.slice(1).replace('-', ' ')}
-              />
+              <div key={status} className="space-y-4">
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="text-lg font-semibold flex items-center space-x-2">
+                      {getStatusIcon(status)}
+                      <span>{status.charAt(0).toUpperCase() + status.slice(1).replace('-', ' ')}</span>
+                      <Badge variant="secondary" className="ml-auto">
+                        {tasks.length}
+                      </Badge>
+                    </CardTitle>
+                  </CardHeader>
+                </Card>
+                {tasks.map((task) => (
+                  <TaskStatusCard
+                    key={task.id}
+                    task={task}
+                    isAssignedToCurrentUser={currentUser?.user_id === task.assigneeId}
+                  />
+                ))}
+              </div>
             ))}
           </div>
         </TabsContent>
