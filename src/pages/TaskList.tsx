@@ -10,7 +10,8 @@ import ProgressionBar from "@/components/ui/ProgressionBar";
 import TaskApprovalActions from "@/components/ui/TaskApprovalActions";
 import { highlightSearchTerm, searchInObject } from "@/utils/searchUtils";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Grid, List, RefreshCw, Clock, Kanban as KanbanIcon } from 'lucide-react';
+import { Grid, List, RefreshCw, Clock, Kanban as KanbanIcon, Calendar as GanttIcon } from 'lucide-react';
+import GanttChart from '@/components/gantt/GanttChart';
 import { useAppDispatch, useAppSelector } from '@/hooks/useAppSelector';
 import { fetchTaskList, fetchTaskCount } from '@/store/slices/ticketsSlice';
 import { convertTicketToDisplayFormat, getStatusColor, getPriorityColor } from '@/utils/ticketUtils';
@@ -22,7 +23,7 @@ const TaskList = () => {
   const [searchValue, setSearchValue] = useState('');
   const [filterStatus, setFilterStatus] = useState('all');
   const [filterPriority, setFilterPriority] = useState('all');
-  const [viewMode, setViewMode] = useState<'table' | 'card' | 'kanban'>('card');
+  const [viewMode, setViewMode] = useState<'table' | 'card' | 'kanban' | 'gantt'>('card');
 
   const dispatch = useAppDispatch();
   const { taskList, taskCount } = useAppSelector((state) => state.tickets);
@@ -330,13 +331,24 @@ const TaskList = () => {
                   <KanbanIcon className="w-4 h-4 mr-1" />
                   Kanban
                 </Button>
+                <Button
+                  variant={viewMode === 'gantt' ? 'default' : 'outline'}
+                  size="sm"
+                  onClick={() => setViewMode('gantt')}
+                  className="px-3"
+                >
+                  <GanttIcon className="w-4 h-4 mr-1" />
+                  Gantt
+                </Button>
               </div>
             </div>
           </CardContent>
         </Card>
 
         {/* Content */}
-        {viewMode === 'kanban' ? (
+        {viewMode === 'gantt' ? (
+          <GanttChart />
+        ) : viewMode === 'kanban' ? (
           <KanbanBoard />
         ) : viewMode === 'table' ? (
           <TableView />
@@ -344,8 +356,8 @@ const TaskList = () => {
           <CardView />
         )}
 
-        {/* Pagination - only show for non-kanban views */}
-        {viewMode !== 'kanban' && taskList.totalPage > 1 && (
+        {/* Pagination - only show for table and card views */}
+        {(viewMode === 'table' || viewMode === 'card') && taskList.totalPage > 1 && (
           <TicketPagination
             currentPage={taskList.currentPage}
             totalPages={taskList.totalPage}

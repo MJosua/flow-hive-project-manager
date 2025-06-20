@@ -1,4 +1,3 @@
-
 import React, { useCallback } from "react";
 import { Provider } from "react-redux";
 import { store } from "./store";
@@ -32,6 +31,7 @@ import Login from "./pages/login/Loginpage";
 import ProtectedRoute from "./components/auth/ProtectedRoute";
 import TicketDetail from "./pages/TicketDetail";
 import RecoveryForm from "./pages/login/form/Recoveryform";
+import Gantt from '@/pages/Gantt';
 
 // Create QueryClient instance outside of component to avoid recreation
 const queryClient = new QueryClient({
@@ -143,6 +143,7 @@ const AppContent = () => {
               <FunctionLogsManagement />
             </ProtectedRoute>
           } />
+          <Route path="/gantt" element={<Gantt />} />
           <Route path="*" element={
             <AppLayout>
               <NotFound />
