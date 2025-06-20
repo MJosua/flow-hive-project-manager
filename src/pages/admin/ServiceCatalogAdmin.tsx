@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import AppLayout from '@/components/layout/AppLayout';
+import AppLayoutNew from "@/components/layout/AppLayoutNew";
 import { useNavigate } from 'react-router-dom';
 import { FormConfig } from '@/types/formTypes';
 import { useCatalogData } from '@/hooks/useCatalogData';
@@ -178,7 +178,7 @@ const ServiceCatalogAdmin = () => {
 
   if (isLoading) {
     return (
-      <AppLayout>
+      <AppLayoutNew>
         <div className="space-y-6">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
@@ -209,13 +209,13 @@ const ServiceCatalogAdmin = () => {
 
           <FormSkeleton />
         </div>
-      </AppLayout>
+      </AppLayoutNew>
     );
   }
 
   if (error) {
     return (
-      <AppLayout>
+      <AppLayoutNew>
         <div className="space-y-4">
           <div className="flex items-center gap-4">
             <Button variant="outline" onClick={() => navigate('/')}>
@@ -227,12 +227,12 @@ const ServiceCatalogAdmin = () => {
             <div className="text-lg text-red-600">Error loading catalog: {error}</div>
           </div>
         </div>
-      </AppLayout>
+      </AppLayoutNew>
     );
   }
 
   return (
-    <AppLayout>
+    <AppLayoutNew>
       <div className="space-y-6">
         <ServiceCatalogHeader
           onReload={handleReload}
@@ -263,7 +263,7 @@ const ServiceCatalogAdmin = () => {
           onCancel={handleDeleteCancel}
         />
       </div>
-    </AppLayout>
+    </AppLayoutNew>
   );
 };
 

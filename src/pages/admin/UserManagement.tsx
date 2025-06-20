@@ -1,13 +1,12 @@
-
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Badge } from "@/components/ui/badge";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import AppLayout from "@/components/layout/AppLayout";
+import { Badge } from "@/components/ui/badge";
+import AppLayoutNew from "@/components/layout/AppLayoutNew";
 import { useAppSelector } from '@/hooks/useAppSelector';
 import { Navigate } from 'react-router-dom';
 import { Loader2 } from 'lucide-react';
@@ -49,11 +48,11 @@ const UserManagement = () => {
   // Show loading while user data is being fetched
   if (!user) {
     return (
-      <AppLayout>
+      <AppLayoutNew>
         <div className="flex items-center justify-center py-12">
           <Loader2 className="h-8 w-8 animate-spin" />
         </div>
-      </AppLayout>
+      </AppLayoutNew>
     );
   }
 
@@ -95,7 +94,7 @@ const UserManagement = () => {
   };
 
   return (
-    <AppLayout>
+    <AppLayoutNew>
       <div className="space-y-6">
         <div className="flex items-center justify-between">
           <h1 className="text-2xl font-bold">User Management</h1>
@@ -183,7 +182,7 @@ const UserManagement = () => {
           />
         )}
       </div>
-    </AppLayout>
+    </AppLayoutNew>
   );
 };
 

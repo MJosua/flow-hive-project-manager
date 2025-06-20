@@ -132,6 +132,30 @@ export const fetchTicketDetail = createAsyncThunk(
   }
 );
 
+export const fetchTicketById = createAsyncThunk(
+  'tickets/fetchTicketById',
+  async (ticketId: number, { rejectWithValue }) => {
+    try {
+      const response = await axios.get(`${API_URL}/hots_ticket/detail/${ticketId}`, {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem('tokek')}`,
+        },
+      });
+      
+      console.log('Ticket By ID API Response:', response.data);
+      
+      if (!response.data.success) {
+        return rejectWithValue(response.data.message || 'Failed to fetch ticket');
+      }
+      
+      return response.data.data;
+    } catch (error: any) {
+      console.error('Ticket By ID API Error:', error);
+      return rejectWithValue(error.response?.data?.message || error.message || 'Network error');
+    }
+  }
+);
+
 export const createTicket = createAsyncThunk(
   'tickets/createTicket',
   async ({ serviceId, ticketData }: { serviceId: string, ticketData: any }, { rejectWithValue }) => {
@@ -347,6 +371,19 @@ const ticketsSlice = createSlice({
         state.detailError = action.payload as string || 'Failed to fetch ticket detail';
         state.ticketDetail = null;
       })
+      .addCase(fetchTicketById.pending, (state) => {
+        state.isLoadingDetail = true;
+        state.detailError = null;
+      })
+      .addCase(fetchTicketById.fulfilled, (state, action) => {
+        state.isLoadingDetail = false;
+        state.ticketDetail = action.payload;
+      })
+      .addCase(fetchTicketById.rejected, (state, action) => {
+        state.isLoadingDetail = false;
+        state.detailError = action.payload as string || 'Failed to fetch ticket';
+        state.ticketDetail = null;
+      })
       // Task Count
       .addCase(fetchTaskCount.pending, (state) => {
         // Optional: could add loading state
@@ -415,6 +452,15 @@ const ticketsSlice = createSlice({
       });
   },
 });
+
+// Selector functions
+export const selectTicketById = (id: number) => (state: any) => {
+  return state.tickets.myTickets.data.find((ticket: any) => ticket.ticket_id === id) ||
+         state.tickets.allTickets.data.find((ticket: any) => ticket.ticket_id === id) ||
+         state.tickets.taskList.data.find((ticket: any) => ticket.ticket_id === id);
+};
+
+export const selectTicketsLoading = (state: any) => state.tickets.isLoadingDetail;
 
 export const { clearErrors, setCurrentPage, clearTicketDetail } = ticketsSlice.actions;
 export default ticketsSlice.reducer;

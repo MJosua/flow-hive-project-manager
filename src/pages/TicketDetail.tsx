@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { ArrowLeft, Clock, User, FileText, MessageSquare } from 'lucide-react';
@@ -10,6 +11,7 @@ import { useAppDispatch, useAppSelector } from '@/hooks/useAppSelector';
 import { fetchTicketById, selectTicketById, selectTicketsLoading } from '@/store/slices/ticketsSlice';
 import { Skeleton } from '@/components/ui/skeleton';
 import { formatDistanceToNow } from 'date-fns';
+import { TicketDetail as TicketDetailType } from '@/types/ticketTypes';
 
 interface TicketComment {
   id: number;
@@ -22,7 +24,7 @@ const TicketDetail = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const dispatch = useAppDispatch();
-  const ticket = useAppSelector(selectTicketById(Number(id)));
+  const ticket = useAppSelector(selectTicketById(Number(id))) as TicketDetailType | undefined;
   const isLoading = useAppSelector(selectTicketsLoading);
   const [comments, setComments] = useState<TicketComment[]>([
     {
@@ -109,7 +111,7 @@ const TicketDetail = () => {
         <Card>
           <CardHeader>
             <div className="flex items-center space-x-2">
-              <CardTitle className="text-lg font-semibold">{ticket.title}</CardTitle>
+              <CardTitle className="text-lg font-semibold">{ticket.service_name || 'Ticket'}</CardTitle>
               <Badge variant="secondary">{ticket.status}</Badge>
             </div>
           </CardHeader>
@@ -117,11 +119,11 @@ const TicketDetail = () => {
             <div className="flex items-center space-x-4">
               <div className="flex items-center space-x-2 text-gray-500">
                 <Clock className="w-4 h-4" />
-                <span>Created {formatDistanceToNow(new Date(ticket.created_at), { addSuffix: true })}</span>
+                <span>Created {formatDistanceToNow(new Date(ticket.creation_date), { addSuffix: true })}</span>
               </div>
               <div className="flex items-center space-x-2 text-gray-500">
                 <User className="w-4 h-4" />
-                <span>{ticket.reporter_name}</span>
+                <span>{ticket.created_by_name || 'Unknown'}</span>
               </div>
             </div>
 
@@ -129,7 +131,7 @@ const TicketDetail = () => {
 
             <div className="space-y-2">
               <h3 className="text-md font-semibold">Description</h3>
-              <p className="text-gray-700">{ticket.description}</p>
+              <p className="text-gray-700">{ticket.reason || 'No description provided'}</p>
             </div>
 
             <Separator />

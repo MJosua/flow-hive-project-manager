@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -52,12 +51,15 @@ const TaskList = () => {
     return matchesSearch && matchesStatus && matchesPriority && matchesProject;
   });
 
-  // Get unique projects for filter - fix TypeScript errors
-  const projects = Array.from(new Set(tasks.map(task => ({ id: task.project_id, name: task.project_name }))))
-    .filter((project): project is { id: number; name: string } => 
-      project.id !== null && project.id !== undefined && 
-      project.name !== null && project.name !== undefined
-    );
+  // Get unique projects for filter with proper type checking
+  const projects = Array.from(
+    new Set(
+      tasks
+        .filter(task => task.project_id !== null && task.project_id !== undefined && task.project_name !== null && task.project_name !== undefined)
+        .map(task => ({ id: task.project_id!, name: task.project_name! }))
+        .map(project => JSON.stringify(project))
+    )
+  ).map(projectStr => JSON.parse(projectStr) as { id: number; name: string });
 
   return (
     <AppLayoutNew searchValue={searchValue} onSearchChange={setSearchValue} searchPlaceholder="Search tasks...">
