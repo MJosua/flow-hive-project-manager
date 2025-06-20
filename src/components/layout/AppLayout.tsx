@@ -15,7 +15,7 @@ import {
   SidebarTrigger,
   SidebarInset,
 } from "@/components/ui/sidebar";
-import { Home, FileText, CheckSquare, List, Settings, LogOut, Monitor, Users, Search, User, Code, FileCode } from 'lucide-react';
+import { Home, FolderOpen, CheckSquare, KanbanSquare, Settings, LogOut, Monitor, Users, Search, User, Code, FileCode } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Link, useNavigate, useLocation } from 'react-router-dom';
@@ -43,7 +43,7 @@ const adminItems = [
   {
     title: "Service Catalog Admin",
     url: "/admin/service-catalog",
-    icon: List,
+    icon: KanbanSquare,
   },
   {
     title: "User Management",
@@ -91,19 +91,19 @@ export function AppSidebar() {
       icon: Home,
     },
     {
-      title: "Service Catalog",
-      url: "/service-catalog",
-      icon: List,
+      title: "Projects",
+      url: "/projects",
+      icon: FolderOpen,
     },
     {
-      title: "My Tickets",
-      url: "/my-tickets",
-      icon: FileText,
+      title: "My Tasks",
+      url: "/my-tasks",
+      icon: CheckSquare,
     },
     {
       title: "Task List",
       url: "/task-list",
-      icon: CheckSquare,
+      icon: KanbanSquare,
       badge: taskCount
     },
   ];
@@ -152,17 +152,17 @@ export function AppSidebar() {
         <div className="flex  items-center space-x-3" style={{ position: 'relative' }} >
           {/* Show when collapsible != icon */}
           <div className="w-6 h-6 bg-primary ms-1 mt-3 mb-3 rounded items-center justify-center flex-shrink-0 hidden group-data-[collapsible=icon]:flex">
-            <span className="text-primary-foreground  font-bold text-xs">H</span>
+            <span className="text-primary-foreground  font-bold text-xs">P</span>
           </div>
 
           {/* Show when collapsible == icon */}
           <div className="w-10 h-10  bg-primary rounded items-center justify-center flex-shrink-0 flex group-data-[collapsible=icon]:hidden">
-            <span className="text-primary-foreground font-bold text-xs">HOTS</span>
+            <span className="text-primary-foreground font-bold text-xs">PMS</span>
           </div>
 
           <div className="group-data-[collapsible=icon]:hidden">
-            <h3 className="font-semibold text-sidebar-foreground">HOTS</h3>
-            <p className="text-sm text-sidebar-foreground/70 mb-1">Helpdesk System</p>
+            <h3 className="font-semibold text-sidebar-foreground">PMS</h3>
+            <p className="text-sm text-sidebar-foreground/70 mb-1">Project Management System</p>
           </div>
         </div>
       </SidebarHeader>
@@ -289,7 +289,7 @@ export function AppLayout({ children, searchValue, onSearchChange, searchPlaceho
                 <div className="flex items-center space-x-3">
                   <div>
                     <h1 className="text-lg font-semibold text-primary  ">PT INDOFOOD CBP SUKSES MAKMUR</h1>
-                    <p className="text-sm text-primary">Divisi Noodle</p>
+                    <p className="text-sm text-primary">Project Management System - Divisi Noodle</p>
                   </div>
                 </div>
               </div>
