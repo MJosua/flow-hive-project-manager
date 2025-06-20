@@ -49,8 +49,14 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
 
   // Use API data if available, fallback to empty array
   const users = apiUsers || [];
+  // Safely get the first user, but handle the case where there are no users
   const currentUser = users.length > 0 ? users[0] : null;
   const error = usersError ? (usersError as Error).message : null;
+
+  console.log('AppContext - currentUser:', currentUser);
+  console.log('AppContext - users:', users);
+  console.log('AppContext - isLoading:', isLoading);
+  console.log('AppContext - error:', error);
 
   const updateTask = (taskId: string, updates: Partial<Task>) => {
     setTasks(prev => prev.map(task =>

@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { useApp } from '@/contexts/AppContext';
 import { useSearch } from '@/contexts/SearchContext';
@@ -11,7 +12,9 @@ import { Layout } from '@/components/layout/Layout';
 const Kanban = () => {
   const { projects, selectedProject, setSelectedProject, currentUser } = useApp();
   const { searchQuery } = useSearch();
-  const isTeamLead = currentUser.role === 'admin' || currentUser.role === 'manager';
+  
+  // Add null check and default role check
+  const isTeamLead = currentUser && (currentUser.role_id === 'admin' || currentUser.role_id === 'manager');
 
   return (
     <Layout>

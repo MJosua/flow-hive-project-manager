@@ -16,7 +16,7 @@ interface TaskCardProps {
 export const TaskCard: React.FC<TaskCardProps> = ({ task }) => {
   const { users } = useApp();
   const { searchQuery, highlightText } = useSearch();
-  const assignee = users.find(user => user.id === task.assigneeId);
+  const assignee = users.find(user => user.user_id === task.assigneeId);
 
   const getPriorityColor = (priority: Task['priority']) => {
     switch (priority) {

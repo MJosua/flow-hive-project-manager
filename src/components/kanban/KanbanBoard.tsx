@@ -26,7 +26,7 @@ export const KanbanBoard: React.FC = () => {
   // Apply search filtering
   const searchFilteredTasks = searchQuery.trim() 
     ? filteredTasks.filter(task => {
-        const assignee = users.find(u => u.id === task.assigneeId);
+        const assignee = users.find(u => u.user_id === task.assigneeId);
         const searchLower = searchQuery.toLowerCase();
         
         return task.title.toLowerCase().includes(searchLower) ||
