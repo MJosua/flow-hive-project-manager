@@ -9,7 +9,7 @@ import ProgressionBar from "@/components/ui/ProgressionBar";
 import { highlightSearchTerm, searchInObject } from "@/utils/searchUtils";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Grid, List, RefreshCw } from 'lucide-react';
-import { AppLayout } from "@/components/layout/AppLayout";
+import AppLayout from "@/components/layout/AppLayout";
 import { useAppDispatch, useAppSelector } from '@/hooks/useAppSelector';
 import { fetchMyTickets } from '@/store/slices/ticketsSlice';
 import { convertTicketToDisplayFormat, getStatusColor, getPriorityColor } from '@/utils/ticketUtils';

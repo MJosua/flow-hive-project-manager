@@ -1,7 +1,6 @@
-
 import React, { useEffect, useMemo } from 'react';
 import { Route } from 'react-router-dom';
-import { AppLayout } from '@/components/layout/AppLayout';
+import AppLayout from '@/components/layout/AppLayout';
 import { CatalogFormLoader } from '@/components/forms/CatalogFormLoader';
 import ProtectedRoute from '@/components/auth/ProtectedRoute';
 import { useAppDispatch, useAppSelector } from '@/hooks/useAppSelector';

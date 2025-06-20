@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { AppLayout } from '@/components/layout/AppLayout';
+import AppLayout from '@/components/layout/AppLayout';
 import { useNavigate } from 'react-router-dom';
 import { FormConfig } from '@/types/formTypes';
 import { useCatalogData } from '@/hooks/useCatalogData';

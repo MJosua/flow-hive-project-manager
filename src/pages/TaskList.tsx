@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { AppLayout } from "@/components/layout/AppLayout";
+import React, { useState } from 'react';
+import AppLayout from '@/components/layout/AppLayout';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Label } from "@/components/ui/label";

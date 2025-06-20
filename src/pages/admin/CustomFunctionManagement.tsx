@@ -1,6 +1,5 @@
-
 import React from 'react';
-import { AppLayout } from "@/components/layout/AppLayout";
+import AppLayout from "@/components/layout/AppLayout";
 import { useAppSelector } from '@/hooks/useAppSelector';
 import { Navigate } from 'react-router-dom';
 import { Loader2 } from 'lucide-react';

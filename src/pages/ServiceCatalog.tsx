@@ -1,10 +1,9 @@
-
 import React, { useState, useEffect } from 'react';
 import { Monitor, Lightbulb, Wrench, Database, Plane, FileText, Users, CreditCard } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
-import { AppLayout } from '@/components/layout/AppLayout';
+import AppLayout from '@/components/layout/AppLayout';
 import { searchInObject } from '@/utils/searchUtils';
 import { renderHighlightedText } from '@/utils/renderhighlight';
 import { useCatalogData } from '@/hooks/useCatalogData';
