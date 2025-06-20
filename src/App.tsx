@@ -12,7 +12,12 @@ import { useDynamicServiceRoutes } from "@/components/routing/DynamicServiceRout
 import TokenExpiredModalWrapper from "@/components/modals/TokenExpiredModalWrapper";
 import Index from "./pages/Index";
 import ServiceCatalog from "./pages/ServiceCatalog";
+import Projects from "./pages/Projects";
+import ProjectDetail from "./pages/ProjectDetail";
+import ProjectCreate from "./pages/ProjectCreate";
+import TaskDetail from "./pages/TaskDetail";
 import TaskList from "./pages/TaskList";
+import MyTasks from "./pages/MyTasks";
 import MyTickets from "./pages/MyTickets";
 import GoodsRequest from "./pages/GoodsRequest";
 import SystemSettings from "./pages/admin/SystemSettings";

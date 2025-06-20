@@ -5,6 +5,8 @@ import catalogReducer from './slices/catalogSlice';
 import ticketsReducer from './slices/ticketsSlice';
 import userManagementReducer from './slices/userManagementSlice';
 import customFunctionReducer from './slices/customFunctionSlice';
+import projectReducer from './slices/projectSlice';
+import taskReducer from './slices/taskSlice';
 
 export const store = configureStore({
   reducer: {
@@ -13,6 +15,8 @@ export const store = configureStore({
     tickets: ticketsReducer,
     userManagement: userManagementReducer,
     customFunction: customFunctionReducer,
+    projects: projectReducer,
+    tasks: taskReducer,
   },
 });
 
