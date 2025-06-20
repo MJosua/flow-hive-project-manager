@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { FolderOpen, CheckSquare, Clock, TrendingUp, Users, Target, Calendar, AlertCircle } from 'lucide-react';
 import AppLayout from "@/components/layout/AppLayout";
 import { useAppDispatch, useAppSelector } from '@/hooks/useAppSelector';

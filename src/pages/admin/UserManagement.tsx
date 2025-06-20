@@ -1,687 +1,184 @@
 import React, { useState, useEffect } from 'react';
-import { Users, Plus, Edit, Trash2, Search, Shield, User } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
+import { Label } from "@/components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
-import { AppLayout } from "@/components/layout/AppLayout";
-import UserModal from "@/components/modals/UserModal";
-import TeamModal from "@/components/modals/TeamModal";
-import WorkflowGroupModal from "@/components/modals/WorkflowGroupModal";
-import UserStatusBadge from "@/components/ui/UserStatusBadge";
-import UserFilters from "@/components/filters/UserFilters";
-import { useAppDispatch, useAppSelector } from '@/hooks/useAppSelector';
+import AppLayout from "@/components/layout/AppLayout";
+import { useAppSelector } from '@/hooks/useAppSelector';
+import { Navigate } from 'react-router-dom';
+import { Loader2 } from 'lucide-react';
 import {
   fetchUsers,
-  fetchTeams,
-  fetchDepartments,
-  fetchWorkflowGroups,
-  fetchRoles,
-  fetchJobTitles,
-  fetchSuperiors,
-  fetchServices,
-  UserType,
-  Team,
-  WorkflowGroup,
-  Department,
-  createTeam,
-  updateTeam,
-  deleteTeam,
-  addTeamMember,
-  createWorkflowGroup,
-  updateWorkflowGroup,
-  deleteWorkflowGroup,
-  createWorkflowStep,
-  fetchWorkflowSteps
-} from '@/store/slices/userManagementSlice';
-import axios from 'axios';
-import { API_URL } from '@/config/sourceConfig';
-import { useToast } from '@/hooks/use-toast';
-import { WorkflowStepData } from '@/components/workflow/WorkflowStepsManager';
+  createUser,
+  updateUser,
+  deleteUser,
+  selectUsers,
+  selectUsersLoading,
+  selectUsersError,
+} from '@/store/slices/userSlice';
+import { useAppDispatch } from '@/hooks/useAppSelector';
+import UserForm from '@/components/admin/UserForm';
 
 const UserManagement = () => {
+  const { user, isAuthenticated } = useAppSelector(state => state.auth);
   const dispatch = useAppDispatch();
-  const { users, teams, departments, workflowGroups, roles, jobTitles, superiors, services, filters, isLoading } = useAppSelector(state => state.userManagement);
-  const [activeTab, setActiveTab] = useState("users");
-  const [searchValue, setSearchValue] = useState("");
-
-  // Modal states
-  const [isUserModalOpen, setIsUserModalOpen] = useState(false);
-  const [isTeamModalOpen, setIsTeamModalOpen] = useState(false);
-  const [isWorkflowModalOpen, setIsWorkflowModalOpen] = useState(false);
-  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
-  const [selectedUser, setSelectedUser] = useState<UserType | null>(null);
-  const [selectedTeam, setSelectedTeam] = useState<Team | null>(null);
-  const [selectedWorkflowGroup, setSelectedWorkflowGroup] = useState<WorkflowGroup | null>(null);
-  const [modalMode, setModalMode] = useState<'add' | 'edit'>('add');
-  const [deleteTarget, setDeleteTarget] = useState<{ type: 'user' | 'team' | 'workflow', item: any } | null>(null);
-
-  const { toast } = useToast();
+  const users = useAppSelector(selectUsers);
+  const isLoading = useAppSelector(selectUsersLoading);
+  const error = useAppSelector(selectUsersError);
+  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+  const [selectedUser, setSelectedUser] = useState(null);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
 
   useEffect(() => {
-    // Fetch all data when component mounts
-    dispatch(fetchUsers());
-    dispatch(fetchTeams());
-    dispatch(fetchDepartments());
-    dispatch(fetchWorkflowGroups());
-    dispatch(fetchRoles());
-    dispatch(fetchJobTitles());
-    dispatch(fetchSuperiors());
-    dispatch(fetchServices());
-  }, [dispatch]);
-
-  // Apply filters to users
-  const filteredUsers = users.filter(user => {
-    // Search filter
-    const searchMatch = searchValue === '' ||
-      `${user.firstname || ''} ${user.lastname || ''}`.toLowerCase().includes(searchValue.toLowerCase()) ||
-      (user.email || '').toLowerCase().includes(searchValue.toLowerCase()) ||
-      (user.team_name || '').toLowerCase().includes(searchValue.toLowerCase()) ||
-      (user.role_name || '').toLowerCase().includes(searchValue.toLowerCase()) ||
-      (user.uid || '').toLowerCase().includes(searchValue.toLowerCase());
-
-    // Status filter
-    const statusMatch = filters.status === 'all' ||
-      (filters.status === 'active' && user.is_active && !user.is_deleted) ||
-      (filters.status === 'deleted' && user.is_deleted);
-
-    // Team filter
-    const teamMatch = !filters.team || user.team_name === filters.team;
-
-    // Role filter
-    const roleMatch = !filters.role || user.role_name === filters.role;
-
-    return searchMatch && statusMatch && teamMatch && roleMatch;
-  });
-
-  // Delete user function
-  const deleteUserFromAPI = async (userId: number) => {
-    try {
-      const response = await axios.delete(`${API_URL}/hots_settings/delete/user/${userId}`, {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem('tokek')}`,
-        }
-      });
-
-      if (response.data.success) {
-        toast({
-          title: "Success",
-          description: "User deleted successfully",
-        });
-        dispatch(fetchUsers()); // Refresh the list
-      } else {
-        throw new Error(response.data.message || 'Failed to delete user');
-      }
-    } catch (error: any) {
-      console.error('Error deleting user:', error);
-      toast({
-        title: "Error",
-        description: error.response?.data?.message || 'Failed to delete user',
-        variant: "destructive",
-      });
+    if (isAuthenticated && user) {
+      dispatch(fetchUsers());
     }
-  };
+  }, [dispatch, isAuthenticated, user]);
 
-  const filteredTeams = teams.filter(team =>
-    team.team_name?.toLowerCase().includes(searchValue.toLowerCase())
-  );
+  // Show loading spinner while auth state is being determined
+  if (!isAuthenticated) {
+    return <Navigate to="/login" replace />;
+  }
 
-  const filteredWorkflowGroups = workflowGroups.filter(group =>
-    group.name?.toLowerCase().includes(searchValue.toLowerCase()) ||
-    group.description?.toLowerCase().includes(searchValue.toLowerCase())
-  );
-
-  const highlightText = (text: string, highlight: string) => {
-    if (!highlight) return text;
-    const parts = text.split(new RegExp(`(${highlight})`, 'gi'));
-    return parts.map((part, index) =>
-      part.toLowerCase() === highlight.toLowerCase() ?
-        <mark key={index} className="bg-yellow-200">{part}</mark> : part
+  // Show loading while user data is being fetched
+  if (!user) {
+    return (
+      <AppLayout>
+        <div className="flex items-center justify-center py-12">
+          <Loader2 className="h-8 w-8 animate-spin" />
+        </div>
+      </AppLayout>
     );
-  };
+  }
 
-  // User handlers
-  const handleAddUser = () => {
-    setSelectedUser(null);
-    setModalMode('add');
-    setIsUserModalOpen(true);
-  };
+  // Check if user has admin role (role_id === '4' or role_id === 4)
+  const isAdmin = user.role_id?.toString() === '4';
 
-  const handleEditUser = (user: UserType) => {
-    setSelectedUser(user);
-    setModalMode('edit');
-    setIsUserModalOpen(true);
-  };
+  if (!isAdmin) {
+    return <Navigate to="/" replace />;
+  }
 
-  const handleDeleteUser = (user: UserType) => {
-    setDeleteTarget({ type: 'user', item: user });
-    setIsDeleteModalOpen(true);
-  };
-
-  const handleSaveUser = (user: any) => {
-    dispatch(fetchUsers()); // Refresh data after save
-  };
-
-  // Team handlers
-  const handleAddTeam = () => {
-    setSelectedTeam(null);
-    setModalMode('add');
-    setIsTeamModalOpen(true);
-  };
-
-  const handleEditTeam = (team: Team) => {
-    setSelectedTeam(team);
-    setModalMode('edit');
-    setIsTeamModalOpen(true);
-  };
-
-  const handleDeleteTeam = (team: Team) => {
-    setDeleteTarget({ type: 'team', item: team });
-    setIsDeleteModalOpen(true);
-  };
-
-  const handleSaveTeam = async (teamData: any, selectedUsers?: number[], teamLeaderId?: number) => {
+  const handleCreateUser = async (userData: any) => {
     try {
-      let savedTeam;
-
-      if (modalMode === 'add') {
-        const result = await dispatch(createTeam(teamData));
-        savedTeam = result.payload;
-
-        if (savedTeam && selectedUsers && selectedUsers.length > 0) {
-          // Add team members
-          for (const userId of selectedUsers) {
-            const memberData = {
-              team_id: savedTeam.team_id,
-              user_id: userId,
-              member_desc: 'Team member',
-              team_leader: userId === teamLeaderId
-            };
-            // console.log('Adding team member:', memberData);
-            await dispatch(addTeamMember(memberData));
-          }
-        }
-
-        toast({
-          title: "Success",
-          description: "Team created successfully",
-        });
-      } else {
-        const result = await dispatch(updateTeam({ id: selectedTeam?.team_id!, data: teamData }));
-        savedTeam = result.payload;
-
-        // For edit mode, we should handle member updates here
-        // This is a simplified approach - in production you might want more sophisticated member management
-        if (savedTeam && selectedUsers && selectedUsers.length > 0) {
-          // Remove existing members and add new ones
-          // Note: This is a simplified approach. In production, you'd want to:
-          // 1. Compare existing vs new members
-          // 2. Only add/remove changed members
-          // 3. Update team leader status properly
-
-          for (const userId of selectedUsers) {
-            const memberData = {
-              team_id: selectedTeam?.team_id!,
-              user_id: userId,
-              member_desc: 'Team member',
-              team_leader: userId === teamLeaderId
-            };
-            // console.log('Updating team member:', memberData);
-            await dispatch(addTeamMember(memberData));
-          }
-        }
-
-        toast({
-          title: "Success",
-          description: "Team updated successfully",
-        });
-      }
-
-      dispatch(fetchTeams());
-      dispatch(fetchUsers()); // Refresh users to update team assignments
-
-    } catch (error: any) {
-      console.error('Error saving team:', error);
-      toast({
-        title: "Error",
-        description: "Failed to save team",
-        variant: "destructive",
-      });
+      await dispatch(createUser(userData));
+      dispatch(fetchUsers()); // Refresh user list
+      setIsCreateModalOpen(false);
+    } catch (error) {
+      console.error("Failed to create user:", error);
     }
   };
 
-  // Workflow Group handlers
-  const handleAddWorkflowGroup = () => {
-    setSelectedWorkflowGroup(null);
-    setModalMode('add');
-    setIsWorkflowModalOpen(true);
-  };
-
-  const handleEditWorkflowGroup = (group: WorkflowGroup) => {
-    setSelectedWorkflowGroup(group);
-    setModalMode('edit');
-    setIsWorkflowModalOpen(true);
-  };
-
-  const handleDeleteWorkflowGroup = (group: WorkflowGroup) => {
-    setDeleteTarget({ type: 'workflow', item: group });
-    setIsDeleteModalOpen(true);
-  };
-
-  const handleSaveWorkflowGroup = async (group: any, steps: WorkflowStepData[]) => {
+  const handleUpdateUser = async (userId: number, userData: any) => {
     try {
-      let savedGroup;
-
-      if (modalMode === 'add') {
-        const result = await dispatch(createWorkflowGroup(group));
-        savedGroup = result.payload;
-
-        if (savedGroup) {
-          toast({
-            title: "Success",
-            description: "Workflow group created successfully",
-          });
-
-          // Save workflow steps if any
-          if (steps.length > 0) {
-            const workflowGroupId = savedGroup.id;
-
-            if (workflowGroupId) {
-              const stepsWithGroupId = steps.map(step => ({
-                ...step,
-                workflow_group_id: workflowGroupId
-              }));
-
-              // Create all steps
-              for (const step of stepsWithGroupId) {
-                await dispatch(createWorkflowStep(step));
-              }
-
-              toast({
-                title: "Success",
-                description: `Workflow group and ${steps.length} steps created successfully`,
-              });
-            }
-          }
-        }
-      } else {
-        const result = await dispatch(updateWorkflowGroup({ id: selectedWorkflowGroup?.id!, data: group }));
-
-        if (result.meta.requestStatus === 'fulfilled') {
-          savedGroup = result.payload;
-          toast({
-            title: "Success",
-            description: "Workflow group updated successfully",
-          });
-
-          // Handle workflow steps for edit mode
-          if (steps.length > 0) {
-            const workflowGroupId = selectedWorkflowGroup?.id;
-
-            if (workflowGroupId) {
-              // For simplicity in edit mode, we'll delete existing steps and recreate them
-              // In production, you might want to implement a more sophisticated update strategy
-              const stepsWithGroupId = steps.map(step => ({
-                ...step,
-                workflow_group_id: workflowGroupId
-              }));
-
-              // Create/update all steps
-              for (const step of stepsWithGroupId) {
-                await dispatch(createWorkflowStep(step));
-              }
-
-              toast({
-                title: "Success",
-                description: `Workflow group and ${steps.length} steps updated successfully`,
-              });
-            }
-          }
-
-          dispatch(fetchWorkflowGroups());
-        } else {
-          toast({
-            title: "Error",
-            description: "Failed to update workflow group",
-            variant: "destructive",
-          });
-          return;
-        }
-      }
-
-      dispatch(fetchWorkflowGroups());
-    } catch (error: any) {
-      console.error('Error saving workflow group:', error);
-      toast({
-        title: "Error",
-        description: "Failed to save workflow group",
-        variant: "destructive",
-      });
+      await dispatch(updateUser({ userId, userData }));
+      dispatch(fetchUsers()); // Refresh user list
+      setIsEditModalOpen(false);
+      setSelectedUser(null);
+    } catch (error) {
+      console.error("Failed to update user:", error);
     }
   };
 
-  const handleConfirmDelete = async () => {
-    if (deleteTarget) {
-      try {
-        if (deleteTarget.type === 'user') {
-          await deleteUserFromAPI(deleteTarget.item.user_id);
-        } else if (deleteTarget.type === 'team') {
-          await dispatch(deleteTeam(deleteTarget.item.team_id));
-          toast({
-            title: "Success",
-            description: "Team deleted successfully",
-          });
-        } else if (deleteTarget.type === 'workflow') {
-          await dispatch(deleteWorkflowGroup(deleteTarget.item.id));
-          toast({
-            title: "Success",
-            description: "Workflow group deleted successfully",
-          });
-          dispatch(fetchWorkflowGroups());
-        }
-        setIsDeleteModalOpen(false);
-        setDeleteTarget(null);
-
-      } catch (error: any) {
-        toast({
-          title: "Error",
-          description: "Failed to delete item",
-          variant: "destructive",
-        });
-      }
+  const handleDeleteUser = async (userId: number) => {
+    try {
+      await dispatch(deleteUser(userId));
+      dispatch(fetchUsers()); // Refresh user list
+    } catch (error) {
+      console.error("Failed to delete user:", error);
     }
-  };
-
-  const getDepartmentName = (departmentId: number) => {
-    const department = departments.find(d => d.department_id === departmentId);
-    return department ? department.department_name : 'Unknown Department';
-  };
-
-  const handleDeleteCancel = () => {
-    setIsDeleteModalOpen(false);
-    setDeleteTarget(null);
-  };
-
-  const getRoleColor = (role: string) => {
-    switch (role) {
-      case "Administrator": return "bg-purple-100 text-purple-800";
-      case "Manager": return "bg-blue-100 text-blue-800";
-      case "Supervisor": return "bg-green-100 text-green-800";
-      case "Staff": return "bg-gray-100 text-gray-800";
-      case "Executor": return "bg-orange-100 text-orange-800";
-      default: return "bg-gray-100 text-gray-800";
-    }
-  };
-
-  const getStatusBadge = (item: Department | Team | WorkflowGroup) => {
-    const isActive = !item.finished_date;
-    return isActive ? (
-      <Badge className="bg-green-100 text-green-800">Active</Badge>
-    ) : (
-      <Badge className="bg-red-100 text-red-800">Inactive</Badge>
-    );
   };
 
   return (
-    <AppLayout
-      searchValue={searchValue}
-      onSearchChange={setSearchValue}
-      searchPlaceholder="Search users, teams, workflows..."
-    >
+    <AppLayout>
       <div className="space-y-6">
         <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-2xl font-bold text-gray-900">User Management</h1>
-            <p className="text-gray-600">Manage users, teams, and workflow groups</p>
-          </div>
-          <Button onClick={handleAddUser}>
-            <Plus className="w-4 h-4 mr-2" />
-            Add User
+          <h1 className="text-2xl font-bold">User Management</h1>
+          <Button onClick={() => setIsCreateModalOpen(true)}>
+            Create New User
           </Button>
         </div>
 
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className="grid w-full grid-cols-3">
-            <TabsTrigger value="users">Users</TabsTrigger>
-            <TabsTrigger value="teams">Teams Management</TabsTrigger>
-            <TabsTrigger value="workflows">Workflow Groups</TabsTrigger>
-          </TabsList>
-
-          <TabsContent value="users" className="space-y-4">
-            <UserFilters />
-
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center space-x-2">
-                  <Users className="w-5 h-5" />
-                  <span>System Users ({filteredUsers.length})</span>
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                {isLoading ? (
-                  <div className="flex items-center justify-center p-8">
-                    <div className="text-lg">Loading users...</div>
-                  </div>
-                ) : (
-                  <Table>
-                    <TableHeader>
-                      <TableRow>
-                        <TableHead>Name</TableHead>
-                        <TableHead>Email</TableHead>
-                        <TableHead>Team</TableHead>
-                        <TableHead>Role</TableHead>
-                        <TableHead>Status</TableHead>
-                        <TableHead>Job Title</TableHead>
-                        <TableHead>Actions</TableHead>
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {filteredUsers.map((user) => (
-                        <TableRow key={user.user_id} className={user.is_deleted ? 'opacity-40' : ''}>
-                          <TableCell>
-                            <div className="flex items-center space-x-3">
-                              <div className="w-8 h-8 bg-gray-300 rounded-full flex items-center justify-center">
-                                <User className="w-4 h-4 text-gray-600" />
-                              </div>
-                              <div>
-                                <div className="font-medium">{highlightText(`${user.firstname || ''} ${user.lastname || ''}`, searchValue)}</div>
-                                <div className="text-sm text-gray-500">{user.uid || 'No UID'}</div>
-                              </div>
-                            </div>
-                          </TableCell>
-                          <TableCell className="text-gray-600">{highlightText(user.email || 'No email', searchValue)}</TableCell>
-                          <TableCell>{highlightText(user.team_name || 'No team', searchValue)}</TableCell>
-                          <TableCell>
-                            <Badge className={getRoleColor(user.role_name || '')}>
-                              {highlightText(user.role_name || 'No role', searchValue)}
-                            </Badge>
-                          </TableCell>
-                          <TableCell>
-                            <UserStatusBadge isActive={!user.is_deleted && user.is_active} />
-                          </TableCell>
-                          <TableCell className="text-gray-600">{user.job_title || 'No title'}</TableCell>
-                          <TableCell>
-                            <div className="flex items-center space-x-2">
-                              <Button variant="outline" size="sm" onClick={() => handleEditUser(user)}>
-                                <Edit className="w-4 h-4" />
-                              </Button>
-                              {!user.is_deleted && user.is_active && (
-                                <Button variant="outline" size="sm" className="text-red-600 hover:text-red-700" onClick={() => handleDeleteUser(user)}>
-                                  <Trash2 className="w-4 h-4" />
-                                </Button>
-                              )}
-                            </div>
-                          </TableCell>
-                        </TableRow>
-                      ))}
-                    </TableBody>
-                  </Table>
-                )}
-              </CardContent>
-            </Card>
-          </TabsContent>
-
-          <TabsContent value="teams" className="space-y-4">
-            <Card>
-              <CardHeader>
-                <div className="flex items-center justify-between">
-                  <CardTitle className="flex items-center space-x-2">
-                    <Shield className="w-5 h-5" />
-                    <span>Teams Management ({filteredTeams.length})</span>
-                  </CardTitle>
-                  <Button size="sm" onClick={handleAddTeam}>
-                    <Plus className="w-4 h-4 mr-2" />
-                    Create Team
-                  </Button>
-                </div>
-              </CardHeader>
-              <CardContent>
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>Team Name</TableHead>
-                      <TableHead>Department</TableHead>
-                      <TableHead>Members</TableHead>
-                      <TableHead>Leader</TableHead>
-                      <TableHead>Status</TableHead>
-                      <TableHead>Actions</TableHead>
+        <Card>
+          <CardHeader>
+            <CardTitle>User List</CardTitle>
+          </CardHeader>
+          <CardContent>
+            {isLoading && (
+              <div className="flex items-center justify-center py-4">
+                <Loader2 className="h-6 w-6 animate-spin" />
+              </div>
+            )}
+            {error && (
+              <div className="text-red-500 py-4">Error: {error}</div>
+            )}
+            {!isLoading && !error && (
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>ID</TableHead>
+                    <TableHead>Name</TableHead>
+                    <TableHead>Email</TableHead>
+                    <TableHead>Role</TableHead>
+                    <TableHead>Actions</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {users.map((user) => (
+                    <TableRow key={user.user_id}>
+                      <TableCell>{user.user_id}</TableCell>
+                      <TableCell>{user.name}</TableCell>
+                      <TableCell>{user.email}</TableCell>
+                      <TableCell>{user.role_name}</TableCell>
+                      <TableCell>
+                        <div className="flex space-x-2">
+                          <Button
+                            variant="secondary"
+                            size="sm"
+                            onClick={() => {
+                              setSelectedUser(user);
+                              setIsEditModalOpen(true);
+                            }}
+                          >
+                            Edit
+                          </Button>
+                          <Button
+                            variant="destructive"
+                            size="sm"
+                            onClick={() => handleDeleteUser(user.user_id)}
+                          >
+                            Delete
+                          </Button>
+                        </div>
+                      </TableCell>
                     </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {filteredTeams.map((team) => (
-                      <TableRow key={team.team_id}>
-                        <TableCell className="font-medium">{highlightText(team.team_name, searchValue)}</TableCell>
-                        <TableCell>{getDepartmentName(team.department_id)}</TableCell>
-                        <TableCell>
-                          <Badge variant="outline">{team.member_count || 0} members</Badge>
-                        </TableCell>
-                        <TableCell className="text-gray-600">
-                          {team.leader_name || 'No leader assigned'}
-                        </TableCell>
-                        <TableCell>
-                          {getStatusBadge(team)}
-                        </TableCell>
-                        <TableCell>
-                          <div className="flex items-center space-x-2">
-                            <Button variant="outline" size="sm" onClick={() => handleEditTeam(team)}>
-                              <Edit className="w-4 h-4" />
-                            </Button>
-                            <Button variant="outline" size="sm" className="text-red-600 hover:text-red-700" onClick={() => handleDeleteTeam(team)}>
-                              <Trash2 className="w-4 h-4" />
-                            </Button>
-                          </div>
-                        </TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-              </CardContent>
-            </Card>
-          </TabsContent>
+                  ))}
+                </TableBody>
+              </Table>
+            )}
+          </CardContent>
+        </Card>
 
-          <TabsContent value="workflows" className="space-y-4">
-            <Card>
-              <CardHeader>
-                <div className="flex items-center justify-between">
-                  <CardTitle>Workflow Groups</CardTitle>
-                  <Button size="sm" onClick={handleAddWorkflowGroup}>
-                    <Plus className="w-4 h-4 mr-2" />
-                    Create Workflow Group
-                  </Button>
-                </div>
-              </CardHeader>
-              <CardContent>
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>Group Name</TableHead>
-                      <TableHead>Description</TableHead>
-                      <TableHead>Status</TableHead>
-                      <TableHead>Actions</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {filteredWorkflowGroups.map((group) => (
-                      <TableRow key={group.id}>
-                        <TableCell className="font-medium">{highlightText(group.name, searchValue)}</TableCell>
-                        <TableCell className="text-gray-600">{highlightText(group.description, searchValue)}</TableCell>
-                        
-                        <TableCell>
-                          {getStatusBadge(group)}
-                        </TableCell>
-                        <TableCell>
-                          <div className="flex items-center space-x-2">
-                            <Button variant="outline" size="sm" onClick={() => handleEditWorkflowGroup(group)}>
-                              <Edit className="w-4 h-4" />
-                            </Button>
-                            <Button variant="outline" size="sm" className="text-red-600 hover:text-red-700" onClick={() => handleDeleteWorkflowGroup(group)}>
-                              <Trash2 className="w-4 h-4" />
-                            </Button>
-                          </div>
-                        </TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-              </CardContent>
-            </Card>
-          </TabsContent>
-        </Tabs>
+        {/* Create User Modal */}
+        {isCreateModalOpen && (
+          <UserForm
+            isOpen={isCreateModalOpen}
+            onClose={() => setIsCreateModalOpen(false)}
+            onSubmit={handleCreateUser}
+          />
+        )}
 
-        {/* Modals */}
-        <UserModal
-          isOpen={isUserModalOpen}
-          onClose={() => setIsUserModalOpen(false)}
-          user={selectedUser}
-          mode={modalMode}
-          onSave={handleSaveUser}
-        />
-
-        <TeamModal
-          isOpen={isTeamModalOpen}
-          onClose={() => setIsTeamModalOpen(false)}
-          team={selectedTeam}
-          mode={modalMode}
-          onSave={handleSaveTeam}
-        />
-
-        <WorkflowGroupModal
-          isOpen={isWorkflowModalOpen}
-          onClose={() => setIsWorkflowModalOpen(false)}
-          workflowGroup={selectedWorkflowGroup}
-          mode={modalMode}
-          onSave={handleSaveWorkflowGroup}
-          users={users}
-        />
-
-        <AlertDialog open={isDeleteModalOpen} onOpenChange={handleDeleteCancel}>
-          <AlertDialogContent
-
-            onOverlayClick={handleDeleteCancel} // custom prop passed to AlertDialogOverlay inside your AlertDialogContent
-            className="bg-white border border-gray-200 shadow-lg z-50"
-          >
-            <AlertDialogHeader>
-              <AlertDialogTitle
-              className="text-red-600"
-              >Delete {deleteTarget?.type === 'user' ? 'User' : deleteTarget?.type === 'team' ? 'Team' : 'Workflow Group'}</AlertDialogTitle>
-              <AlertDialogDescription
-              className="text-gray-600"
-              >
-                Are you sure you want to delete "{deleteTarget?.item.team_name || deleteTarget?.item.name || deleteTarget?.item.firstname + ' ' + deleteTarget?.item.lastname}"? This action cannot be undone.
-              </AlertDialogDescription>
-            </AlertDialogHeader>
-            <AlertDialogFooter
-            className="bg-gray-50 -mx-6 -mb-6 px-6 py-4 rounded-b-lg"
-            >
-              <AlertDialogCancel onClick={handleDeleteCancel}>Cancel</AlertDialogCancel>
-              <AlertDialogAction onClick={handleConfirmDelete} className="bg-red-600 hover:bg-red-700">
-                Delete
-              </AlertDialogAction>
-            </AlertDialogFooter>
-          </AlertDialogContent>
-        </AlertDialog>
+        {/* Edit User Modal */}
+        {selectedUser && (
+          <UserForm
+            isOpen={isEditModalOpen}
+            onClose={() => setIsEditModalOpen(false)}
+            onSubmit={(userData) => handleUpdateUser(selectedUser.user_id, userData)}
+            initialData={selectedUser}
+          />
+        )}
       </div>
     </AppLayout>
   );
