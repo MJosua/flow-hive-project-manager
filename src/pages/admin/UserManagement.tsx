@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -15,26 +16,28 @@ import {
   createUser,
   updateUser,
   deleteUser,
-  selectUsers,
-  selectUsersLoading,
-  selectUsersError,
-} from '@/store/slices/userSlice';
+  fetchDepartments,
+  fetchRoles,
+  fetchTeams,
+  UserType
+} from '@/store/slices/userManagementSlice';
 import { useAppDispatch } from '@/hooks/useAppSelector';
 import UserForm from '@/components/admin/UserForm';
 
 const UserManagement = () => {
   const { user, isAuthenticated } = useAppSelector(state => state.auth);
   const dispatch = useAppDispatch();
-  const users = useAppSelector(selectUsers);
-  const isLoading = useAppSelector(selectUsersLoading);
-  const error = useAppSelector(selectUsersError);
+  const { users, isLoading, error } = useAppSelector(state => state.userManagement);
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
-  const [selectedUser, setSelectedUser] = useState(null);
+  const [selectedUser, setSelectedUser] = useState<UserType | null>(null);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
 
   useEffect(() => {
     if (isAuthenticated && user) {
       dispatch(fetchUsers());
+      dispatch(fetchDepartments());
+      dispatch(fetchRoles());
+      dispatch(fetchTeams());
     }
   }, [dispatch, isAuthenticated, user]);
 
@@ -73,7 +76,7 @@ const UserManagement = () => {
 
   const handleUpdateUser = async (userId: number, userData: any) => {
     try {
-      await dispatch(updateUser({ userId, userData }));
+      await dispatch(updateUser({ id: userId, data: userData }));
       dispatch(fetchUsers()); // Refresh user list
       setIsEditModalOpen(false);
       setSelectedUser(null);
@@ -114,7 +117,7 @@ const UserManagement = () => {
             {error && (
               <div className="text-red-500 py-4">Error: {error}</div>
             )}
-            {!isLoading && !error && (
+            {!isLoading && !error && Array.isArray(users) && (
               <Table>
                 <TableHeader>
                   <TableRow>
@@ -126,19 +129,19 @@ const UserManagement = () => {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {users.map((user) => (
-                    <TableRow key={user.user_id}>
-                      <TableCell>{user.user_id}</TableCell>
-                      <TableCell>{user.name}</TableCell>
-                      <TableCell>{user.email}</TableCell>
-                      <TableCell>{user.role_name}</TableCell>
+                  {users.map((userItem) => (
+                    <TableRow key={userItem.user_id}>
+                      <TableCell>{userItem.user_id}</TableCell>
+                      <TableCell>{`${userItem.firstname} ${userItem.lastname}`}</TableCell>
+                      <TableCell>{userItem.email}</TableCell>
+                      <TableCell>{userItem.role_name}</TableCell>
                       <TableCell>
                         <div className="flex space-x-2">
                           <Button
                             variant="secondary"
                             size="sm"
                             onClick={() => {
-                              setSelectedUser(user);
+                              setSelectedUser(userItem);
                               setIsEditModalOpen(true);
                             }}
                           >
@@ -147,7 +150,7 @@ const UserManagement = () => {
                           <Button
                             variant="destructive"
                             size="sm"
-                            onClick={() => handleDeleteUser(user.user_id)}
+                            onClick={() => handleDeleteUser(userItem.user_id)}
                           >
                             Delete
                           </Button>
