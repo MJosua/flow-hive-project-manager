@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { AppLayout } from "@/components/layout/AppLayout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -11,18 +10,19 @@ import ProgressionBar from "@/components/ui/ProgressionBar";
 import TaskApprovalActions from "@/components/ui/TaskApprovalActions";
 import { highlightSearchTerm, searchInObject } from "@/utils/searchUtils";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Grid, List, RefreshCw, Clock } from 'lucide-react';
+import { Grid, List, RefreshCw, Clock, Kanban as KanbanIcon } from 'lucide-react';
 import { useAppDispatch, useAppSelector } from '@/hooks/useAppSelector';
 import { fetchTaskList, fetchTaskCount } from '@/store/slices/ticketsSlice';
 import { convertTicketToDisplayFormat, getStatusColor, getPriorityColor } from '@/utils/ticketUtils';
 import { TicketPagination } from '@/components/ui/TicketPagination';
 import { LoadingSpinner } from '@/components/ui/loading-spinner';
+import KanbanBoard from '@/components/kanban/KanbanBoard';
 
 const TaskList = () => {
   const [searchValue, setSearchValue] = useState('');
   const [filterStatus, setFilterStatus] = useState('all');
   const [filterPriority, setFilterPriority] = useState('all');
-  const [viewMode, setViewMode] = useState<'table' | 'card'>('card');
+  const [viewMode, setViewMode] = useState<'table' | 'card' | 'kanban'>('card');
 
   const dispatch = useAppDispatch();
   const { taskList, taskCount } = useAppSelector((state) => state.tickets);
@@ -234,7 +234,7 @@ const TaskList = () => {
       <div className="space-y-6">
         {/* Header */}
         <div className="flex items-center justify-between">
-          <h1 className="text-3xl font-bold text-foreground">Task List</h1>
+          <h1 className="text-3xl font-bold text-foreground">Task Management</h1>
           <div className="flex items-center space-x-2">
             <Button
               variant="outline"
@@ -321,16 +321,31 @@ const TaskList = () => {
                   <Grid className="w-4 h-4 mr-1" />
                   Cards
                 </Button>
+                <Button
+                  variant={viewMode === 'kanban' ? 'default' : 'outline'}
+                  size="sm"
+                  onClick={() => setViewMode('kanban')}
+                  className="px-3"
+                >
+                  <KanbanIcon className="w-4 h-4 mr-1" />
+                  Kanban
+                </Button>
               </div>
             </div>
           </CardContent>
         </Card>
 
         {/* Content */}
-        {viewMode === 'table' ? <TableView /> : <CardView />}
+        {viewMode === 'kanban' ? (
+          <KanbanBoard />
+        ) : viewMode === 'table' ? (
+          <TableView />
+        ) : (
+          <CardView />
+        )}
 
-        {/* Pagination */}
-        {taskList.totalPage > 1 && (
+        {/* Pagination - only show for non-kanban views */}
+        {viewMode !== 'kanban' && taskList.totalPage > 1 && (
           <TicketPagination
             currentPage={taskList.currentPage}
             totalPages={taskList.totalPage}
@@ -339,7 +354,7 @@ const TaskList = () => {
           />
         )}
 
-        {filteredTasks.length === 0 && !taskList.isLoading && (
+        {filteredTasks.length === 0 && !taskList.isLoading && viewMode !== 'kanban' && (
           <Card className="border-border">
             <CardContent className="p-8 text-center">
               <p className="text-muted-foreground">No tasks found matching your search criteria.</p>
