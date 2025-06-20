@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { FolderOpen, CheckSquare, Clock, TrendingUp, Users, Target, Calendar, AlertCircle } from 'lucide-react';
-import AppLayout from "@/components/layout/AppLayout";
+import AppLayoutNew from "@/components/layout/AppLayoutNew";
 import { useAppDispatch, useAppSelector } from '@/hooks/useAppSelector';
 import { 
   fetchProjects, 
@@ -84,7 +84,7 @@ const Index = () => {
   };
 
   return (
-    <AppLayout>
+    <AppLayoutNew>
       <div className="space-y-6">
         {/* Welcome Section */}
         <div className="flex items-center justify-between">
@@ -318,7 +318,7 @@ const Index = () => {
           </CardContent>
         </Card>
       </div>
-    </AppLayout>
+    </AppLayoutNew>
   );
 };
 

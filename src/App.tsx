@@ -1,3 +1,4 @@
+
 import React, { useCallback } from "react";
 import { Provider } from "react-redux";
 import { store } from "./store";
@@ -6,7 +7,7 @@ import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
-import AppLayout from "@/components/layout/AppLayout";
+import AppLayoutNew from "@/components/layout/AppLayoutNew";
 import { useDynamicServiceRoutes } from "@/components/routing/DynamicServiceRoutes";
 import TokenExpiredModalWrapper from "@/components/modals/TokenExpiredModalWrapper";
 import Index from "./pages/Index";
@@ -128,9 +129,9 @@ const AppContent = () => {
           } />
           <Route path="/goods-request" element={
             <ProtectedRoute>
-              <AppLayout>
+              <AppLayoutNew>
                 <GoodsRequest />
-              </AppLayout>
+              </AppLayoutNew>
             </ProtectedRoute>
           } />
 
@@ -190,9 +191,9 @@ const AppContent = () => {
             </ProtectedRoute>
           } />
           <Route path="*" element={
-            <AppLayout>
+            <AppLayoutNew>
               <NotFound />
-            </AppLayout>
+            </AppLayoutNew>
           } />
         </Routes>
         
