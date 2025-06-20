@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useApp } from '@/contexts/AppContext';
@@ -112,8 +113,8 @@ const ProjectDetail = () => {
     );
   }
 
-  const manager = users.find(u => u.id === project.managerId);
-  const teamMembers = users.filter(u => project.teamMembers.includes(u.id));
+  const manager = users.find(u => u.user_id === project.managerId);
+  const teamMembers = users.filter(u => project.teamMembers.includes(u.user_id));
 
   const getStatusIcon = (status: string) => {
     switch (status) {
@@ -296,7 +297,7 @@ const ProjectDetail = () => {
 
           <div className="grid gap-4">
             {dummyTasks.map((task) => {
-              const assignee = users.find(u => u.id === task.assigneeId);
+              const assignee = users.find(u => u.user_id === task.assigneeId);
               return (
                 <Card key={task.id} className="hover:shadow-md transition-shadow">
                   <CardContent className="p-6">
@@ -372,14 +373,14 @@ const ProjectDetail = () => {
                         <Badge className="bg-purple-100 text-purple-800">Project Manager</Badge>
                       </div>
                     </div>
-                    <Badge variant="outline">{manager.department}</Badge>
+                    <Badge variant="outline">{manager.department_id}</Badge>
                   </div>
                 </CardContent>
               </Card>
             )}
 
             {teamMembers.map((member) => (
-              <Card key={member.id}>
+              <Card key={member.user_id}>
                 <CardContent className="p-6">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center space-x-4">
@@ -392,10 +393,10 @@ const ProjectDetail = () => {
                       <div>
                         <h3 className="font-semibold">{member.name}</h3>
                         <p className="text-gray-600">{member.email}</p>
-                        <Badge variant="outline">{member.role}</Badge>
+                        <Badge variant="outline">{member.role_id}</Badge>
                       </div>
                     </div>
-                    <Badge variant="outline">{member.department}</Badge>
+                    <Badge variant="outline">{member.department_id}</Badge>
                   </div>
                 </CardContent>
               </Card>
