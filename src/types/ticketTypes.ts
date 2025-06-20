@@ -1,3 +1,4 @@
+
 export interface Approver {
   approver_id: number;
   approver_name: string;
@@ -37,6 +38,7 @@ export interface TicketDetail extends Ticket {
   priority?: string;
   department?: string;
   department_name?: string;
+  dept_name?: string; // Add this missing property
   requester?: string;
   items?: Array<{
     name: string;

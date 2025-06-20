@@ -40,8 +40,9 @@ const initialState: TaskState = {
 // Async thunks
 export const fetchTasks = createAsyncThunk(
   'tasks/fetchTasks',
-  async (projectId?: number, { rejectWithValue }) => {
+  async (params: { projectId?: number } = {}, { rejectWithValue }) => {
     try {
+      const { projectId } = params;
       const url = projectId ? `${API_URL}/projects/${projectId}/tasks` : `${API_URL}/tasks`;
       const response = await axios.get(url, {
         headers: {
