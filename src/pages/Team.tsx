@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { useApp } from '@/contexts/AppContext';
 import { useSearch } from '@/contexts/SearchContext';
@@ -59,7 +58,7 @@ const Team = () => {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {filteredUsers.map((user) => (
             <TeamMemberCard
-              key={user.user_id || user.id}
+              key={user.user_id}
               user={user}
               highlightText={highlightText}
               searchQuery={searchQuery}

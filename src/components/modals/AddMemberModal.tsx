@@ -26,7 +26,7 @@ const AddMemberModal = ({ open, onOpenChange, projectId }: AddMemberModalProps) 
 
   const project = projects.find(p => p.id === projectId);
   const availableUsers = users.filter(user => 
-    !project?.teamMembers.includes(user.id) && user.id !== project?.managerId
+    !project?.teamMembers.includes(user.user_id) && user.user_id !== project?.managerId
   );
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -60,7 +60,7 @@ const AddMemberModal = ({ open, onOpenChange, projectId }: AddMemberModalProps) 
               </SelectTrigger>
               <SelectContent>
                 {availableUsers.map((user) => (
-                  <SelectItem key={user.id} value={user.id}>
+                  <SelectItem key={user.user_id} value={user.user_id}>
                     <div className="flex items-center space-x-2">
                       <Avatar className="h-6 w-6">
                         <AvatarImage src={user.avatar} alt={user.name} />

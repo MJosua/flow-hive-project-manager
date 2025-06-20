@@ -17,7 +17,7 @@ export const SearchableProjectGrid: React.FC = () => {
   const filteredProjects = searchQuery.trim()
     ? projects.filter(project => {
         const searchLower = searchQuery.toLowerCase();
-        const manager = users.find(u => u.id === project.managerId);
+        const manager = users.find(u => u.user_id === project.managerId);
         
         return project.name.toLowerCase().includes(searchLower) ||
                project.description.toLowerCase().includes(searchLower) ||
@@ -52,8 +52,8 @@ export const SearchableProjectGrid: React.FC = () => {
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
       {filteredProjects.map((project) => {
-        const manager = users.find(u => u.id === project.managerId);
-        const teamMembers = users.filter(u => project.teamMembers.includes(u.id));
+        const manager = users.find(u => u.user_id === project.managerId);
+        const teamMembers = users.filter(u => project.teamMembers.includes(u.user_id));
 
         return (
           <Card key={project.id} className="hover:shadow-lg transition-shadow cursor-pointer">

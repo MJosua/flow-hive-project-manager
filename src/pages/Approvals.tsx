@@ -26,7 +26,7 @@ const Approvals = () => {
   // Apply search filtering
   const filteredApprovals = searchQuery.trim()
     ? approvals.filter(approval => {
-        const requester = users.find(u => u.id === approval.requesterId);
+        const requester = users.find(u => u.user_id === approval.requesterId);
         const searchLower = searchQuery.toLowerCase();
         
         return approval.type.toLowerCase().includes(searchLower) ||
@@ -91,7 +91,7 @@ const Approvals = () => {
           
           <div className="grid gap-4">
             {pendingApprovals.map((approval) => {
-              const requester = users.find(u => u.id === approval.requesterId);
+              const requester = users.find(u => u.user_id === approval.requesterId);
               
               return (
                 <PendingApprovalCard
@@ -115,7 +115,7 @@ const Approvals = () => {
         
         <div className="grid gap-4">
           {processedApprovals.slice(0, 10).map((approval) => {
-            const requester = users.find(u => u.id === approval.requesterId);
+            const requester = users.find(u => u.user_id === approval.requesterId);
             
             return (
               <ProcessedApprovalCard
@@ -139,7 +139,7 @@ const Approvals = () => {
         onOpenChange={(open) => setConfirmationModal(prev => ({ ...prev, open }))}
         action={confirmationModal.action}
         approvalType={confirmationModal.approval?.type || ''}
-        requesterName={users.find(u => u.id === confirmationModal.approval?.requesterId)?.name}
+        requesterName={users.find(u => u.user_id === confirmationModal.approval?.requesterId)?.name}
         onConfirm={confirmApproval}
       />
     </Layout>

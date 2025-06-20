@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
@@ -34,7 +33,7 @@ const AddTaskModal = ({ open, onOpenChange, projectId }: AddTaskModalProps) => {
 
   const project = projects.find(p => p.id === projectId);
   const projectMembers = users.filter(user => 
-    project?.teamMembers.includes(user.id) || user.id === project?.managerId
+    project?.teamMembers.includes(user.user_id) || user.user_id === project?.managerId
   );
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -91,7 +90,7 @@ const AddTaskModal = ({ open, onOpenChange, projectId }: AddTaskModalProps) => {
                 </SelectTrigger>
                 <SelectContent>
                   {projectMembers.map((user) => (
-                    <SelectItem key={user.id} value={user.id}>
+                    <SelectItem key={user.user_id} value={user.user_id}>
                       {user.name}
                     </SelectItem>
                   ))}

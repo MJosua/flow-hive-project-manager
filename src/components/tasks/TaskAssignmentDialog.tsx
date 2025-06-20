@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
@@ -35,7 +34,7 @@ export const TaskAssignmentDialog: React.FC<TaskAssignmentDialogProps> = ({
   });
   const [newTag, setNewTag] = useState('');
 
-  const teamMembers = users.filter(user => user.status === 'active');
+  const teamMembers = users.filter(user => user.active === true);
   const currentProjectId = projectId || selectedProject?.id;
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -134,7 +133,7 @@ export const TaskAssignmentDialog: React.FC<TaskAssignmentDialogProps> = ({
                 </SelectTrigger>
                 <SelectContent>
                   {teamMembers.map((user) => (
-                    <SelectItem key={user.id} value={user.id}>
+                    <SelectItem key={user.user_id} value={user.user_id}>
                       <div className="flex items-center space-x-2">
                         <Avatar className="h-6 w-6">
                           <AvatarImage src={user.avatar} alt={user.name} />
@@ -143,7 +142,7 @@ export const TaskAssignmentDialog: React.FC<TaskAssignmentDialogProps> = ({
                           </AvatarFallback>
                         </Avatar>
                         <span>{user.name}</span>
-                        <Badge variant="outline" className="text-xs">{user.role}</Badge>
+                        <Badge variant="outline" className="text-xs">{user.role_id}</Badge>
                       </div>
                     </SelectItem>
                   ))}
