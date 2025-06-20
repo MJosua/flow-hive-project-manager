@@ -11,6 +11,7 @@ import { fetchDepartments, fetchUsers, Department } from '@/store/slices/userMan
 import { useToast } from '@/hooks/use-toast';
 import axios from 'axios';
 import { API_URL } from '@/config/sourceConfig';
+import DepartmentModal from '@/components/modals/DepartmentModal';
 
 const DepartmentManagement = () => {
   const dispatch = useAppDispatch();

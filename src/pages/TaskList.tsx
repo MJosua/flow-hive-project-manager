@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -56,10 +57,15 @@ const TaskList = () => {
     new Set(
       tasks
         .filter(task => task.project_id !== null && task.project_id !== undefined && task.project_name !== null && task.project_name !== undefined)
-        .map(task => ({ id: task.project_id!, name: task.project_name! }))
-        .map(project => JSON.stringify(project))
+        .map(task => {
+          const project = { id: task.project_id!, name: task.project_name! };
+          return `${project.id}:${project.name}`;
+        })
     )
-  ).map(projectStr => JSON.parse(projectStr) as { id: number; name: string });
+  ).map(projectStr => {
+    const [id, name] = projectStr.split(':');
+    return { id: parseInt(id), name };
+  });
 
   return (
     <AppLayoutNew searchValue={searchValue} onSearchChange={setSearchValue} searchPlaceholder="Search tasks...">
