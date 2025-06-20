@@ -1,381 +1,205 @@
 
 import React, { useState, useEffect } from 'react';
-import AppLayout from '@/components/layout/AppLayout';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Button } from "@/components/ui/button";
-import { useNavigate } from 'react-router-dom';
-import ProgressionBar from "@/components/ui/ProgressionBar";
-import TaskApprovalActions from "@/components/ui/TaskApprovalActions";
-import { highlightSearchTerm, searchInObject } from "@/utils/searchUtils";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Grid, List, RefreshCw, Clock, Kanban as KanbanIcon, Calendar as GanttIcon } from 'lucide-react';
-import GanttChart from '@/components/gantt/GanttChart';
+import AppLayoutNew from '@/components/layout/AppLayoutNew';
 import { useAppDispatch, useAppSelector } from '@/hooks/useAppSelector';
-import { fetchTaskList, fetchTaskCount } from '@/store/slices/ticketsSlice';
-import { convertTicketToDisplayFormat, getStatusColor, getPriorityColor } from '@/utils/ticketUtils';
-import { TicketPagination } from '@/components/ui/TicketPagination';
-import { LoadingSpinner } from '@/components/ui/loading-spinner';
-import KanbanBoard from '@/components/kanban/KanbanBoard';
+import { fetchTasks, selectTasks, selectTasksLoading } from '@/store/slices/taskSlice';
+import { useNavigate } from 'react-router-dom';
+import { Plus, Calendar, User } from 'lucide-react';
 
 const TaskList = () => {
   const [searchValue, setSearchValue] = useState('');
-  const [filterStatus, setFilterStatus] = useState('all');
-  const [filterPriority, setFilterPriority] = useState('all');
-  const [viewMode, setViewMode] = useState<'table' | 'card' | 'kanban' | 'gantt'>('card');
+  const [statusFilter, setStatusFilter] = useState('all');
+  const [priorityFilter, setPriorityFilter] = useState('all');
+  const [projectFilter, setProjectFilter] = useState('all');
 
   const dispatch = useAppDispatch();
-  const { taskList, taskCount } = useAppSelector((state) => state.tickets);
+  const tasks = useAppSelector(selectTasks);
+  const isLoading = useAppSelector(selectTasksLoading);
   const navigate = useNavigate();
 
   useEffect(() => {
-    dispatch(fetchTaskList(1));
-    dispatch(fetchTaskCount());
+    dispatch(fetchTasks({}));
   }, [dispatch]);
 
-  const tasks = taskList.data.map(convertTicketToDisplayFormat);
+  const statusColors: Record<string, string> = {
+    'todo': 'bg-gray-100 text-gray-800',
+    'in-progress': 'bg-blue-100 text-blue-800',
+    'completed': 'bg-green-100 text-green-800',
+    'on-hold': 'bg-yellow-100 text-yellow-800'
+  };
+
+  const priorityColors: Record<string, string> = {
+    'low': 'bg-gray-100 text-gray-800',
+    'medium': 'bg-blue-100 text-blue-800',
+    'high': 'bg-orange-100 text-orange-800',
+    'critical': 'bg-red-100 text-red-800'
+  };
 
   const filteredTasks = tasks.filter(task => {
-    const statusFilter = filterStatus === 'all' || task.status === filterStatus;
-    const priorityFilter = filterPriority === 'all' || task.priority === filterPriority;
-    const searchFilter = searchInObject(task, searchValue);
-
-    return statusFilter && priorityFilter && searchFilter;
+    const matchesSearch = task.name.toLowerCase().includes(searchValue.toLowerCase()) ||
+                         task.description.toLowerCase().includes(searchValue.toLowerCase()) ||
+                         task.assigned_to_name?.toLowerCase().includes(searchValue.toLowerCase());
+    const matchesStatus = statusFilter === 'all' || task.status === statusFilter;
+    const matchesPriority = priorityFilter === 'all' || task.priority === priorityFilter;
+    const matchesProject = projectFilter === 'all' || task.project_id?.toString() === projectFilter;
+    
+    return matchesSearch && matchesStatus && matchesPriority && matchesProject;
   });
 
-  const handleRowClick = (taskId: string) => {
-    navigate(`/ticket/${taskId}`);
-  };
-
-  const handlePageChange = (page: number) => {
-    dispatch(fetchTaskList(page));
-  };
-
-  const handleRefresh = () => {
-    dispatch(fetchTaskList(taskList.currentPage));
-    dispatch(fetchTaskCount());
-  };
-
-  const renderHighlightedText = (text: string) => {
-    return (
-      <span 
-        dangerouslySetInnerHTML={{ 
-          __html: highlightSearchTerm(text, searchValue) 
-        }}
-      />
-    );
-  };
-
-  // Helper function to check if current user can approve a specific step
-  const canUserApprove = (ticket: any, approvalOrder: number): boolean => {
-    if (!ticket.list_approval) return false;
-    
-    const currentUserApproval = ticket.list_approval.find((approval: any) => 
-      approval.approval_order === approvalOrder && approval.approval_status === 0
-    );
-    
-    return !!currentUserApproval;
-  };
-
-  // Get the current user's pending approval order for a ticket
-  const getUserApprovalOrder = (ticket: any): number | null => {
-    if (!ticket.list_approval) return null;
-    
-    const userApproval = ticket.list_approval.find((approval: any) => 
-      approval.approval_status === 0
-    );
-    
-    return userApproval ? userApproval.approval_order : null;
-  };
-
-  const TableView = () => (
-    <Card className="border-border shadow-sm">
-      <CardContent className="p-0">
-        <div className="overflow-x-auto">
-          <Table>
-            <TableHeader>
-              <TableRow className="bg-muted/50 border-b border-border">
-                <TableHead className="text-xs font-medium text-muted-foreground uppercase">Ticket ID</TableHead>
-                <TableHead className="text-xs font-medium text-muted-foreground uppercase">Type</TableHead>
-                <TableHead className="text-xs font-medium text-muted-foreground uppercase">Requester</TableHead>
-                <TableHead className="text-xs font-medium text-muted-foreground uppercase">Department</TableHead>
-                <TableHead className="text-xs font-medium text-muted-foreground uppercase">Priority</TableHead>
-                <TableHead className="text-xs font-medium text-muted-foreground uppercase">Progress</TableHead>
-                <TableHead className="text-xs font-medium text-muted-foreground uppercase">Status</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {filteredTasks.map((task) => (
-                <TableRow 
-                  key={task.id}
-                  className="hover:bg-muted/30 cursor-pointer transition-colors"
-                  onClick={() => handleRowClick(task.id)}
-                >
-                  <TableCell className="font-medium text-primary">
-                    {renderHighlightedText(task.id)}
-                  </TableCell>
-                  <TableCell className="text-muted-foreground">
-                    {renderHighlightedText(task.type)}
-                  </TableCell>
-                  <TableCell className="text-muted-foreground">
-                    {renderHighlightedText(task.requester)}
-                  </TableCell>
-                  <TableCell className="text-muted-foreground">
-                    {renderHighlightedText(task.department)}
-                  </TableCell>
-                  <TableCell>
-                    <Badge className={`${getPriorityColor(task.priority)} border`}>
-                      {renderHighlightedText(task.priority)}
-                    </Badge>
-                  </TableCell>
-                  <TableCell>
-                    <ProgressionBar steps={task.approvalSteps} />
-                  </TableCell>
-                  <TableCell>
-                    <Badge className={`${getStatusColor(task.status)} border`}>
-                      {renderHighlightedText(task.status)}
-                    </Badge>
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </div>
-      </CardContent>
-    </Card>
-  );
-
-  const CardView = () => (
-    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-      {filteredTasks.map((task) => {
-        const originalTicket = taskList.data.find(t => t.ticket_id.toString() === task.id);
-        const userApprovalOrder = getUserApprovalOrder(originalTicket);
-        const canApprove = userApprovalOrder !== null;
-        
-        return (
-          <div key={task.id} className="space-y-4">
-            <Card className="border-border shadow-sm hover:shadow-md transition-shadow">
-              <CardHeader className="pb-3">
-                <div className="flex items-center justify-between">
-                  <CardTitle 
-                    className="text-lg font-medium text-primary cursor-pointer hover:underline"
-                    onClick={() => handleRowClick(task.id)}
-                  >
-                    {renderHighlightedText(task.id)}
-                  </CardTitle>
-                  <div className="flex items-center gap-2">
-                    {canApprove && (
-                      <Badge variant="outline" className="bg-orange-50 text-orange-700 border-orange-200">
-                        <Clock className="w-3 h-3 mr-1" />
-                        Action Required
-                      </Badge>
-                    )}
-                    <Badge className={`${getPriorityColor(task.priority)} border text-xs`}>
-                      {renderHighlightedText(task.priority)}
-                    </Badge>
-                  </div>
-                </div>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div>
-                  <p className="text-sm font-medium text-foreground">
-                    {renderHighlightedText(task.type)}
-                  </p>
-                  <p className="text-xs text-muted-foreground">
-                    Requester: {renderHighlightedText(task.requester)}
-                  </p>
-                  <p className="text-xs text-muted-foreground">
-                    Department: {renderHighlightedText(task.department)}
-                  </p>
-                </div>
-                
-                <div>
-                  <p className="text-xs text-muted-foreground mb-2">Approval Progress</p>
-                  <ProgressionBar steps={task.approvalSteps} showDetails={true} />
-                </div>
-
-                <div className="flex items-center justify-between">
-                  <Badge className={`${getStatusColor(task.status)} border text-xs`}>
-                    {renderHighlightedText(task.status)}
-                  </Badge>
-                  <span className="text-xs text-muted-foreground">
-                    {new Date(originalTicket?.creation_date || '').toLocaleDateString()}
-                  </span>
-                </div>
-              </CardContent>
-            </Card>
-
-            {canApprove && userApprovalOrder && (
-              <TaskApprovalActions
-                ticketId={task.id}
-                approvalOrder={userApprovalOrder}
-                canApprove={canApprove}
-                currentStatus={0}
-              />
-            )}
-          </div>
-        );
-      })}
-    </div>
-  );
-
-  if (taskList.isLoading && taskList.data.length === 0) {
-    return (
-      <AppLayout searchValue={searchValue} onSearchChange={setSearchValue} searchPlaceholder="Search tasks...">
-        <div className="flex items-center justify-center h-64">
-          <LoadingSpinner />
-        </div>
-      </AppLayout>
-    );
-  }
+  // Get unique projects for filter
+  const projects = Array.from(new Set(tasks.map(task => ({ id: task.project_id, name: task.project_name }))))
+    .filter(project => project.id && project.name);
 
   return (
-    <AppLayout searchValue={searchValue} onSearchChange={setSearchValue} searchPlaceholder="Search tasks...">
+    <AppLayoutNew searchValue={searchValue} onSearchChange={setSearchValue} searchPlaceholder="Search tasks...">
       <div className="space-y-6">
-        {/* Header */}
         <div className="flex items-center justify-between">
-          <h1 className="text-3xl font-bold text-foreground">Task Management</h1>
-          <div className="flex items-center space-x-2">
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={handleRefresh}
-              disabled={taskList.isLoading}
-            >
-              <RefreshCw className={`w-4 h-4 mr-2 ${taskList.isLoading ? 'animate-spin' : ''}`} />
-              Refresh
-            </Button>
-            <Badge variant="secondary" className="px-3 py-1 bg-primary/10 text-primary border-primary/20">
-              {taskList.totalData} Tasks
-            </Badge>
-            {taskCount > 0 && (
-              <Badge variant="destructive" className="px-3 py-1">
-                {taskCount} Pending Actions
-              </Badge>
-            )}
+          <div>
+            <h1 className="text-2xl font-bold text-gray-900">Task List</h1>
+            <p className="text-gray-600">View and manage all tasks across projects</p>
           </div>
+          <Button>
+            <Plus className="w-4 h-4 mr-2" />
+            Create Task
+          </Button>
         </div>
 
-        {/* Error display */}
-        {taskList.error && (
-          <Card className="border-red-200 bg-red-50">
-            <CardContent className="p-4">
-              <p className="text-red-600">{taskList.error}</p>
-            </CardContent>
-          </Card>
-        )}
-
-        {/* Filters and View Toggle */}
-        <Card className="border-border shadow-sm">
+        {/* Filters */}
+        <Card>
           <CardContent className="p-4">
-            <div className="flex flex-wrap items-center justify-between gap-4">
-              <div className="flex flex-wrap items-center gap-4">
-                <div className="flex items-center space-x-2">
-                  <Label htmlFor="status-filter" className="text-muted-foreground">Status:</Label>
-                  <Select value={filterStatus} onValueChange={setFilterStatus}>
-                    <SelectTrigger className="w-40 border-input">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="all">All Status</SelectItem>
-                      <SelectItem value="Submitted">Submitted</SelectItem>
-                      <SelectItem value="In Progress">In Progress</SelectItem>
-                      <SelectItem value="Approved">Approved</SelectItem>
-                      <SelectItem value="Rejected">Rejected</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-
-                <div className="flex items-center space-x-2">
-                  <Label htmlFor="priority-filter" className="text-muted-foreground">Priority:</Label>
-                  <Select value={filterPriority} onValueChange={setFilterPriority}>
-                    <SelectTrigger className="w-40 border-input">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="all">All Priorities</SelectItem>
-                      <SelectItem value="High">High</SelectItem>
-                      <SelectItem value="Medium">Medium</SelectItem>
-                      <SelectItem value="Low">Low</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
+            <div className="flex flex-wrap items-center gap-4">
+              <div className="flex items-center space-x-2">
+                <Label>Status:</Label>
+                <Select value={statusFilter} onValueChange={setStatusFilter}>
+                  <SelectTrigger className="w-40">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All Status</SelectItem>
+                    <SelectItem value="todo">Todo</SelectItem>
+                    <SelectItem value="in-progress">In Progress</SelectItem>
+                    <SelectItem value="completed">Completed</SelectItem>
+                    <SelectItem value="on-hold">On Hold</SelectItem>
+                  </SelectContent>
+                </Select>
               </div>
 
               <div className="flex items-center space-x-2">
-                <Button
-                  variant={viewMode === 'table' ? 'default' : 'outline'}
-                  size="sm"
-                  onClick={() => setViewMode('table')}
-                  className="px-3"
-                >
-                  <List className="w-4 h-4 mr-1" />
-                  Table
-                </Button>
-                <Button
-                  variant={viewMode === 'card' ? 'default' : 'outline'}
-                  size="sm"
-                  onClick={() => setViewMode('card')}
-                  className="px-3"
-                >
-                  <Grid className="w-4 h-4 mr-1" />
-                  Cards
-                </Button>
-                <Button
-                  variant={viewMode === 'kanban' ? 'default' : 'outline'}
-                  size="sm"
-                  onClick={() => setViewMode('kanban')}
-                  className="px-3"
-                >
-                  <KanbanIcon className="w-4 h-4 mr-1" />
-                  Kanban
-                </Button>
-                <Button
-                  variant={viewMode === 'gantt' ? 'default' : 'outline'}
-                  size="sm"
-                  onClick={() => setViewMode('gantt')}
-                  className="px-3"
-                >
-                  <GanttIcon className="w-4 h-4 mr-1" />
-                  Gantt
-                </Button>
+                <Label>Priority:</Label>
+                <Select value={priorityFilter} onValueChange={setPriorityFilter}>
+                  <SelectTrigger className="w-40">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All Priorities</SelectItem>
+                    <SelectItem value="low">Low</SelectItem>
+                    <SelectItem value="medium">Medium</SelectItem>
+                    <SelectItem value="high">High</SelectItem>
+                    <SelectItem value="critical">Critical</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="flex items-center space-x-2">
+                <Label>Project:</Label>
+                <Select value={projectFilter} onValueChange={setProjectFilter}>
+                  <SelectTrigger className="w-48">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All Projects</SelectItem>
+                    {projects.map((project) => (
+                      <SelectItem key={project.id} value={project.id?.toString() || ''}>
+                        {project.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </div>
             </div>
           </CardContent>
         </Card>
 
-        {/* Content */}
-        {viewMode === 'gantt' ? (
-          <GanttChart />
-        ) : viewMode === 'kanban' ? (
-          <KanbanBoard />
-        ) : viewMode === 'table' ? (
-          <TableView />
-        ) : (
-          <CardView />
-        )}
+        {/* Tasks Table */}
+        <Card>
+          <CardContent className="p-0">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Task Name</TableHead>
+                  <TableHead>Project</TableHead>
+                  <TableHead>Assignee</TableHead>
+                  <TableHead>Status</TableHead>
+                  <TableHead>Priority</TableHead>
+                  <TableHead>Due Date</TableHead>
+                  <TableHead>Actions</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {filteredTasks.map((task) => (
+                  <TableRow key={task.task_id} className="hover:bg-gray-50 cursor-pointer">
+                    <TableCell className="font-medium">
+                      <div>
+                        <p className="font-semibold">{task.name}</p>
+                        <p className="text-sm text-gray-600 truncate max-w-xs">{task.description}</p>
+                      </div>
+                    </TableCell>
+                    <TableCell>{task.project_name || 'No Project'}</TableCell>
+                    <TableCell>
+                      <div className="flex items-center space-x-2">
+                        <User className="w-4 h-4 text-gray-400" />
+                        <span>{task.assigned_to_name || 'Unassigned'}</span>
+                      </div>
+                    </TableCell>
+                    <TableCell>
+                      <Badge className={statusColors[task.status]}>
+                        {task.status.replace('-', ' ')}
+                      </Badge>
+                    </TableCell>
+                    <TableCell>
+                      <Badge variant="outline" className={priorityColors[task.priority]}>
+                        {task.priority}
+                      </Badge>
+                    </TableCell>
+                    <TableCell>
+                      <div className="flex items-center space-x-1">
+                        <Calendar className="w-4 h-4 text-gray-400" />
+                        <span>{new Date(task.due_date).toLocaleDateString()}</span>
+                      </div>
+                    </TableCell>
+                    <TableCell>
+                      <Button 
+                        variant="ghost" 
+                        size="sm" 
+                        onClick={() => navigate(`/task/${task.task_id}`)}
+                      >
+                        View
+                      </Button>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </CardContent>
+        </Card>
 
-        {/* Pagination - only show for table and card views */}
-        {(viewMode === 'table' || viewMode === 'card') && taskList.totalPage > 1 && (
-          <TicketPagination
-            currentPage={taskList.currentPage}
-            totalPages={taskList.totalPage}
-            totalItems={taskList.totalData}
-            onPageChange={handlePageChange}
-          />
-        )}
-
-        {filteredTasks.length === 0 && !taskList.isLoading && viewMode !== 'kanban' && (
-          <Card className="border-border">
-            <CardContent className="p-8 text-center">
-              <p className="text-muted-foreground">No tasks found matching your search criteria.</p>
-            </CardContent>
-          </Card>
+        {filteredTasks.length === 0 && !isLoading && (
+          <div className="text-center py-12">
+            <Plus className="w-12 h-12 text-gray-400 mx-auto mb-4" />
+            <h3 className="text-lg font-medium text-gray-900 mb-2">No tasks found</h3>
+            <p className="text-gray-600 mb-4">
+              {searchValue ? 'Try adjusting your search terms' : 'No tasks match your current filters'}
+            </p>
+          </div>
         )}
       </div>
-    </AppLayout>
+    </AppLayoutNew>
   );
 };
 

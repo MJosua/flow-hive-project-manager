@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -9,7 +10,7 @@ import ProgressionBar from "@/components/ui/ProgressionBar";
 import { highlightSearchTerm, searchInObject } from "@/utils/searchUtils";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Grid, List, RefreshCw } from 'lucide-react';
-import AppLayout from "@/components/layout/AppLayout";
+import AppLayoutNew from "@/components/layout/AppLayoutNew";
 import { useAppDispatch, useAppSelector } from '@/hooks/useAppSelector';
 import { fetchMyTickets } from '@/store/slices/ticketsSlice';
 import { convertTicketToDisplayFormat, getStatusColor, getPriorityColor } from '@/utils/ticketUtils';
@@ -158,16 +159,16 @@ const MyTickets = () => {
 
   if (myTickets.isLoading && myTickets.data.length === 0) {
     return (
-      <AppLayout searchValue={searchValue} onSearchChange={setSearchValue} searchPlaceholder="Search tickets...">
+      <AppLayoutNew searchValue={searchValue} onSearchChange={setSearchValue} searchPlaceholder="Search tickets...">
         <div className="flex items-center justify-center h-64">
           <LoadingSpinner />
         </div>
-      </AppLayout>
+      </AppLayoutNew>
     );
   }
 
   return (
-    <AppLayout searchValue={searchValue} onSearchChange={setSearchValue} searchPlaceholder="Search tickets...">
+    <AppLayoutNew searchValue={searchValue} onSearchChange={setSearchValue} searchPlaceholder="Search tickets...">
       <div className="space-y-6">
         {/* Header */}
         <div className="flex items-center justify-between">
@@ -279,7 +280,7 @@ const MyTickets = () => {
           </Card>
         )}
       </div>
-    </AppLayout>
+    </AppLayoutNew>
   );
 };
 

@@ -1,145 +1,108 @@
 
-import React, { useState, useEffect } from 'react';
-import { CheckSquare, Clock, AlertCircle, User, Calendar, Flag } from 'lucide-react';
+import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import AppLayout from "@/components/layout/AppLayout";
-import { useAppDispatch, useAppSelector } from '@/hooks/useAppSelector';
-import { 
-  fetchMyTasks, 
-  selectMyTasks, 
-  selectTasksLoading, 
-  selectTasksError,
-  useFallbackTaskData,
-  updateTaskStatus
-} from '@/store/slices/taskSlice';
-import { useNavigate } from 'react-router-dom';
-import { useToast } from '@/hooks/use-toast';
-
-// Status color mapping
-const statusColors: Record<string, string> = {
-  'todo': 'bg-gray-100 text-gray-800',
-  'in-progress': 'bg-blue-100 text-blue-800',
-  'review': 'bg-yellow-100 text-yellow-800',
-  'done': 'bg-green-100 text-green-800',
-  'blocked': 'bg-red-100 text-red-800',
-};
-
-// Priority color mapping
-const priorityColors: Record<string, string> = {
-  'low': 'bg-gray-100 text-gray-800',
-  'medium': 'bg-blue-100 text-blue-800',
-  'high': 'bg-orange-100 text-orange-800',
-  'critical': 'bg-red-100 text-red-800',
-};
+import AppLayoutNew from '@/components/layout/AppLayoutNew';
+import { CheckSquare, Calendar, Clock, User, AlertCircle } from 'lucide-react';
 
 const MyTasks = () => {
   const [searchValue, setSearchValue] = useState('');
-  const [activeTab, setActiveTab] = useState('all');
-  const navigate = useNavigate();
-  const { toast } = useToast();
-  
-  const dispatch = useAppDispatch();
-  const myTasks = useAppSelector(selectMyTasks);
-  const isLoading = useAppSelector(selectTasksLoading);
-  const error = useAppSelector(selectTasksError);
+  const [statusFilter, setStatusFilter] = useState('all');
+  const [priorityFilter, setPriorityFilter] = useState('all');
 
-  useEffect(() => {
-    // Try to fetch real data, fallback to dummy data if API fails
-    dispatch(fetchMyTasks());
-    
-    // Initialize with fallback data immediately if no tasks
-    if (myTasks.length === 0) {
-      dispatch(useFallbackTaskData());
+  // Mock data for tasks
+  const tasks = [
+    {
+      id: 1,
+      title: "Design Homepage Layout",
+      description: "Create wireframes and mockups for the new homepage",
+      status: "in-progress",
+      priority: "high",
+      dueDate: "2024-02-15",
+      project: "Website Redesign",
+      estimatedHours: 8,
+      completedHours: 3
+    },
+    {
+      id: 2,
+      title: "Database Schema Update",
+      description: "Update user table with new authentication fields",
+      status: "todo",
+      priority: "medium",
+      dueDate: "2024-02-20",
+      project: "User Management System",
+      estimatedHours: 4,
+      completedHours: 0
+    },
+    {
+      id: 3,
+      title: "API Documentation",
+      description: "Complete API documentation for v2.0",
+      status: "completed",
+      priority: "low",
+      dueDate: "2024-02-10",
+      project: "API Development",
+      estimatedHours: 6,
+      completedHours: 6
     }
-  }, [dispatch]);
+  ];
 
-  // Filter tasks based on search and active tab
-  const filteredTasks = myTasks.filter(task => {
-    const matchesSearch = 
-      task.name.toLowerCase().includes(searchValue.toLowerCase()) ||
-      task.description.toLowerCase().includes(searchValue.toLowerCase()) ||
-      task.project_name?.toLowerCase().includes(searchValue.toLowerCase());
+  const statusColors: Record<string, string> = {
+    'todo': 'bg-gray-100 text-gray-800',
+    'in-progress': 'bg-blue-100 text-blue-800',
+    'completed': 'bg-green-100 text-green-800',
+    'on-hold': 'bg-yellow-100 text-yellow-800'
+  };
 
-    const matchesTab = activeTab === 'all' || task.status === activeTab;
+  const priorityColors: Record<string, string> = {
+    'low': 'bg-gray-100 text-gray-800',
+    'medium': 'bg-blue-100 text-blue-800',
+    'high': 'bg-orange-100 text-orange-800',
+    'critical': 'bg-red-100 text-red-800'
+  };
 
-    return matchesSearch && matchesTab;
+  const filteredTasks = tasks.filter(task => {
+    const matchesSearch = task.title.toLowerCase().includes(searchValue.toLowerCase()) ||
+                         task.description.toLowerCase().includes(searchValue.toLowerCase()) ||
+                         task.project.toLowerCase().includes(searchValue.toLowerCase());
+    const matchesStatus = statusFilter === 'all' || task.status === statusFilter;
+    const matchesPriority = priorityFilter === 'all' || task.priority === priorityFilter;
+    
+    return matchesSearch && matchesStatus && matchesPriority;
   });
 
-  // Group tasks by status for stats
-  const todoTasks = myTasks.filter(t => t.status === 'todo');
-  const inProgressTasks = myTasks.filter(t => t.status === 'in-progress');
-  const reviewTasks = myTasks.filter(t => t.status === 'review');
-  const doneTasks = myTasks.filter(t => t.status === 'done');
-  const overdueTasks = myTasks.filter(t => 
-    new Date(t.due_date) < new Date() && t.status !== 'done'
-  );
-
-  const handleStatusChange = async (taskId: number, newStatus: any) => {
-    try {
-      await dispatch(updateTaskStatus({ taskId, status: newStatus }));
-      toast({
-        title: "Success",
-        description: "Task status updated successfully",
-      });
-    } catch (error) {
-      toast({
-        title: "Error",
-        description: "Failed to update task status",
-        variant: "destructive",
-      });
-    }
-  };
-
-  const getStatusIcon = (status: string) => {
-    switch (status) {
-      case 'todo': return <Clock className="w-4 h-4" />;
-      case 'in-progress': return <User className="w-4 h-4" />;
-      case 'review': return <AlertCircle className="w-4 h-4" />;
-      case 'done': return <CheckSquare className="w-4 h-4" />;
-      default: return <Clock className="w-4 h-4" />;
-    }
-  };
-
-  const getPriorityIcon = (priority: string) => {
-    return <Flag className={`w-4 h-4 ${
-      priority === 'critical' ? 'text-red-600' :
-      priority === 'high' ? 'text-orange-600' :
-      priority === 'medium' ? 'text-blue-600' : 'text-gray-600'
-    }`} />;
-  };
-
-  const isOverdue = (dueDate: string, status: string) => {
-    return new Date(dueDate) < new Date() && status !== 'done';
+  const getProgressPercentage = (completed: number, estimated: number) => {
+    if (estimated === 0) return 0;
+    return Math.min((completed / estimated) * 100, 100);
   };
 
   return (
-    <AppLayout searchValue={searchValue} onSearchChange={setSearchValue} searchPlaceholder="Search tasks...">
+    <AppLayoutNew searchValue={searchValue} onSearchChange={setSearchValue} searchPlaceholder="Search tasks...">
       <div className="space-y-6">
         <div className="flex items-center justify-between">
           <div>
             <h1 className="text-2xl font-bold text-gray-900">My Tasks</h1>
             <p className="text-gray-600">Track and manage your assigned tasks</p>
           </div>
-          <Button onClick={() => navigate('/project/create')}>
-            Request New Project
+          <Button>
+            <CheckSquare className="w-4 h-4 mr-2" />
+            Create Task
           </Button>
         </div>
 
-        {/* Quick Stats */}
-        <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
+        {/* Task Stats */}
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
           <Card>
             <CardContent className="p-4">
               <div className="flex items-center space-x-2">
-                <Clock className="w-5 h-5 text-gray-600" />
+                <CheckSquare className="w-5 h-5 text-blue-600" />
                 <div>
-                  <p className="text-sm font-medium text-gray-600">To Do</p>
-                  <p className="text-2xl font-bold">{todoTasks.length}</p>
+                  <p className="text-sm font-medium text-gray-600">Total Tasks</p>
+                  <p className="text-2xl font-bold">{tasks.length}</p>
                 </div>
               </div>
             </CardContent>
@@ -148,34 +111,10 @@ const MyTasks = () => {
           <Card>
             <CardContent className="p-4">
               <div className="flex items-center space-x-2">
-                <User className="w-5 h-5 text-blue-600" />
+                <Clock className="w-5 h-5 text-orange-600" />
                 <div>
                   <p className="text-sm font-medium text-gray-600">In Progress</p>
-                  <p className="text-2xl font-bold">{inProgressTasks.length}</p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-          
-          <Card>
-            <CardContent className="p-4">
-              <div className="flex items-center space-x-2">
-                <AlertCircle className="w-5 h-5 text-yellow-600" />
-                <div>
-                  <p className="text-sm font-medium text-gray-600">Review</p>
-                  <p className="text-2xl font-bold">{reviewTasks.length}</p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-          
-          <Card>
-            <CardContent className="p-4">
-              <div className="flex items-center space-x-2">
-                <CheckSquare className="w-5 h-5 text-green-600" />
-                <div>
-                  <p className="text-sm font-medium text-gray-600">Done</p>
-                  <p className="text-2xl font-bold">{doneTasks.length}</p>
+                  <p className="text-2xl font-bold">{tasks.filter(t => t.status === 'in-progress').length}</p>
                 </div>
               </div>
             </CardContent>
@@ -186,140 +125,129 @@ const MyTasks = () => {
               <div className="flex items-center space-x-2">
                 <AlertCircle className="w-5 h-5 text-red-600" />
                 <div>
-                  <p className="text-sm font-medium text-gray-600">Overdue</p>
-                  <p className="text-2xl font-bold">{overdueTasks.length}</p>
+                  <p className="text-sm font-medium text-gray-600">Todo</p>
+                  <p className="text-2xl font-bold">{tasks.filter(t => t.status === 'todo').length}</p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+          
+          <Card>
+            <CardContent className="p-4">
+              <div className="flex items-center space-x-2">
+                <CheckSquare className="w-5 h-5 text-green-600" />
+                <div>
+                  <p className="text-sm font-medium text-gray-600">Completed</p>
+                  <p className="text-2xl font-bold">{tasks.filter(t => t.status === 'completed').length}</p>
                 </div>
               </div>
             </CardContent>
           </Card>
         </div>
 
-        {/* Tasks Table with Tabs */}
+        {/* Filters */}
         <Card>
-          <CardHeader>
-            <CardTitle>Your Tasks</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <Tabs value={activeTab} onValueChange={setActiveTab}>
-              <TabsList className="grid w-full grid-cols-6">
-                <TabsTrigger value="all">All ({myTasks.length})</TabsTrigger>
-                <TabsTrigger value="todo">To Do ({todoTasks.length})</TabsTrigger>
-                <TabsTrigger value="in-progress">In Progress ({inProgressTasks.length})</TabsTrigger>
-                <TabsTrigger value="review">Review ({reviewTasks.length})</TabsTrigger>
-                <TabsTrigger value="done">Done ({doneTasks.length})</TabsTrigger>
-                <TabsTrigger value="blocked">Blocked</TabsTrigger>
-              </TabsList>
-              
-              <TabsContent value={activeTab} className="mt-6">
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>Task</TableHead>
-                      <TableHead>Project</TableHead>
-                      <TableHead>Status</TableHead>
-                      <TableHead>Priority</TableHead>
-                      <TableHead>Due Date</TableHead>
-                      <TableHead>Progress</TableHead>
-                      <TableHead>Actions</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {filteredTasks.map((task) => (
-                      <TableRow 
-                        key={task.task_id} 
-                        className={`cursor-pointer hover:bg-gray-50 ${isOverdue(task.due_date, task.status) ? 'bg-red-50' : ''}`}
-                        onClick={() => navigate(`/task/${task.task_id}`)}
-                      >
-                        <TableCell>
-                          <div>
-                            <div className="font-medium">{task.name}</div>
-                            <div className="text-sm text-gray-500 line-clamp-1">{task.description}</div>
-                            {task.tags && task.tags.length > 0 && (
-                              <div className="flex flex-wrap gap-1 mt-1">
-                                {task.tags.map((tag, index) => (
-                                  <Badge key={index} variant="outline" className="text-xs">
-                                    {tag}
-                                  </Badge>
-                                ))}
-                              </div>
-                            )}
-                          </div>
-                        </TableCell>
-                        <TableCell>
-                          <div className="text-sm font-medium">{task.project_name}</div>
-                        </TableCell>
-                        <TableCell>
-                          <Badge className={statusColors[task.status]}>
-                            <div className="flex items-center space-x-1">
-                              {getStatusIcon(task.status)}
-                              <span>{task.status.replace('-', ' ')}</span>
-                            </div>
-                          </Badge>
-                        </TableCell>
-                        <TableCell>
-                          <Badge variant="outline" className={priorityColors[task.priority]}>
-                            <div className="flex items-center space-x-1">
-                              {getPriorityIcon(task.priority)}
-                              <span>{task.priority}</span>
-                            </div>
-                          </Badge>
-                        </TableCell>
-                        <TableCell>
-                          <div className={`flex items-center space-x-1 ${isOverdue(task.due_date, task.status) ? 'text-red-600 font-medium' : ''}`}>
-                            <Calendar className="w-4 h-4" />
-                            <span>{new Date(task.due_date).toLocaleDateString()}</span>
-                            {isOverdue(task.due_date, task.status) && (
-                              <Badge variant="destructive" className="ml-2">Overdue</Badge>
-                            )}
-                          </div>
-                        </TableCell>
-                        <TableCell>
-                          <div className="text-sm">
-                            {task.actual_hours ? `${task.actual_hours}h` : '0h'} / {task.estimated_hours}h
-                          </div>
-                        </TableCell>
-                        <TableCell>
-                          <div className="flex space-x-2">
-                            {task.status !== 'done' && (
-                              <Button
-                                size="sm"
-                                variant="outline"
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  const nextStatus = 
-                                    task.status === 'todo' ? 'in-progress' :
-                                    task.status === 'in-progress' ? 'review' :
-                                    task.status === 'review' ? 'done' : task.status;
-                                  handleStatusChange(task.task_id, nextStatus);
-                                }}
-                              >
-                                {task.status === 'todo' ? 'Start' :
-                                 task.status === 'in-progress' ? 'Review' :
-                                 task.status === 'review' ? 'Done' : 'Update'}
-                              </Button>
-                            )}
-                          </div>
-                        </TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-                
-                {filteredTasks.length === 0 && (
-                  <div className="text-center py-8">
-                    <CheckSquare className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-                    <h3 className="text-lg font-medium text-gray-900 mb-2">No tasks found</h3>
-                    <p className="text-gray-600">
-                      {activeTab === 'all' ? 'You have no assigned tasks' : `No tasks in ${activeTab.replace('-', ' ')} status`}
-                    </p>
-                  </div>
-                )}
-              </TabsContent>
-            </Tabs>
+          <CardContent className="p-4">
+            <div className="flex flex-wrap items-center gap-4">
+              <div className="flex items-center space-x-2">
+                <Label>Status:</Label>
+                <Select value={statusFilter} onValueChange={setStatusFilter}>
+                  <SelectTrigger className="w-40">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All Status</SelectItem>
+                    <SelectItem value="todo">Todo</SelectItem>
+                    <SelectItem value="in-progress">In Progress</SelectItem>
+                    <SelectItem value="completed">Completed</SelectItem>
+                    <SelectItem value="on-hold">On Hold</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="flex items-center space-x-2">
+                <Label>Priority:</Label>
+                <Select value={priorityFilter} onValueChange={setPriorityFilter}>
+                  <SelectTrigger className="w-40">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All Priorities</SelectItem>
+                    <SelectItem value="low">Low</SelectItem>
+                    <SelectItem value="medium">Medium</SelectItem>
+                    <SelectItem value="high">High</SelectItem>
+                    <SelectItem value="critical">Critical</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
           </CardContent>
         </Card>
+
+        {/* Tasks Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          {filteredTasks.map((task) => (
+            <Card key={task.id} className="hover:shadow-md transition-shadow cursor-pointer">
+              <CardHeader className="pb-3">
+                <div className="flex items-start justify-between">
+                  <div className="flex-1 min-w-0">
+                    <CardTitle className="text-lg font-semibold text-gray-900 mb-1 truncate">
+                      {task.title}
+                    </CardTitle>
+                    <p className="text-sm text-gray-600">{task.project}</p>
+                  </div>
+                  <div className="flex flex-col items-end space-y-1">
+                    <Badge className={statusColors[task.status]}>
+                      {task.status.replace('-', ' ')}
+                    </Badge>
+                    <Badge variant="outline" className={priorityColors[task.priority]}>
+                      {task.priority}
+                    </Badge>
+                  </div>
+                </div>
+              </CardHeader>
+              <CardContent className="pt-0">
+                <p className="text-sm text-gray-600 mb-4 line-clamp-2">
+                  {task.description}
+                </p>
+                
+                <div className="space-y-3">
+                  <div className="flex items-center justify-between text-sm">
+                    <span className="text-gray-500">Progress</span>
+                    <span className="font-medium">
+                      {task.completedHours}h / {task.estimatedHours}h
+                    </span>
+                  </div>
+                  <div className="w-full bg-gray-200 rounded-full h-2">
+                    <div 
+                      className="bg-blue-600 h-2 rounded-full transition-all"
+                      style={{ width: `${getProgressPercentage(task.completedHours, task.estimatedHours)}%` }}
+                    />
+                  </div>
+                  
+                  <div className="flex items-center justify-between text-sm text-gray-500">
+                    <div className="flex items-center space-x-1">
+                      <Calendar className="w-4 h-4" />
+                      <span>Due {new Date(task.dueDate).toLocaleDateString()}</span>
+                    </div>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+
+        {filteredTasks.length === 0 && (
+          <div className="text-center py-12">
+            <CheckSquare className="w-12 h-12 text-gray-400 mx-auto mb-4" />
+            <h3 className="text-lg font-medium text-gray-900 mb-2">No tasks found</h3>
+            <p className="text-gray-600 mb-4">
+              {searchValue ? 'Try adjusting your search terms' : 'No tasks match your current filters'}
+            </p>
+          </div>
+        )}
       </div>
-    </AppLayout>
+    </AppLayoutNew>
   );
 };
 

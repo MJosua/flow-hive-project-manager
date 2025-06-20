@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { FolderOpen, Plus, Calendar, Users, BarChart3, Clock, Target, TrendingUp } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -5,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { Skeleton } from "@/components/ui/skeleton";
-import AppLayout from '@/components/layout/AppLayout';
+import AppLayoutNew from '@/components/layout/AppLayoutNew';
 import { useAppDispatch, useAppSelector } from '@/hooks/useAppSelector';
 import { 
   fetchProjects, 
@@ -138,7 +139,7 @@ const Projects = () => {
 
   if (isLoading && projects.length === 0) {
     return (
-      <AppLayout searchValue={searchValue} onSearchChange={setSearchValue} searchPlaceholder="Search projects...">
+      <AppLayoutNew searchValue={searchValue} onSearchChange={setSearchValue} searchPlaceholder="Search projects...">
         <div className="space-y-6">
           <div className="flex items-center justify-between">
             <div>
@@ -157,12 +158,12 @@ const Projects = () => {
             ))}
           </div>
         </div>
-      </AppLayout>
+      </AppLayoutNew>
     );
   }
 
   return (
-    <AppLayout searchValue={searchValue} onSearchChange={setSearchValue} searchPlaceholder="Search projects...">
+    <AppLayoutNew searchValue={searchValue} onSearchChange={setSearchValue} searchPlaceholder="Search projects...">
       <div className="space-y-6">
         <div className="flex items-center justify-between">
           <div>
@@ -278,7 +279,7 @@ const Projects = () => {
           </div>
         )}
       </div>
-    </AppLayout>
+    </AppLayoutNew>
   );
 };
 
