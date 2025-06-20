@@ -23,7 +23,7 @@ const Projects = () => {
   const filteredProjects = searchQuery.trim()
     ? projects.filter(project => {
         const searchLower = searchQuery.toLowerCase();
-        const manager = users.find(u => u.id === project.managerId);
+        const manager = users.find(u => u.user_id === project.managerId);
         
         return project.name.toLowerCase().includes(searchLower) ||
                project.description.toLowerCase().includes(searchLower) ||
@@ -83,8 +83,8 @@ const Projects = () => {
       {/* Projects Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {filteredProjects.map((project) => {
-          const manager = users.find(u => u.id === project.managerId);
-          const teamMembers = users.filter(u => project.teamMembers.includes(u.id));
+          const manager = users.find(u => u.user_id === project.managerId);
+          const teamMembers = users.filter(u => project.teamMembers.includes(u.user_id));
           
           return (
             <Card key={project.id} className={`hover:shadow-lg transition-shadow border-l-4 ${getPriorityColor(project.priority)}`}>
@@ -165,7 +165,7 @@ const Projects = () => {
                     {/* Team Members */}
                     <div className="flex -space-x-1">
                       {teamMembers.slice(0, 3).map((member) => (
-                        <Avatar key={member.id} className="h-6 w-6 border-2 border-white">
+                        <Avatar key={member.user_id} className="h-6 w-6 border-2 border-white">
                           <AvatarImage src={member.avatar} alt={member.name} />
                           <AvatarFallback className="text-xs">
                             {member.name.split(' ').map(n => n[0]).join('')}

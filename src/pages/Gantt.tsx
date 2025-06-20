@@ -24,7 +24,7 @@ const Gantt = () => {
   // Apply search filtering
   const filteredTasks = searchQuery.trim()
     ? projectFilteredTasks.filter(task => {
-        const assignee = users.find(u => u.id === task.assigneeId);
+        const assignee = users.find(u => u.user_id === task.assigneeId);
         const searchLower = searchQuery.toLowerCase();
         
         return task.title.toLowerCase().includes(searchLower) ||
@@ -138,7 +138,7 @@ const Gantt = () => {
               {/* Tasks */}
               <div className="space-y-2">
                 {filteredTasks.map((task) => {
-                  const assignee = users.find(u => u.id === task.assigneeId);
+                  const assignee = users.find(u => u.user_id === task.assigneeId);
                   const { startDay, duration } = getTaskPosition(task);
                   
                   return (

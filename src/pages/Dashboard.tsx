@@ -27,7 +27,7 @@ const Dashboard = () => {
   const filteredProjects = searchQuery.trim() 
     ? projects.filter(project => {
         const searchLower = searchQuery.toLowerCase();
-        const manager = users.find(u => u.id === project.managerId);
+        const manager = users.find(u => u.user_id === project.managerId);
         
         return project.name.toLowerCase().includes(searchLower) ||
                project.description.toLowerCase().includes(searchLower) ||
@@ -40,7 +40,7 @@ const Dashboard = () => {
 
   const filteredTasks = searchQuery.trim()
     ? tasks.filter(task => {
-        const assignee = users.find(u => u.id === task.assigneeId);
+        const assignee = users.find(u => u.user_id === task.assigneeId);
         const searchLower = searchQuery.toLowerCase();
         
         return task.title.toLowerCase().includes(searchLower) ||
@@ -154,7 +154,7 @@ const Dashboard = () => {
           </CardHeader>
           <CardContent className="space-y-3">
             {recentTasks.map((task) => {
-              const assignee = users.find(u => u.id === task.assigneeId);
+              const assignee = users.find(u => u.user_id === task.assigneeId);
               return (
                 <div key={task.id} className="flex items-center space-x-3 p-2 hover:bg-gray-50 rounded-lg">
                   <div className={`w-2 h-2 rounded-full ${

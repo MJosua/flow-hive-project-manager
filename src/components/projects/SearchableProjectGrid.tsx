@@ -110,7 +110,7 @@ export const SearchableProjectGrid: React.FC = () => {
                 </div>
                 <div className="flex -space-x-2">
                   {teamMembers.slice(0, 3).map((member) => (
-                    <Avatar key={member.id} className="h-6 w-6 border-2 border-white">
+                    <Avatar key={member.user_id} className="h-6 w-6 border-2 border-white">
                       <AvatarImage src={member.avatar} alt={member.name} />
                       <AvatarFallback className="text-xs">
                         {member.name.split(' ').map(n => n[0]).join('')}
