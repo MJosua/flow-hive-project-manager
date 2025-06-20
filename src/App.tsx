@@ -6,7 +6,7 @@ import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
-import { AppLayout } from "@/components/layout/AppLayout";
+import AppLayout from "@/components/layout/AppLayout";
 import { useDynamicServiceRoutes } from "@/components/routing/DynamicServiceRoutes";
 import TokenExpiredModalWrapper from "@/components/modals/TokenExpiredModalWrapper";
 import Index from "./pages/Index";
@@ -32,6 +32,7 @@ import ProtectedRoute from "./components/auth/ProtectedRoute";
 import TicketDetail from "./pages/TicketDetail";
 import RecoveryForm from "./pages/login/form/Recoveryform";
 import Gantt from '@/pages/Gantt';
+import Kanban from '@/pages/Kanban';
 
 // Create QueryClient instance outside of component to avoid recreation
 const queryClient = new QueryClient({
@@ -75,9 +76,44 @@ const AppContent = () => {
           {/* Dynamic service catalog routes */}
           {dynamicServiceRoutes}
 
+          <Route path="/projects" element={
+            <ProtectedRoute>
+              <Projects />
+            </ProtectedRoute>
+          } />
+          <Route path="/project/:id" element={
+            <ProtectedRoute>
+              <ProjectDetail />
+            </ProtectedRoute>
+          } />
+          <Route path="/project/create" element={
+            <ProtectedRoute>
+              <ProjectCreate />
+            </ProtectedRoute>
+          } />
           <Route path="/task-list" element={
             <ProtectedRoute>
               <TaskList />
+            </ProtectedRoute>
+          } />
+          <Route path="/task/:id" element={
+            <ProtectedRoute>
+              <TaskDetail />
+            </ProtectedRoute>
+          } />
+          <Route path="/my-tasks" element={
+            <ProtectedRoute>
+              <MyTasks />
+            </ProtectedRoute>
+          } />
+          <Route path="/kanban" element={
+            <ProtectedRoute>
+              <Kanban />
+            </ProtectedRoute>
+          } />
+          <Route path="/gantt" element={
+            <ProtectedRoute>
+              <Gantt />
             </ProtectedRoute>
           } />
           <Route path="/my-tickets" element={
@@ -103,7 +139,17 @@ const AppContent = () => {
               <SystemSettings />
             </ProtectedRoute>
           } />
+          <Route path="/admin/system-settings" element={
+            <ProtectedRoute>
+              <SystemSettings />
+            </ProtectedRoute>
+          } />
           <Route path="/admin/users" element={
+            <ProtectedRoute>
+              <UserManagement />
+            </ProtectedRoute>
+          } />
+          <Route path="/admin/team-management" element={
             <ProtectedRoute>
               <UserManagement />
             </ProtectedRoute>
@@ -143,7 +189,6 @@ const AppContent = () => {
               <FunctionLogsManagement />
             </ProtectedRoute>
           } />
-          <Route path="/gantt" element={<Gantt />} />
           <Route path="*" element={
             <AppLayout>
               <NotFound />

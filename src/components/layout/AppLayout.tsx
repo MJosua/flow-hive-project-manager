@@ -1,13 +1,10 @@
+
 import React, { useState } from 'react';
-import { Layout, Menu, Button, Input, Avatar, Dropdown, Space } from 'antd';
-import {
-  MenuUnfoldOutlined,
-  MenuFoldOutlined,
-  UserOutlined,
-} from '@ant-design/icons';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAppSelector, useAppDispatch } from '@/hooks/useAppSelector';
-import { logout } from '@/store/slices/authSlice';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { 
   Home, 
   FolderOpen, 
@@ -17,11 +14,17 @@ import {
   LogOut, 
   Search,
   Kanban,
-  Calendar as GanttIcon
+  Calendar as GanttIcon,
+  Menu,
+  X
 } from 'lucide-react';
-
-const { Header, Sider, Content } = Layout;
-const { Search: AntdSearch } = Input;
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 
 interface AppLayoutProps {
   children: React.ReactNode;
@@ -30,39 +33,21 @@ interface AppLayoutProps {
   searchPlaceholder?: string;
 }
 
-const AppLayout: React.FC<AppLayoutProps> = ({ children, searchValue = '', onSearchChange, searchPlaceholder = 'Search...' }) => {
-  const [collapsed, setCollapsed] = useState(false);
+const AppLayout: React.FC<AppLayoutProps> = ({ 
+  children, 
+  searchValue = '', 
+  onSearchChange, 
+  searchPlaceholder = 'Search...' 
+}) => {
+  const [sidebarOpen, setSidebarOpen] = useState(false);
   const { user } = useAppSelector((state) => state.auth);
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
 
-  const toggle = () => {
-    setCollapsed(!collapsed);
-  };
-
-  const onSearch = (value: string) => {
-    console.log('Search:', value);
-  };
-
   const handleLogout = () => {
-    dispatch(logout());
+    // For now, just navigate to login - we'll implement proper logout later
     navigate('/login');
   };
-
-  const menu = (
-    <Menu>
-      <Menu.Item key="profile">
-        <Link to="/profile">Profile</Link>
-      </Menu.Item>
-      <Menu.Item key="settings">
-        <Link to="/settings">Settings</Link>
-      </Menu.Item>
-      <Menu.Divider />
-      <Menu.Item key="logout" onClick={handleLogout}>
-        Logout
-      </Menu.Item>
-    </Menu>
-  );
 
   const sidebarItems = [
     { name: 'Dashboard', href: '/', icon: Home },
@@ -75,65 +60,116 @@ const AppLayout: React.FC<AppLayoutProps> = ({ children, searchValue = '', onSea
     { name: 'Settings', href: '/admin/system-settings', icon: Settings },
   ];
 
-  return (
-    <Layout style={{ minHeight: '100vh' }}>
-      <Sider trigger={null} collapsible collapsed={collapsed} width={256} style={{ backgroundColor: '#fff' }}>
-        <div className="demo-logo-vertical" style={{ height: '64px', margin: '16px', color: '#fff', fontSize: '20px', textAlign: 'center' }}>
-          {/* Replace with your logo */}
-          <img src="/logo.png" alt="Logo" style={{ height: '100%', width: 'auto' }} />
+  const SidebarContent = () => (
+    <div className="flex flex-col h-full bg-white border-r">
+      <div className="p-4 border-b">
+        <div className="flex items-center space-x-2">
+          <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center">
+            <span className="text-white font-bold text-sm">PM</span>
+          </div>
+          <span className="font-semibold text-lg">Project Manager</span>
         </div>
-        <Menu theme="light" mode="inline" defaultSelectedKeys={['1']}>
+      </div>
+      
+      <nav className="flex-1 p-4">
+        <ul className="space-y-2">
           {sidebarItems.map((item) => (
-            <Menu.Item key={item.name} icon={React.createElement(item.icon)} >
-              <Link to={item.href}>{item.name}</Link>
-            </Menu.Item>
+            <li key={item.name}>
+              <Link
+                to={item.href}
+                className="flex items-center space-x-3 px-3 py-2 rounded-lg text-gray-700 hover:bg-gray-100 transition-colors"
+                onClick={() => setSidebarOpen(false)}
+              >
+                <item.icon className="w-5 h-5" />
+                <span>{item.name}</span>
+              </Link>
+            </li>
           ))}
-        </Menu>
-      </Sider>
-      <Layout className="site-layout">
-        <Header style={{ padding: 0, background: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-          <Button
-            type="text"
-            icon={collapsed ? <MenuUnfoldOutlined /> : <MenuFoldOutlined />}
-            onClick={toggle}
-            style={{
-              fontSize: '16px',
-              width: 64,
-              height: 64,
-            }}
-          />
-          {onSearchChange && (
-            <div style={{ flex: 1, marginLeft: '24px', marginRight: '24px' }}>
-              <AntdSearch
-                placeholder={searchPlaceholder}
-                allowClear
-                enterButton="Search"
-                size="large"
-                value={searchValue}
-                onChange={(e) => onSearchChange(e.target.value)}
-                onSearch={onSearch}
-              />
+        </ul>
+      </nav>
+    </div>
+  );
+
+  return (
+    <div className="min-h-screen bg-gray-50">
+      {/* Mobile sidebar overlay */}
+      {sidebarOpen && (
+        <div 
+          className="fixed inset-0 bg-black bg-opacity-50 z-40 lg:hidden"
+          onClick={() => setSidebarOpen(false)}
+        />
+      )}
+
+      {/* Sidebar */}
+      <div className={`
+        fixed inset-y-0 left-0 z-50 w-64 transform transition-transform duration-300 ease-in-out lg:translate-x-0 lg:static lg:inset-0
+        ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'}
+      `}>
+        <SidebarContent />
+      </div>
+
+      {/* Main content */}
+      <div className="lg:pl-64">
+        {/* Header */}
+        <header className="bg-white border-b px-4 py-3">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center space-x-4">
+              <Button
+                variant="ghost"
+                size="sm"
+                className="lg:hidden"
+                onClick={() => setSidebarOpen(!sidebarOpen)}
+              >
+                {sidebarOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+              </Button>
+
+              {onSearchChange && (
+                <div className="relative flex-1 max-w-md">
+                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+                  <Input
+                    placeholder={searchPlaceholder}
+                    value={searchValue}
+                    onChange={(e) => onSearchChange(e.target.value)}
+                    className="pl-10"
+                  />
+                </div>
+              )}
             </div>
-          )}
-          <Dropdown overlay={menu} trigger={['click']}>
-            <Space direction="horizontal" size="middle" style={{ paddingRight: 24, cursor: 'pointer' }}>
-              <Avatar icon={<UserOutlined />} />
-              <span>{user?.username}</span>
-            </Space>
-          </Dropdown>
-        </Header>
-        <Content
-          style={{
-            margin: '24px 16px',
-            padding: 24,
-            minHeight: 280,
-            background: '#fff',
-          }}
-        >
+
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" className="flex items-center space-x-2">
+                  <Avatar className="w-8 h-8">
+                    <AvatarFallback>
+                      {user?.username ? user.username.charAt(0).toUpperCase() : 'U'}
+                    </AvatarFallback>
+                  </Avatar>
+                  <span className="hidden md:block">{user?.username || 'User'}</span>
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuItem onClick={() => navigate('/profile')}>
+                  Profile
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => navigate('/settings')}>
+                  Settings
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem onClick={handleLogout}>
+                  <LogOut className="w-4 h-4 mr-2" />
+                  Logout
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
+        </header>
+
+        {/* Page content */}
+        <main className="p-6">
           {children}
-        </Content>
-      </Layout>
-    </Layout>
+        </main>
+      </div>
+    </div>
   );
 };
 
