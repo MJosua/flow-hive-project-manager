@@ -57,13 +57,13 @@ const Index = () => {
     t.priority === 'high' || t.priority === 'critical'
   );
 
-  // Get recent projects (last 3)
-  const recentProjects = projects
+  // Get recent projects (last 3) - create a copy before sorting
+  const recentProjects = [...projects]
     .sort((a, b) => new Date(b.updated_date).getTime() - new Date(a.updated_date).getTime())
     .slice(0, 3);
 
-  // Get upcoming tasks (next 5 due)
-  const upcomingTasks = myTasks
+  // Get upcoming tasks (next 5 due) - create a copy before sorting
+  const upcomingTasks = [...myTasks]
     .filter(t => t.status !== 'done')
     .sort((a, b) => new Date(a.due_date).getTime() - new Date(b.due_date).getTime())
     .slice(0, 5);
