@@ -55,12 +55,12 @@ const initialState: AuthState = {
   isLocked: false,
 };
 
-// Async thunk for login
+// Updated login thunk to use PM endpoint
 export const loginUser = createAsyncThunk(
   'auth/loginUser',
   async ({ username, password }: { username: string; password: string }, { rejectWithValue }) => {
     try {
-      const response = await axios.post(`${API_URL}/hots_auth/login`, {
+      const response = await axios.post(`${API_URL}/hots_auth/pm/login`, {
         uid: username,
         asin: password,
       });
@@ -70,7 +70,6 @@ export const loginUser = createAsyncThunk(
         localStorage.setItem('tokek', tokek);
         localStorage.setItem('isAuthenticated', 'true');
         
-        // Persist user data for recovery scenarios
         persistUserData(userData);
         
         return { token: tokek, userData };
@@ -83,8 +82,117 @@ export const loginUser = createAsyncThunk(
   }
 );
 
-// Async thunk for logout
+// New register thunk
+export const registerUser = createAsyncThunk(
+  'auth/registerUser',
+  async (registerData: { uid: string; password: string; email: string; firstname: string; lastname: string }, { rejectWithValue }) => {
+    try {
+      const response = await axios.post(`${API_URL}/hots_auth/pm/register`, registerData);
+      
+      if (response.data.success) {
+        return response.data;
+      } else {
+        return rejectWithValue(response.data.message);
+      }
+    } catch (error: any) {
+      return rejectWithValue(error.response?.data?.message || error.message);
+    }
+  }
+);
+
+// Get profile thunk
+export const getProfile = createAsyncThunk(
+  'auth/getProfile',
+  async (_, { rejectWithValue }) => {
+    try {
+      const response = await axios.get(`${API_URL}/hots_auth/pm/profile`, {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem('tokek')}`,
+        }
+      });
+      
+      if (response.data.success) {
+        return response.data.data;
+      } else {
+        return rejectWithValue(response.data.message);
+      }
+    } catch (error: any) {
+      return rejectWithValue(error.response?.data?.message || error.message);
+    }
+  }
+);
+
+// Update profile thunk
+export const updateProfile = createAsyncThunk(
+  'auth/updateProfile',
+  async (profileData: Partial<UserData>, { rejectWithValue }) => {
+    try {
+      const response = await axios.put(`${API_URL}/hots_auth/pm/profile`, profileData, {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem('tokek')}`,
+          'Content-Type': 'application/json'
+        }
+      });
+      
+      if (response.data.success) {
+        return response.data.data;
+      } else {
+        return rejectWithValue(response.data.message);
+      }
+    } catch (error: any) {
+      return rejectWithValue(error.response?.data?.message || error.message);
+    }
+  }
+);
+
+// Forgot password thunk
+export const forgotPassword = createAsyncThunk(
+  'auth/forgotPassword',
+  async (email: string, { rejectWithValue }) => {
+    try {
+      const response = await axios.post(`${API_URL}/hots_auth/pm/forgot-password`, { email });
+      
+      if (response.data.success) {
+        return response.data.message;
+      } else {
+        return rejectWithValue(response.data.message);
+      }
+    } catch (error: any) {
+      return rejectWithValue(error.response?.data?.message || error.message);
+    }
+  }
+);
+
+// Reset password thunk
+export const resetPassword = createAsyncThunk(
+  'auth/resetPassword',
+  async ({ token, password }: { token: string; password: string }, { rejectWithValue }) => {
+    try {
+      const response = await axios.post(`${API_URL}/hots_auth/pm/reset-password`, { token, password });
+      
+      if (response.data.success) {
+        return response.data.message;
+      } else {
+        return rejectWithValue(response.data.message);
+      }
+    } catch (error: any) {
+      return rejectWithValue(error.response?.data?.message || error.message);
+    }
+  }
+);
+
+// Updated logout thunk to use PM endpoint
 export const logoutUser = createAsyncThunk('auth/logoutUser', async () => {
+  try {
+    await axios.post(`${API_URL}/hots_auth/pm/logout`, {}, {
+      headers: {
+        Authorization: `Bearer ${localStorage.getItem('tokek')}`,
+      }
+    });
+  } catch (error) {
+    console.error('Logout error:', error);
+  }
+  
   localStorage.removeItem('tokek');
   localStorage.removeItem('isAuthenticated');
   clearPersistentUserData();
@@ -104,13 +212,10 @@ const authSlice = createSlice({
     setLocked: (state) => {
       state.isLocked = true;
     },
-    // Add action to clear only token but preserve user data temporarily
     clearToken: (state) => {
       state.token = null;
       state.isAuthenticated = false;
-      // Don't clear user data immediately to allow re-authentication
     },
-    // New action to get persistent user data for recovery
     loadPersistentUser: (state) => {
       const persistentData = getPersistentUserData();
       if (persistentData && !state.user?.uid) {
@@ -134,7 +239,6 @@ const authSlice = createSlice({
         state.loginAttempts = 0;
         state.isLocked = false;
         
-        // Persist user data
         persistUserData(action.payload.userData);
       })
       .addCase(loginUser.rejected, (state, action) => {
@@ -143,11 +247,31 @@ const authSlice = createSlice({
         state.error = action.payload as string;
         state.loginAttempts += 1;
 
-        // Check if account should be locked
         if (action.payload && typeof action.payload === 'string' &&
           action.payload.includes('Too many login attempt')) {
           state.isLocked = true;
         }
+      })
+      // Register cases
+      .addCase(registerUser.pending, (state) => {
+        state.isLoading = true;
+        state.error = null;
+      })
+      .addCase(registerUser.fulfilled, (state) => {
+        state.isLoading = false;
+        state.error = null;
+      })
+      .addCase(registerUser.rejected, (state, action) => {
+        state.isLoading = false;
+        state.error = action.payload as string;
+      })
+      // Profile cases
+      .addCase(getProfile.fulfilled, (state, action) => {
+        state.user = { ...state.user, ...action.payload };
+      })
+      .addCase(updateProfile.fulfilled, (state, action) => {
+        state.user = { ...state.user, ...action.payload };
+        persistUserData(action.payload);
       })
       // Logout cases
       .addCase(logoutUser.fulfilled, (state) => {
@@ -162,5 +286,5 @@ const authSlice = createSlice({
 });
 
 export const { clearError, resetLoginAttempts, setLocked, clearToken, loadPersistentUser } = authSlice.actions;
-export { getPersistentUserData }; // Export for use in other components
+export { getPersistentUserData };
 export default authSlice.reducer;

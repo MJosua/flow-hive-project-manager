@@ -4,10 +4,37 @@ import axios from 'axios';
 import { API_URL } from '@/config/sourceConfig';
 import type { Project, ProjectMember, CustomAttribute } from '@/types/projectTypes';
 
+interface TaskGroup {
+  group_id: number;
+  project_id: number;
+  name: string;
+  description?: string;
+  color?: string;
+  order: number;
+  created_date: string;
+  updated_date: string;
+}
+
+interface ChatMessage {
+  message_id: number;
+  project_id: number;
+  user_id: number;
+  user_name: string;
+  message: string;
+  message_type: 'text' | 'file' | 'system';
+  file_url?: string;
+  file_name?: string;
+  created_date: string;
+}
+
 interface ProjectState {
   projects: Project[];
   currentProject: Project | null;
   projectMembers: ProjectMember[];
+  taskGroups: TaskGroup[];
+  chatMessages: ChatMessage[];
+  kanbanData: any;
+  ganttData: any;
   customAttributes: CustomAttribute[];
   isLoading: boolean;
   error: string | null;
@@ -23,6 +50,10 @@ const initialState: ProjectState = {
   projects: [],
   currentProject: null,
   projectMembers: [],
+  taskGroups: [],
+  chatMessages: [],
+  kanbanData: null,
+  ganttData: null,
   customAttributes: [],
   isLoading: false,
   error: null,
@@ -34,12 +65,12 @@ const initialState: ProjectState = {
   }
 };
 
-// Async thunks for API calls
+// Updated to use PM endpoints
 export const fetchProjects = createAsyncThunk(
   'projects/fetchProjects',
   async (_, { rejectWithValue }) => {
     try {
-      const response = await axios.get(`${API_URL}/projects`, {
+      const response = await axios.get(`${API_URL}/prjct_mngr/project`, {
         headers: {
           Authorization: `Bearer ${localStorage.getItem('tokek')}`,
         }
@@ -56,7 +87,7 @@ export const fetchProjectById = createAsyncThunk(
   'projects/fetchProjectById',
   async (projectId: number, { rejectWithValue }) => {
     try {
-      const response = await axios.get(`${API_URL}/projects/${projectId}`, {
+      const response = await axios.get(`${API_URL}/prjct_mngr/project/${projectId}`, {
         headers: {
           Authorization: `Bearer ${localStorage.getItem('tokek')}`,
         }
@@ -73,7 +104,7 @@ export const createProject = createAsyncThunk(
   'projects/createProject',
   async (projectData: Partial<Project>, { rejectWithValue }) => {
     try {
-      const response = await axios.post(`${API_URL}/projects`, projectData, {
+      const response = await axios.post(`${API_URL}/prjct_mngr/project`, projectData, {
         headers: {
           Authorization: `Bearer ${localStorage.getItem('tokek')}`,
           'Content-Type': 'application/json'
@@ -91,7 +122,7 @@ export const updateProject = createAsyncThunk(
   'projects/updateProject',
   async ({ id, data }: { id: number; data: Partial<Project> }, { rejectWithValue }) => {
     try {
-      const response = await axios.put(`${API_URL}/projects/${id}`, data, {
+      const response = await axios.put(`${API_URL}/prjct_mngr/project/${id}`, data, {
         headers: {
           Authorization: `Bearer ${localStorage.getItem('tokek')}`,
           'Content-Type': 'application/json'
@@ -109,7 +140,7 @@ export const deleteProject = createAsyncThunk(
   'projects/deleteProject',
   async (projectId: number, { rejectWithValue }) => {
     try {
-      await axios.delete(`${API_URL}/projects/${projectId}`, {
+      await axios.delete(`${API_URL}/prjct_mngr/project/${projectId}`, {
         headers: {
           Authorization: `Bearer ${localStorage.getItem('tokek')}`,
         }
@@ -122,11 +153,12 @@ export const deleteProject = createAsyncThunk(
   }
 );
 
+// Project Members
 export const fetchProjectMembers = createAsyncThunk(
   'projects/fetchProjectMembers',
   async (projectId: number, { rejectWithValue }) => {
     try {
-      const response = await axios.get(`${API_URL}/projects/${projectId}/members`, {
+      const response = await axios.get(`${API_URL}/prjct_mngr/project/${projectId}/members`, {
         headers: {
           Authorization: `Bearer ${localStorage.getItem('tokek')}`,
         }
@@ -135,6 +167,202 @@ export const fetchProjectMembers = createAsyncThunk(
     } catch (error: any) {
       console.error('Error fetching project members:', error);
       return rejectWithValue(error.response?.data?.message || 'Failed to fetch project members');
+    }
+  }
+);
+
+export const addProjectMember = createAsyncThunk(
+  'projects/addProjectMember',
+  async ({ projectId, memberData }: { projectId: number; memberData: any }, { rejectWithValue }) => {
+    try {
+      const response = await axios.post(`${API_URL}/prjct_mngr/project/${projectId}/members`, memberData, {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem('tokek')}`,
+          'Content-Type': 'application/json'
+        }
+      });
+      return response.data.data;
+    } catch (error: any) {
+      console.error('Error adding project member:', error);
+      return rejectWithValue(error.response?.data?.message || 'Failed to add project member');
+    }
+  }
+);
+
+export const updateProjectMember = createAsyncThunk(
+  'projects/updateProjectMember',
+  async ({ projectId, userId, memberData }: { projectId: number; userId: number; memberData: any }, { rejectWithValue }) => {
+    try {
+      const response = await axios.put(`${API_URL}/prjct_mngr/project/${projectId}/members/${userId}`, memberData, {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem('tokek')}`,
+          'Content-Type': 'application/json'
+        }
+      });
+      return response.data.data;
+    } catch (error: any) {
+      console.error('Error updating project member:', error);
+      return rejectWithValue(error.response?.data?.message || 'Failed to update project member');
+    }
+  }
+);
+
+export const removeProjectMember = createAsyncThunk(
+  'projects/removeProjectMember',
+  async ({ projectId, userId }: { projectId: number; userId: number }, { rejectWithValue }) => {
+    try {
+      await axios.delete(`${API_URL}/prjct_mngr/project/${projectId}/members/${userId}`, {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem('tokek')}`,
+        }
+      });
+      return { projectId, userId };
+    } catch (error: any) {
+      console.error('Error removing project member:', error);
+      return rejectWithValue(error.response?.data?.message || 'Failed to remove project member');
+    }
+  }
+);
+
+// Task Groups
+export const fetchTaskGroups = createAsyncThunk(
+  'projects/fetchTaskGroups',
+  async (projectId: number, { rejectWithValue }) => {
+    try {
+      const response = await axios.get(`${API_URL}/prjct_mngr/project/${projectId}/groups`, {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem('tokek')}`,
+        }
+      });
+      return response.data.data || [];
+    } catch (error: any) {
+      console.error('Error fetching task groups:', error);
+      return rejectWithValue(error.response?.data?.message || 'Failed to fetch task groups');
+    }
+  }
+);
+
+export const createTaskGroup = createAsyncThunk(
+  'projects/createTaskGroup',
+  async ({ projectId, groupData }: { projectId: number; groupData: any }, { rejectWithValue }) => {
+    try {
+      const response = await axios.post(`${API_URL}/prjct_mngr/project/${projectId}/groups`, groupData, {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem('tokek')}`,
+          'Content-Type': 'application/json'
+        }
+      });
+      return response.data.data;
+    } catch (error: any) {
+      console.error('Error creating task group:', error);
+      return rejectWithValue(error.response?.data?.message || 'Failed to create task group');
+    }
+  }
+);
+
+export const updateTaskGroup = createAsyncThunk(
+  'projects/updateTaskGroup',
+  async ({ projectId, groupId, groupData }: { projectId: number; groupId: number; groupData: any }, { rejectWithValue }) => {
+    try {
+      const response = await axios.put(`${API_URL}/prjct_mngr/project/${projectId}/groups/${groupId}`, groupData, {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem('tokek')}`,
+          'Content-Type': 'application/json'
+        }
+      });
+      return response.data.data;
+    } catch (error: any) {
+      console.error('Error updating task group:', error);
+      return rejectWithValue(error.response?.data?.message || 'Failed to update task group');
+    }
+  }
+);
+
+export const deleteTaskGroup = createAsyncThunk(
+  'projects/deleteTaskGroup',
+  async ({ projectId, groupId }: { projectId: number; groupId: number }, { rejectWithValue }) => {
+    try {
+      await axios.delete(`${API_URL}/prjct_mngr/project/${projectId}/groups/${groupId}`, {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem('tokek')}`,
+        }
+      });
+      return { projectId, groupId };
+    } catch (error: any) {
+      console.error('Error deleting task group:', error);
+      return rejectWithValue(error.response?.data?.message || 'Failed to delete task group');
+    }
+  }
+);
+
+// Kanban Data
+export const fetchKanbanData = createAsyncThunk(
+  'projects/fetchKanbanData',
+  async (projectId: number, { rejectWithValue }) => {
+    try {
+      const response = await axios.get(`${API_URL}/prjct_mngr/project/${projectId}/kanban`, {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem('tokek')}`,
+        }
+      });
+      return response.data.data;
+    } catch (error: any) {
+      console.error('Error fetching kanban data:', error);
+      return rejectWithValue(error.response?.data?.message || 'Failed to fetch kanban data');
+    }
+  }
+);
+
+// Gantt Data
+export const fetchGanttData = createAsyncThunk(
+  'projects/fetchGanttData',
+  async (projectId: number, { rejectWithValue }) => {
+    try {
+      const response = await axios.get(`${API_URL}/prjct_mngr/project/${projectId}/gantt`, {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem('tokek')}`,
+        }
+      });
+      return response.data.data;
+    } catch (error: any) {
+      console.error('Error fetching gantt data:', error);
+      return rejectWithValue(error.response?.data?.message || 'Failed to fetch gantt data');
+    }
+  }
+);
+
+// Chat Messages
+export const fetchChatMessages = createAsyncThunk(
+  'projects/fetchChatMessages',
+  async (projectId: number, { rejectWithValue }) => {
+    try {
+      const response = await axios.get(`${API_URL}/prjct_mngr/project/${projectId}/messages`, {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem('tokek')}`,
+        }
+      });
+      return response.data.data || [];
+    } catch (error: any) {
+      console.error('Error fetching chat messages:', error);
+      return rejectWithValue(error.response?.data?.message || 'Failed to fetch chat messages');
+    }
+  }
+);
+
+export const sendChatMessage = createAsyncThunk(
+  'projects/sendChatMessage',
+  async ({ projectId, messageData }: { projectId: number; messageData: any }, { rejectWithValue }) => {
+    try {
+      const response = await axios.post(`${API_URL}/prjct_mngr/project/${projectId}/messages`, messageData, {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem('tokek')}`,
+          'Content-Type': 'application/json'
+        }
+      });
+      return response.data.data;
+    } catch (error: any) {
+      console.error('Error sending chat message:', error);
+      return rejectWithValue(error.response?.data?.message || 'Failed to send chat message');
     }
   }
 );
@@ -227,7 +455,6 @@ const projectSlice = createSlice({
       .addCase(fetchProjects.rejected, (state, action) => {
         state.isLoading = false;
         state.error = action.payload as string;
-        // Use fallback data when API fails
         projectSlice.caseReducers.useFallbackProjectData(state);
       })
       .addCase(fetchProjectById.fulfilled, (state, action) => {
@@ -247,6 +474,45 @@ const projectSlice = createSlice({
       })
       .addCase(fetchProjectMembers.fulfilled, (state, action) => {
         state.projectMembers = action.payload;
+      })
+      .addCase(addProjectMember.fulfilled, (state, action) => {
+        state.projectMembers.push(action.payload);
+      })
+      .addCase(updateProjectMember.fulfilled, (state, action) => {
+        const index = state.projectMembers.findIndex(m => m.user_id === action.payload.user_id);
+        if (index !== -1) {
+          state.projectMembers[index] = action.payload;
+        }
+      })
+      .addCase(removeProjectMember.fulfilled, (state, action) => {
+        state.projectMembers = state.projectMembers.filter(m => m.user_id !== action.payload.userId);
+      })
+      .addCase(fetchTaskGroups.fulfilled, (state, action) => {
+        state.taskGroups = action.payload;
+      })
+      .addCase(createTaskGroup.fulfilled, (state, action) => {
+        state.taskGroups.push(action.payload);
+      })
+      .addCase(updateTaskGroup.fulfilled, (state, action) => {
+        const index = state.taskGroups.findIndex(g => g.group_id === action.payload.group_id);
+        if (index !== -1) {
+          state.taskGroups[index] = action.payload;
+        }
+      })
+      .addCase(deleteTaskGroup.fulfilled, (state, action) => {
+        state.taskGroups = state.taskGroups.filter(g => g.group_id !== action.payload.groupId);
+      })
+      .addCase(fetchKanbanData.fulfilled, (state, action) => {
+        state.kanbanData = action.payload;
+      })
+      .addCase(fetchGanttData.fulfilled, (state, action) => {
+        state.ganttData = action.payload;
+      })
+      .addCase(fetchChatMessages.fulfilled, (state, action) => {
+        state.chatMessages = action.payload;
+      })
+      .addCase(sendChatMessage.fulfilled, (state, action) => {
+        state.chatMessages.push(action.payload);
       });
   },
 });
@@ -262,6 +528,10 @@ export const {
 export const selectProjects = (state: any) => state.projects.projects;
 export const selectCurrentProject = (state: any) => state.projects.currentProject;
 export const selectProjectMembers = (state: any) => state.projects.projectMembers;
+export const selectTaskGroups = (state: any) => state.projects.taskGroups;
+export const selectChatMessages = (state: any) => state.projects.chatMessages;
+export const selectKanbanData = (state: any) => state.projects.kanbanData;
+export const selectGanttData = (state: any) => state.projects.ganttData;
 export const selectProjectsLoading = (state: any) => state.projects.isLoading;
 export const selectProjectsError = (state: any) => state.projects.error;
 export const selectProjectFilters = (state: any) => state.projects.filters;

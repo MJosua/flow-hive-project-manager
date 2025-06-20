@@ -4,9 +4,43 @@ import axios from 'axios';
 import { API_URL } from '@/config/sourceConfig';
 import type { Task, KanbanColumn } from '@/types/projectTypes';
 
+interface TaskDependency {
+  dependency_id: number;
+  task_id: number;
+  depends_on_task_id: number;
+  dependency_type: 'finish_to_start' | 'start_to_start' | 'finish_to_finish' | 'start_to_finish';
+  created_date: string;
+}
+
+interface TimeEntry {
+  entry_id: number;
+  task_id: number;
+  user_id: number;
+  user_name?: string;
+  hours: number;
+  description?: string;
+  entry_date: string;
+  created_date: string;
+}
+
+interface TaskAttachment {
+  attachment_id: number;
+  task_id: number;
+  file_name: string;
+  file_url: string;
+  file_size: number;
+  uploaded_by: number;
+  uploaded_by_name?: string;
+  created_date: string;
+}
+
 interface TaskState {
   tasks: Task[];
   myTasks: Task[];
+  currentTask: Task | null;
+  taskDependencies: TaskDependency[];
+  timeEntries: TimeEntry[];
+  taskAttachments: TaskAttachment[];
   kanbanColumns: KanbanColumn[];
   isLoading: boolean;
   error: string | null;
@@ -21,6 +55,10 @@ interface TaskState {
 const initialState: TaskState = {
   tasks: [],
   myTasks: [],
+  currentTask: null,
+  taskDependencies: [],
+  timeEntries: [],
+  taskAttachments: [],
   kanbanColumns: [
     { column_id: 'todo', name: 'To Do', status: 'todo', order: 1, color: '#94a3b8' },
     { column_id: 'in-progress', name: 'In Progress', status: 'in-progress', order: 2, color: '#3b82f6', limit: 3 },
@@ -37,13 +75,12 @@ const initialState: TaskState = {
   }
 };
 
-// Async thunks
+// Updated to use PM endpoints
 export const fetchTasks = createAsyncThunk(
   'tasks/fetchTasks',
   async (params: { projectId?: number } = {}, { rejectWithValue }) => {
     try {
-      const { projectId } = params;
-      const url = projectId ? `${API_URL}/projects/${projectId}/tasks` : `${API_URL}/tasks`;
+      const url = `${API_URL}/prjct_mngr/task`;
       const response = await axios.get(url, {
         headers: {
           Authorization: `Bearer ${localStorage.getItem('tokek')}`,
@@ -61,7 +98,7 @@ export const fetchMyTasks = createAsyncThunk(
   'tasks/fetchMyTasks',
   async (_, { rejectWithValue }) => {
     try {
-      const response = await axios.get(`${API_URL}/tasks/my-tasks`, {
+      const response = await axios.get(`${API_URL}/prjct_mngr/task/my-tasks`, {
         headers: {
           Authorization: `Bearer ${localStorage.getItem('tokek')}`,
         }
@@ -74,11 +111,28 @@ export const fetchMyTasks = createAsyncThunk(
   }
 );
 
+export const fetchTaskById = createAsyncThunk(
+  'tasks/fetchTaskById',
+  async (taskId: number, { rejectWithValue }) => {
+    try {
+      const response = await axios.get(`${API_URL}/prjct_mngr/task/${taskId}`, {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem('tokek')}`,
+        }
+      });
+      return response.data.data;
+    } catch (error: any) {
+      console.error('Error fetching task:', error);
+      return rejectWithValue(error.response?.data?.message || 'Failed to fetch task');
+    }
+  }
+);
+
 export const createTask = createAsyncThunk(
   'tasks/createTask',
   async (taskData: Partial<Task>, { rejectWithValue }) => {
     try {
-      const response = await axios.post(`${API_URL}/tasks`, taskData, {
+      const response = await axios.post(`${API_URL}/prjct_mngr/task`, taskData, {
         headers: {
           Authorization: `Bearer ${localStorage.getItem('tokek')}`,
           'Content-Type': 'application/json'
@@ -96,7 +150,7 @@ export const updateTask = createAsyncThunk(
   'tasks/updateTask',
   async ({ id, data }: { id: number; data: Partial<Task> }, { rejectWithValue }) => {
     try {
-      const response = await axios.put(`${API_URL}/tasks/${id}`, data, {
+      const response = await axios.put(`${API_URL}/prjct_mngr/task/${id}`, data, {
         headers: {
           Authorization: `Bearer ${localStorage.getItem('tokek')}`,
           'Content-Type': 'application/json'
@@ -114,7 +168,7 @@ export const updateTaskStatus = createAsyncThunk(
   'tasks/updateTaskStatus',
   async ({ taskId, status }: { taskId: number; status: Task['status'] }, { rejectWithValue }) => {
     try {
-      const response = await axios.patch(`${API_URL}/tasks/${taskId}/status`, { status }, {
+      const response = await axios.patch(`${API_URL}/prjct_mngr/task/${taskId}/status`, { status }, {
         headers: {
           Authorization: `Bearer ${localStorage.getItem('tokek')}`,
           'Content-Type': 'application/json'
@@ -124,6 +178,219 @@ export const updateTaskStatus = createAsyncThunk(
     } catch (error: any) {
       console.error('Error updating task status:', error);
       return rejectWithValue(error.response?.data?.message || 'Failed to update task status');
+    }
+  }
+);
+
+export const moveTaskToGroup = createAsyncThunk(
+  'tasks/moveTaskToGroup',
+  async ({ taskId, groupId }: { taskId: number; groupId: number }, { rejectWithValue }) => {
+    try {
+      const response = await axios.patch(`${API_URL}/prjct_mngr/task/${taskId}/move-group`, { groupId }, {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem('tokek')}`,
+          'Content-Type': 'application/json'
+        }
+      });
+      return response.data.data;
+    } catch (error: any) {
+      console.error('Error moving task to group:', error);
+      return rejectWithValue(error.response?.data?.message || 'Failed to move task to group');
+    }
+  }
+);
+
+export const deleteTask = createAsyncThunk(
+  'tasks/deleteTask',
+  async (taskId: number, { rejectWithValue }) => {
+    try {
+      await axios.delete(`${API_URL}/prjct_mngr/task/${taskId}`, {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem('tokek')}`,
+        }
+      });
+      return taskId;
+    } catch (error: any) {
+      console.error('Error deleting task:', error);
+      return rejectWithValue(error.response?.data?.message || 'Failed to delete task');
+    }
+  }
+);
+
+// Task Dependencies
+export const fetchTaskDependencies = createAsyncThunk(
+  'tasks/fetchTaskDependencies',
+  async (taskId: number, { rejectWithValue }) => {
+    try {
+      const response = await axios.get(`${API_URL}/prjct_mngr/task/${taskId}/dependencies`, {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem('tokek')}`,
+        }
+      });
+      return response.data.data || [];
+    } catch (error: any) {
+      console.error('Error fetching task dependencies:', error);
+      return rejectWithValue(error.response?.data?.message || 'Failed to fetch task dependencies');
+    }
+  }
+);
+
+export const addTaskDependency = createAsyncThunk(
+  'tasks/addTaskDependency',
+  async ({ taskId, dependsOnTaskId, dependencyType }: { taskId: number; dependsOnTaskId: number; dependencyType: string }, { rejectWithValue }) => {
+    try {
+      const response = await axios.post(`${API_URL}/prjct_mngr/task/${taskId}/dependencies`, 
+        { depends_on_task_id: dependsOnTaskId, dependency_type: dependencyType }, {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem('tokek')}`,
+          'Content-Type': 'application/json'
+        }
+      });
+      return response.data.data;
+    } catch (error: any) {
+      console.error('Error adding task dependency:', error);
+      return rejectWithValue(error.response?.data?.message || 'Failed to add task dependency');
+    }
+  }
+);
+
+export const removeTaskDependency = createAsyncThunk(
+  'tasks/removeTaskDependency',
+  async ({ taskId, depId }: { taskId: number; depId: number }, { rejectWithValue }) => {
+    try {
+      await axios.delete(`${API_URL}/prjct_mngr/task/${taskId}/dependencies/${depId}`, {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem('tokek')}`,
+        }
+      });
+      return { taskId, depId };
+    } catch (error: any) {
+      console.error('Error removing task dependency:', error);
+      return rejectWithValue(error.response?.data?.message || 'Failed to remove task dependency');
+    }
+  }
+);
+
+// Time Tracking
+export const fetchTimeEntries = createAsyncThunk(
+  'tasks/fetchTimeEntries',
+  async (taskId: number, { rejectWithValue }) => {
+    try {
+      const response = await axios.get(`${API_URL}/prjct_mngr/task/${taskId}/time-entries`, {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem('tokek')}`,
+        }
+      });
+      return response.data.data || [];
+    } catch (error: any) {
+      console.error('Error fetching time entries:', error);
+      return rejectWithValue(error.response?.data?.message || 'Failed to fetch time entries');
+    }
+  }
+);
+
+export const logTime = createAsyncThunk(
+  'tasks/logTime',
+  async ({ taskId, timeData }: { taskId: number; timeData: any }, { rejectWithValue }) => {
+    try {
+      const response = await axios.post(`${API_URL}/prjct_mngr/task/${taskId}/time-entries`, timeData, {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem('tokek')}`,
+          'Content-Type': 'application/json'
+        }
+      });
+      return response.data.data;
+    } catch (error: any) {
+      console.error('Error logging time:', error);
+      return rejectWithValue(error.response?.data?.message || 'Failed to log time');
+    }
+  }
+);
+
+export const updateTimeEntry = createAsyncThunk(
+  'tasks/updateTimeEntry',
+  async ({ entryId, timeData }: { entryId: number; timeData: any }, { rejectWithValue }) => {
+    try {
+      const response = await axios.put(`${API_URL}/prjct_mngr/task/time-entries/${entryId}`, timeData, {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem('tokek')}`,
+          'Content-Type': 'application/json'
+        }
+      });
+      return response.data.data;
+    } catch (error: any) {
+      console.error('Error updating time entry:', error);
+      return rejectWithValue(error.response?.data?.message || 'Failed to update time entry');
+    }
+  }
+);
+
+export const deleteTimeEntry = createAsyncThunk(
+  'tasks/deleteTimeEntry',
+  async (entryId: number, { rejectWithValue }) => {
+    try {
+      await axios.delete(`${API_URL}/prjct_mngr/task/time-entries/${entryId}`, {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem('tokek')}`,
+        }
+      });
+      return entryId;
+    } catch (error: any) {
+      console.error('Error deleting time entry:', error);
+      return rejectWithValue(error.response?.data?.message || 'Failed to delete time entry');
+    }
+  }
+);
+
+// File Attachments
+export const fetchTaskAttachments = createAsyncThunk(
+  'tasks/fetchTaskAttachments',
+  async (taskId: number, { rejectWithValue }) => {
+    try {
+      const response = await axios.get(`${API_URL}/prjct_mngr/task/${taskId}/attachments`, {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem('tokek')}`,
+        }
+      });
+      return response.data.data || [];
+    } catch (error: any) {
+      console.error('Error fetching task attachments:', error);
+      return rejectWithValue(error.response?.data?.message || 'Failed to fetch task attachments');
+    }
+  }
+);
+
+export const uploadAttachment = createAsyncThunk(
+  'tasks/uploadAttachment',
+  async ({ taskId, formData }: { taskId: number; formData: FormData }, { rejectWithValue }) => {
+    try {
+      const response = await axios.post(`${API_URL}/prjct_mngr/task/${taskId}/attachments`, formData, {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem('tokek')}`,
+          'Content-Type': 'multipart/form-data'
+        }
+      });
+      return response.data.data;
+    } catch (error: any) {
+      console.error('Error uploading attachment:', error);
+      return rejectWithValue(error.response?.data?.message || 'Failed to upload attachment');
+    }
+  }
+);
+
+export const deleteAttachment = createAsyncThunk(
+  'tasks/deleteAttachment',
+  async (attachmentId: number, { rejectWithValue }) => {
+    try {
+      await axios.delete(`${API_URL}/prjct_mngr/task/attachments/${attachmentId}`, {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem('tokek')}`,
+        }
+      });
+      return attachmentId;
+    } catch (error: any) {
+      console.error('Error deleting attachment:', error);
+      return rejectWithValue(error.response?.data?.message || 'Failed to delete attachment');
     }
   }
 );
@@ -225,7 +492,6 @@ const taskSlice = createSlice({
       .addCase(fetchTasks.rejected, (state, action) => {
         state.isLoading = false;
         state.error = action.payload as string;
-        // Use fallback data when API fails
         taskSlice.caseReducers.useFallbackTaskData(state);
       })
       .addCase(fetchMyTasks.fulfilled, (state, action) => {
@@ -233,12 +499,14 @@ const taskSlice = createSlice({
       })
       .addCase(fetchMyTasks.rejected, (state, action) => {
         state.error = action.payload as string;
-        // Use fallback data when API fails
         taskSlice.caseReducers.useFallbackTaskData(state);
+      })
+      .addCase(fetchTaskById.fulfilled, (state, action) => {
+        state.currentTask = action.payload;
       })
       .addCase(createTask.fulfilled, (state, action) => {
         state.tasks.push(action.payload);
-        if (action.payload.assigned_to === 10098) { // Current user ID
+        if (action.payload.assigned_to === 10098) {
           state.myTasks.push(action.payload);
         }
       })
@@ -261,6 +529,49 @@ const taskSlice = createSlice({
         if (myTaskIndex !== -1) {
           state.myTasks[myTaskIndex] = action.payload;
         }
+      })
+      .addCase(moveTaskToGroup.fulfilled, (state, action) => {
+        const taskIndex = state.tasks.findIndex(t => t.task_id === action.payload.task_id);
+        if (taskIndex !== -1) {
+          state.tasks[taskIndex] = action.payload;
+        }
+      })
+      .addCase(deleteTask.fulfilled, (state, action) => {
+        state.tasks = state.tasks.filter(t => t.task_id !== action.payload);
+        state.myTasks = state.myTasks.filter(t => t.task_id !== action.payload);
+      })
+      .addCase(fetchTaskDependencies.fulfilled, (state, action) => {
+        state.taskDependencies = action.payload;
+      })
+      .addCase(addTaskDependency.fulfilled, (state, action) => {
+        state.taskDependencies.push(action.payload);
+      })
+      .addCase(removeTaskDependency.fulfilled, (state, action) => {
+        state.taskDependencies = state.taskDependencies.filter(d => d.dependency_id !== action.payload.depId);
+      })
+      .addCase(fetchTimeEntries.fulfilled, (state, action) => {
+        state.timeEntries = action.payload;
+      })
+      .addCase(logTime.fulfilled, (state, action) => {
+        state.timeEntries.push(action.payload);
+      })
+      .addCase(updateTimeEntry.fulfilled, (state, action) => {
+        const index = state.timeEntries.findIndex(e => e.entry_id === action.payload.entry_id);
+        if (index !== -1) {
+          state.timeEntries[index] = action.payload;
+        }
+      })
+      .addCase(deleteTimeEntry.fulfilled, (state, action) => {
+        state.timeEntries = state.timeEntries.filter(e => e.entry_id !== action.payload);
+      })
+      .addCase(fetchTaskAttachments.fulfilled, (state, action) => {
+        state.taskAttachments = action.payload;
+      })
+      .addCase(uploadAttachment.fulfilled, (state, action) => {
+        state.taskAttachments.push(action.payload);
+      })
+      .addCase(deleteAttachment.fulfilled, (state, action) => {
+        state.taskAttachments = state.taskAttachments.filter(a => a.attachment_id !== action.payload);
       });
   },
 });
@@ -275,6 +586,10 @@ export const {
 // Selectors
 export const selectTasks = (state: any) => state.tasks.tasks;
 export const selectMyTasks = (state: any) => state.tasks.myTasks;
+export const selectCurrentTask = (state: any) => state.tasks.currentTask;
+export const selectTaskDependencies = (state: any) => state.tasks.taskDependencies;
+export const selectTimeEntries = (state: any) => state.tasks.timeEntries;
+export const selectTaskAttachments = (state: any) => state.tasks.taskAttachments;
 export const selectKanbanColumns = (state: any) => state.tasks.kanbanColumns;
 export const selectTasksLoading = (state: any) => state.tasks.isLoading;
 export const selectTasksError = (state: any) => state.tasks.error;

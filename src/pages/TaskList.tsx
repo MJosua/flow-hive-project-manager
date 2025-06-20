@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -8,7 +7,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import AppLayoutNew from '@/components/layout/AppLayoutNew';
 import { useAppDispatch, useAppSelector } from '@/hooks/useAppSelector';
-import { fetchTasks, selectTasks, selectTasksLoading } from '@/store/slices/taskSlice';
+import { fetchTasks, selectTasks, selectTasksLoading, useFallbackTaskData } from '@/store/slices/taskSlice';
 import { useNavigate } from 'react-router-dom';
 import { Plus, Calendar, User } from 'lucide-react';
 
@@ -24,14 +23,19 @@ const TaskList = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
+    console.log('TaskList: Fetching tasks from PM API...');
     dispatch(fetchTasks({}));
+    
+    // Fallback to dummy data for development
+    dispatch(useFallbackTaskData());
   }, [dispatch]);
 
   const statusColors: Record<string, string> = {
     'todo': 'bg-gray-100 text-gray-800',
     'in-progress': 'bg-blue-100 text-blue-800',
-    'completed': 'bg-green-100 text-green-800',
-    'on-hold': 'bg-yellow-100 text-yellow-800'
+    'review': 'bg-yellow-100 text-yellow-800',
+    'done': 'bg-green-100 text-green-800',
+    'blocked': 'bg-red-100 text-red-800'
   };
 
   const priorityColors: Record<string, string> = {
@@ -73,7 +77,7 @@ const TaskList = () => {
         <div className="flex items-center justify-between">
           <div>
             <h1 className="text-2xl font-bold text-gray-900">Task List</h1>
-            <p className="text-gray-600">View and manage all tasks across projects</p>
+            <p className="text-gray-600">View and manage all tasks across projects (PM API)</p>
           </div>
           <Button>
             <Plus className="w-4 h-4 mr-2" />
@@ -95,8 +99,9 @@ const TaskList = () => {
                     <SelectItem value="all">All Status</SelectItem>
                     <SelectItem value="todo">Todo</SelectItem>
                     <SelectItem value="in-progress">In Progress</SelectItem>
-                    <SelectItem value="completed">Completed</SelectItem>
-                    <SelectItem value="on-hold">On Hold</SelectItem>
+                    <SelectItem value="review">Review</SelectItem>
+                    <SelectItem value="done">Done</SelectItem>
+                    <SelectItem value="blocked">Blocked</SelectItem>
                   </SelectContent>
                 </Select>
               </div>

@@ -7,6 +7,7 @@ import userManagementReducer from './slices/userManagementSlice';
 import customFunctionReducer from './slices/customFunctionSlice';
 import projectReducer from './slices/projectSlice';
 import taskReducer from './slices/taskSlice';
+import pmUserReducer from './slices/pmUserSlice';
 
 export const store = configureStore({
   reducer: {
@@ -17,6 +18,7 @@ export const store = configureStore({
     customFunction: customFunctionReducer,
     projects: projectReducer,
     tasks: taskReducer,
+    pmUser: pmUserReducer,
   },
 });
 
