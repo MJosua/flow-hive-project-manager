@@ -31,9 +31,9 @@ const DivisionManagement = () => {
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
   const [editingDivision, setEditingDivision] = useState<any>(null);
   const [newDivision, setNewDivision] = useState({
-    name: '',
+    department_name: '',
     description: '',
-    manager_id: '',
+    department_head: '',
   });
 
   const { data: departments = [], isLoading, error } = useDepartments();
@@ -42,17 +42,19 @@ const DivisionManagement = () => {
   const deleteTeamMutation = useDeleteTeam();
 
   const filteredDivisions = departments.filter(dept =>
-    dept.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    dept.department_name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
     dept.description?.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
   const handleCreateDivision = async () => {
     try {
       await createTeamMutation.mutateAsync({
-        ...newDivision,
-        team_name: newDivision.name,
+        team_name: newDivision.department_name,
+        department_id: 'default-dept',
+        creation_date: new Date(),
+        member_count: 0,
       });
-      setNewDivision({ name: '', description: '', manager_id: '' });
+      setNewDivision({ department_name: '', description: '', department_head: '' });
       setIsCreateDialogOpen(false);
     } catch (error) {
       console.error('Error creating division:', error);
@@ -66,9 +68,7 @@ const DivisionManagement = () => {
       await updateTeamMutation.mutateAsync({
         id: editingDivision.department_id,
         data: {
-          team_name: editingDivision.name,
-          description: editingDivision.description,
-          manager_id: editingDivision.manager_id,
+          team_name: editingDivision.department_name,
         },
       });
       setEditingDivision(null);
@@ -135,8 +135,8 @@ const DivisionManagement = () => {
                   <Label htmlFor="name">Division Name</Label>
                   <Input
                     id="name"
-                    value={newDivision.name}
-                    onChange={(e) => setNewDivision({ ...newDivision, name: e.target.value })}
+                    value={newDivision.department_name}
+                    onChange={(e) => setNewDivision({ ...newDivision, department_name: e.target.value })}
                     placeholder="Enter division name"
                   />
                 </div>
@@ -200,11 +200,11 @@ const DivisionManagement = () => {
               <TableBody>
                 {filteredDivisions.map((division) => (
                   <TableRow key={division.department_id}>
-                    <TableCell className="font-medium">{division.name}</TableCell>
+                    <TableCell className="font-medium">{division.department_name}</TableCell>
                     <TableCell>{division.description || 'No description'}</TableCell>
                     <TableCell>
-                      <Badge variant={division.active ? 'default' : 'secondary'}>
-                        {division.active ? 'Active' : 'Inactive'}
+                      <Badge variant={!division.is_deleted ? 'default' : 'secondary'}>
+                        {!division.is_deleted ? 'Active' : 'Inactive'}
                       </Badge>
                     </TableCell>
                     <TableCell className="text-right">
@@ -247,8 +247,8 @@ const DivisionManagement = () => {
                   <Label htmlFor="edit-name">Division Name</Label>
                   <Input
                     id="edit-name"
-                    value={editingDivision.name}
-                    onChange={(e) => setEditingDivision({ ...editingDivision, name: e.target.value })}
+                    value={editingDivision.department_name}
+                    onChange={(e) => setEditingDivision({ ...editingDivision, department_name: e.target.value })}
                     placeholder="Enter division name"
                   />
                 </div>

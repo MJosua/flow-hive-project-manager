@@ -57,7 +57,7 @@ const UserManagement = () => {
 
   const getDepartmentName = (departmentId: string) => {
     const dept = departments.find(d => d.department_id === departmentId);
-    return dept?.name || 'Unknown Department';
+    return dept?.department_name || 'Unknown Department';
   };
 
   const getRoleName = (roleId: string) => {
@@ -67,7 +67,15 @@ const UserManagement = () => {
 
   const handleCreateUser = async () => {
     try {
-      await createUserMutation.mutateAsync(newUser);
+      const userData = {
+        ...newUser,
+        name: `${newUser.firstname} ${newUser.lastname}`,
+        uid: `${newUser.firstname.toLowerCase()}-${newUser.lastname.toLowerCase()}-${Date.now()}`,
+        jobtitle_id: 'default-job',
+        is_deleted: false,
+        registration_date: new Date(),
+      };
+      await createUserMutation.mutateAsync(userData);
       setNewUser({
         firstname: '',
         lastname: '',
@@ -207,7 +215,7 @@ const UserManagement = () => {
                     <option value="">Select Department</option>
                     {departments.map((dept) => (
                       <option key={dept.department_id} value={dept.department_id}>
-                        {dept.name}
+                        {dept.department_name}
                       </option>
                     ))}
                   </select>
@@ -385,7 +393,7 @@ const UserManagement = () => {
                     <option value="">Select Department</option>
                     {departments.map((dept) => (
                       <option key={dept.department_id} value={dept.department_id}>
-                        {dept.name}
+                        {dept.department_name}
                       </option>
                     ))}
                   </select>
