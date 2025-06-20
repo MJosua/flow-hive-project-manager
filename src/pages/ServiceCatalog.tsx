@@ -3,7 +3,7 @@ import { Monitor, Lightbulb, Wrench, Database, Plane, FileText, Users, CreditCar
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
-import AppLayout from '@/components/layout/AppLayout';
+import AppLayoutNew from '@/components/layout/AppLayoutNew';
 import { searchInObject } from '@/utils/searchUtils';
 import { renderHighlightedText } from '@/utils/renderhighlight';
 import { useCatalogData } from '@/hooks/useCatalogData';
@@ -103,7 +103,7 @@ const ServiceCatalog = () => {
 
   if (isLoading) {
     return (
-      <AppLayout searchValue={searchValue} onSearchChange={setSearchValue} searchPlaceholder="Search services...">
+      <AppLayoutNew searchValue={searchValue} onSearchChange={setSearchValue} searchPlaceholder="Search services...">
         <div className="space-y-6">
           <div className="flex items-center justify-between">
             <div>
@@ -130,22 +130,22 @@ const ServiceCatalog = () => {
             ))}
           </div>
         </div>
-      </AppLayout>
+      </AppLayoutNew>
     );
   }
 
   if (error) {
     return (
-      <AppLayout>
+      <AppLayoutNew>
         <div className="flex items-center justify-center h-64">
           <div className="text-lg text-red-600">Error loading catalog: {error}</div>
         </div>
-      </AppLayout>
+      </AppLayoutNew>
     );
   }
 
   return (
-    <AppLayout searchValue={searchValue} onSearchChange={setSearchValue} searchPlaceholder="Search services...">
+    <AppLayoutNew searchValue={searchValue} onSearchChange={setSearchValue} searchPlaceholder="Search services...">
       <div className="space-y-6">
         <div className="flex items-center justify-between">
           <div>
@@ -199,7 +199,7 @@ const ServiceCatalog = () => {
           ))}
         </div>
       </div>
-    </AppLayout>
+    </AppLayoutNew>
   );
 };
 

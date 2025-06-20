@@ -1,15 +1,15 @@
 
 import React from 'react';
-import AppLayout from '@/components/layout/AppLayout';
+import AppLayoutNew from '@/components/layout/AppLayoutNew';
 import GanttChart from '@/components/gantt/GanttChart';
 
 const Gantt = () => {
   return (
-    <AppLayout>
+    <AppLayoutNew>
       <div className="space-y-6">
         <GanttChart />
       </div>
-    </AppLayout>
+    </AppLayoutNew>
   );
 };
 

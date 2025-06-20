@@ -1,5 +1,6 @@
+
 import React from 'react';
-import AppLayout from "@/components/layout/AppLayout";
+import AppLayoutNew from "@/components/layout/AppLayoutNew";
 import { useAppSelector } from '@/hooks/useAppSelector';
 import { Navigate } from 'react-router-dom';
 import { Loader2 } from 'lucide-react';
@@ -16,11 +17,11 @@ const FunctionLogsManagement = () => {
   // Show loading while user data is being fetched
   if (!user) {
     return (
-      <AppLayout>
+      <AppLayoutNew>
         <div className="flex items-center justify-center py-12">
           <Loader2 className="h-8 w-8 animate-spin" />
         </div>
-      </AppLayout>
+      </AppLayoutNew>
     );
   }
   
@@ -32,7 +33,7 @@ const FunctionLogsManagement = () => {
   }
 
   return (
-    <AppLayout>
+    <AppLayoutNew>
       <div className="space-y-6">
         <div>
           <h1 className="text-2xl font-bold">Function Logs & Documents</h1>
@@ -40,7 +41,7 @@ const FunctionLogsManagement = () => {
         </div>
         <FunctionLogsViewer />
       </div>
-    </AppLayout>
+    </AppLayoutNew>
   );
 };
 

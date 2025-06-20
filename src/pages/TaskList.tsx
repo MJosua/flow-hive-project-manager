@@ -52,9 +52,12 @@ const TaskList = () => {
     return matchesSearch && matchesStatus && matchesPriority && matchesProject;
   });
 
-  // Get unique projects for filter
+  // Get unique projects for filter - fix TypeScript errors
   const projects = Array.from(new Set(tasks.map(task => ({ id: task.project_id, name: task.project_name }))))
-    .filter(project => project.id && project.name);
+    .filter((project): project is { id: number; name: string } => 
+      project.id !== null && project.id !== undefined && 
+      project.name !== null && project.name !== undefined
+    );
 
   return (
     <AppLayoutNew searchValue={searchValue} onSearchChange={setSearchValue} searchPlaceholder="Search tasks...">
@@ -115,7 +118,7 @@ const TaskList = () => {
                   <SelectContent>
                     <SelectItem value="all">All Projects</SelectItem>
                     {projects.map((project) => (
-                      <SelectItem key={project.id} value={project.id?.toString() || ''}>
+                      <SelectItem key={project.id} value={project.id.toString()}>
                         {project.name}
                       </SelectItem>
                     ))}

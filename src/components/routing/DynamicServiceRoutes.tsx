@@ -1,6 +1,7 @@
+
 import React, { useEffect, useMemo } from 'react';
 import { Route } from 'react-router-dom';
-import AppLayout from '@/components/layout/AppLayout';
+import AppLayoutNew from '@/components/layout/AppLayoutNew';
 import { CatalogFormLoader } from '@/components/forms/CatalogFormLoader';
 import ProtectedRoute from '@/components/auth/ProtectedRoute';
 import { useAppDispatch, useAppSelector } from '@/hooks/useAppSelector';
@@ -65,12 +66,12 @@ export const useDynamicServiceRoutes = (onSubmit: (data: any) => void) => {
           path={`/service-catalog/${service.nav_link}`}
           element={
             <ProtectedRoute>
-              <AppLayout>
+              <AppLayoutNew>
                 <CatalogFormLoader
                   servicePath={service.nav_link}
                   onSubmit={onSubmit}
                 />
-              </AppLayout>
+              </AppLayoutNew>
             </ProtectedRoute>
           }
         />

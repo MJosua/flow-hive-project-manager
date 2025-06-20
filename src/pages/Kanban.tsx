@@ -1,15 +1,15 @@
 
 import React from 'react';
-import AppLayout from '@/components/layout/AppLayout';
+import AppLayoutNew from '@/components/layout/AppLayoutNew';
 import KanbanBoard from '@/components/kanban/KanbanBoard';
 
 const Kanban = () => {
   return (
-    <AppLayout>
+    <AppLayoutNew>
       <div className="space-y-6">
         <KanbanBoard />
       </div>
-    </AppLayout>
+    </AppLayoutNew>
   );
 };
 

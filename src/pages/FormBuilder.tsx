@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -5,7 +6,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import AppLayout from '@/components/layout/AppLayout';
+import AppLayoutNew from '@/components/layout/AppLayoutNew';
 import { DynamicForm } from '@/components/forms/DynamicForm';
 import { FormConfig } from '@/types/formTypes';
 
@@ -358,7 +359,7 @@ const FormBuilder = () => {
   };
 
   return (
-    <AppLayout>
+    <AppLayoutNew>
       <div className="space-y-6">
         <div>
           <h1 className="text-3xl font-bold">Form Builder & Preview</h1>
@@ -405,7 +406,7 @@ const FormBuilder = () => {
           </div>
         </div>
       </div>
-    </AppLayout>
+    </AppLayoutNew>
   );
 };
 
