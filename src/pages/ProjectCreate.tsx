@@ -15,6 +15,7 @@ import { CalendarIcon, ArrowLeft } from "lucide-react";
 import { useAppDispatch } from '@/hooks/useAppSelector';
 import { createProject } from '@/store/slices/projectSlice';
 import { useToast } from '@/hooks/use-toast';
+import type { Project } from '@/types/projectTypes';
 
 const ProjectCreate = () => {
   const navigate = useNavigate();
@@ -24,8 +25,8 @@ const ProjectCreate = () => {
   const [formData, setFormData] = useState({
     name: '',
     description: '',
-    status: 'planning',
-    priority: 'medium',
+    status: 'planning' as Project['status'],
+    priority: 'medium' as Project['priority'],
     budget: '',
     estimated_hours: '',
     manager_id: 10098, // Default to current user
@@ -41,7 +42,7 @@ const ProjectCreate = () => {
     setIsSubmitting(true);
 
     try {
-      const projectData = {
+      const projectData: Partial<Project> = {
         ...formData,
         start_date: startDate ? format(startDate, 'yyyy-MM-dd') : '',
         end_date: endDate ? format(endDate, 'yyyy-MM-dd') : '',
@@ -113,7 +114,7 @@ const ProjectCreate = () => {
                   <div className="grid grid-cols-2 gap-4">
                     <div>
                       <Label htmlFor="status">Status</Label>
-                      <Select value={formData.status} onValueChange={(value) => setFormData(prev => ({ ...prev, status: value }))}>
+                      <Select value={formData.status} onValueChange={(value: Project['status']) => setFormData(prev => ({ ...prev, status: value }))}>
                         <SelectTrigger>
                           <SelectValue />
                         </SelectTrigger>
@@ -128,7 +129,7 @@ const ProjectCreate = () => {
 
                     <div>
                       <Label htmlFor="priority">Priority</Label>
-                      <Select value={formData.priority} onValueChange={(value) => setFormData(prev => ({ ...prev, priority: value }))}>
+                      <Select value={formData.priority} onValueChange={(value: Project['priority']) => setFormData(prev => ({ ...prev, priority: value }))}>
                         <SelectTrigger>
                           <SelectValue />
                         </SelectTrigger>
