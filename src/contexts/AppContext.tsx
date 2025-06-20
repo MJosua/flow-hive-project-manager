@@ -1,10 +1,12 @@
+
 import React, { createContext, useContext, useState, ReactNode } from 'react';
 import { User, Project, Task, Approval, Notification, ProjectRole } from '@/types';
-import { mockUsers, mockProjects, mockTasks, mockApprovals, mockNotifications, mockProjectRoles } from '@/data/mockData';
+import { mockProjects, mockTasks, mockApprovals, mockNotifications, mockProjectRoles } from '@/data/mockData';
+import { useUsers } from '@/hooks/useApiData';
 
 interface AppContextType {
   applicationName: string;
-  currentUser: User;
+  currentUser: User | null;
   users: User[];
   projects: Project[];
   tasks: Task[];
@@ -20,6 +22,8 @@ interface AppContextType {
   updateApproval: (approvalId: string, status: 'approved' | 'rejected', notes?: string) => void;
   updateProjectRole: (userId: string, projectId: string, updates: Partial<ProjectRole>) => void;
   addProjectRole: (role: Omit<ProjectRole, 'id'>) => void;
+  isLoading: boolean;
+  error: string | null;
 }
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
@@ -33,7 +37,8 @@ export const useApp = () => {
 };
 
 export const AppProvider = ({ children }: { children: ReactNode }) => {
-  const [users] = useState<User[]>(mockUsers);
+  const { data: apiUsers, isLoading, error: usersError } = useUsers();
+  
   const [applicationName] = useState("Template Application Name");
   const [projects, setProjects] = useState<Project[]>(mockProjects);
   const [tasks, setTasks] = useState<Task[]>(mockTasks);
@@ -41,7 +46,11 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
   const [notifications] = useState<Notification[]>(mockNotifications);
   const [projectRoles, setProjectRoles] = useState<ProjectRole[]>(mockProjectRoles);
   const [selectedProject, setSelectedProject] = useState<Project | null>(null);
-  const [currentUser] = useState<User>(mockUsers[0]); // Current logged-in user
+
+  // Use API data if available, fallback to empty array
+  const users = apiUsers || [];
+  const currentUser = users.length > 0 ? users[0] : null;
+  const error = usersError ? (usersError as Error).message : null;
 
   const updateTask = (taskId: string, updates: Partial<Task>) => {
     setTasks(prev => prev.map(task =>
@@ -112,7 +121,9 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
       createTask,
       updateApproval,
       updateProjectRole,
-      addProjectRole
+      addProjectRole,
+      isLoading,
+      error
     }}>
       {children}
     </AppContext.Provider>

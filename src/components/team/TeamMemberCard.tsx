@@ -1,16 +1,16 @@
 
 import React from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Mail, Phone, Calendar, MapPin } from 'lucide-react';
-import { format } from 'date-fns';
+import { Badge } from '@/components/ui/badge';
+import { Progress } from '@/components/ui/progress';
+import { Phone, Mail, Calendar, TrendingUp } from 'lucide-react';
 import { User } from '@/types';
+import { format } from 'date-fns';
 
 interface TeamMemberCardProps {
   user: User;
-  highlightText: (text: string, query: string) => JSX.Element;
+  highlightText: (text: string, query: string) => React.ReactNode;
   searchQuery: string;
 }
 
@@ -19,49 +19,36 @@ export const TeamMemberCard: React.FC<TeamMemberCardProps> = ({
   highlightText, 
   searchQuery 
 }) => {
-  const getRoleColor = (role: string) => {
-    switch (role) {
-      case 'admin': return 'bg-red-100 text-red-800 border-red-300';
-      case 'manager': return 'bg-purple-100 text-purple-800 border-purple-300';
-      case 'developer': return 'bg-blue-100 text-blue-800 border-blue-300';
-      case 'designer': return 'bg-green-100 text-green-800 border-green-300';
-      default: return 'bg-gray-100 text-gray-800 border-gray-300';
-    }
+  const fullName = user.name || `${user.firstname} ${user.lastname}`;
+  const workload = user.workload || 0;
+  
+  const getStatusColor = (active: boolean) => {
+    return active ? 'bg-green-500 text-white' : 'bg-gray-500 text-white';
   };
 
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case 'active': return 'bg-green-500';
-      case 'away': return 'bg-yellow-500';
-      case 'busy': return 'bg-red-500';
-      default: return 'bg-gray-500';
-    }
+  const getWorkloadColor = (workload: number) => {
+    if (workload >= 90) return 'text-red-500';
+    if (workload >= 75) return 'text-yellow-500';
+    return 'text-green-500';
   };
 
   return (
     <Card className="hover:shadow-lg transition-shadow">
-      <CardHeader>
-        <div className="flex items-center space-x-4">
-          <div className="relative">
-            <Avatar className="h-16 w-16">
-              <AvatarImage src={user.avatar} alt={user.name} />
-              <AvatarFallback className="text-lg">
-                {user.name.split(' ').map(n => n[0]).join('')}
-              </AvatarFallback>
-            </Avatar>
-            <div 
-              className={`absolute -bottom-1 -right-1 w-4 h-4 rounded-full border-2 border-white ${getStatusColor(user.status)}`}
-              title={user.status}
-            />
-          </div>
-          
-          <div className="flex-1">
-            <CardTitle className="text-lg font-semibold text-gray-900">
-              {highlightText(user.name, searchQuery)}
-            </CardTitle>
+      <CardHeader className="pb-3">
+        <div className="flex items-center space-x-3">
+          <Avatar className="h-12 w-12">
+            <AvatarImage src={user.avatar} alt={fullName} />
+            <AvatarFallback>
+              {user.firstname[0]}{user.lastname[0]}
+            </AvatarFallback>
+          </Avatar>
+          <div className="flex-1 min-w-0">
+            <h3 className="font-semibold text-gray-900 truncate">
+              {highlightText(fullName, searchQuery)}
+            </h3>
             <div className="flex items-center space-x-2 mt-1">
-              <Badge className={getRoleColor(user.role)}>
-                {highlightText(user.role, searchQuery)}
+              <Badge className={getStatusColor(user.active)}>
+                {user.active ? 'Active' : 'Inactive'}
               </Badge>
             </div>
           </div>
@@ -69,75 +56,74 @@ export const TeamMemberCard: React.FC<TeamMemberCardProps> = ({
       </CardHeader>
 
       <CardContent className="space-y-4">
-        {/* Contact Info */}
-        <div className="space-y-2 text-sm">
-          <div className="flex items-center space-x-2 text-gray-600">
+        {/* Contact Information */}
+        <div className="space-y-2">
+          <div className="flex items-center space-x-2 text-sm text-gray-600">
             <Mail className="h-4 w-4" />
-            <span>{highlightText(user.email, searchQuery)}</span>
+            <span className="truncate">{highlightText(user.email, searchQuery)}</span>
           </div>
-          
-          <div className="flex items-center space-x-2 text-gray-600">
-            <Phone className="h-4 w-4" />
-            <span>{user.phone}</span>
+          {user.phone && (
+            <div className="flex items-center space-x-2 text-sm text-gray-600">
+              <Phone className="h-4 w-4" />
+              <span>{user.phone}</span>
+            </div>
+          )}
+        </div>
+
+        {/* Department & Role */}
+        <div className="space-y-2">
+          <div className="flex items-center justify-between text-sm">
+            <span className="text-gray-600">Department:</span>
+            <span className="font-medium">{user.department_id}</span>
           </div>
-          
-          <div className="flex items-center space-x-2 text-gray-600">
-            <MapPin className="h-4 w-4" />
-            <span>{highlightText(user.department, searchQuery)}</span>
-          </div>
-          
-          <div className="flex items-center space-x-2 text-gray-600">
-            <Calendar className="h-4 w-4" />
-            <span>Joined {format(user.joinDate, 'MMM yyyy')}</span>
+          <div className="flex items-center justify-between text-sm">
+            <span className="text-gray-600">Role:</span>
+            <span className="font-medium">{user.role_id}</span>
           </div>
         </div>
 
-        {/* Skills */}
-        <div className="space-y-2">
-          <h4 className="text-sm font-medium text-gray-900">Skills</h4>
-          <div className="flex flex-wrap gap-1">
-            {user.skills.slice(0, 4).map((skill) => (
-              <Badge key={skill} variant="secondary" className="text-xs">
-                {highlightText(skill, searchQuery)}
-              </Badge>
-            ))}
-            {user.skills.length > 4 && (
-              <Badge variant="secondary" className="text-xs">
-                +{user.skills.length - 4}
-              </Badge>
-            )}
+        {/* Join Date */}
+        {user.registration_date && (
+          <div className="flex items-center space-x-2 text-sm text-gray-600">
+            <Calendar className="h-4 w-4" />
+            <span>Joined {format(new Date(user.registration_date), 'MMM yyyy')}</span>
           </div>
-        </div>
+        )}
 
         {/* Workload */}
-        <div className="space-y-2">
-          <div className="flex justify-between text-sm">
-            <span className="text-gray-600">Current Workload</span>
-            <span className="font-medium">{user.workload}%</span>
+        {workload > 0 && (
+          <div className="space-y-2">
+            <div className="flex items-center justify-between text-sm">
+              <div className="flex items-center space-x-1">
+                <TrendingUp className="h-4 w-4 text-gray-500" />
+                <span className="text-gray-600">Workload</span>
+              </div>
+              <span className={`font-medium ${getWorkloadColor(workload)}`}>
+                {workload}%
+              </span>
+            </div>
+            <Progress value={workload} className="h-2" />
           </div>
-          <div className="w-full bg-gray-200 rounded-full h-2">
-            <div 
-              className={`h-2 rounded-full ${
-                user.workload > 90 ? 'bg-red-500' :
-                user.workload > 70 ? 'bg-yellow-500' : 'bg-green-500'
-              }`}
-              style={{ width: `${user.workload}%` }}
-            />
-          </div>
-        </div>
+        )}
 
-        {/* Actions */}
-        <div className="pt-2 border-t">
-          <div className="flex space-x-2">
-            <Button variant="outline" size="sm" className="flex-1">
-              <Mail className="h-4 w-4 mr-1" />
-              Message
-            </Button>
-            <Button variant="outline" size="sm" className="flex-1">
-              View Profile
-            </Button>
+        {/* Skills */}
+        {user.skills && user.skills.length > 0 && (
+          <div className="space-y-2">
+            <span className="text-sm text-gray-600">Skills:</span>
+            <div className="flex flex-wrap gap-1">
+              {user.skills.slice(0, 3).map((skill) => (
+                <Badge key={skill} variant="secondary" className="text-xs">
+                  {highlightText(skill, searchQuery)}
+                </Badge>
+              ))}
+              {user.skills.length > 3 && (
+                <Badge variant="secondary" className="text-xs">
+                  +{user.skills.length - 3}
+                </Badge>
+              )}
+            </div>
           </div>
-        </div>
+        )}
       </CardContent>
     </Card>
   );
