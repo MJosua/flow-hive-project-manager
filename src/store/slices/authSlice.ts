@@ -1,6 +1,6 @@
 
 import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit';
-import axios from 'axios';
+import { apiService } from '@/services/apiService';
 import { API_URL } from '../../config/sourceConfig';
 
 interface UserData {
@@ -55,12 +55,12 @@ const initialState: AuthState = {
   isLocked: false,
 };
 
-// Updated login thunk to use PM endpoint
+// Updated login thunk to use enhanced API service
 export const loginUser = createAsyncThunk(
   'auth/loginUser',
   async ({ username, password }: { username: string; password: string }, { rejectWithValue }) => {
     try {
-      const response = await axios.post(`${API_URL}/hots_auth/pm/login`, {
+      const response = await apiService.post(`${API_URL}/hots_auth/pm/login`, {
         uid: username,
         asin: password,
       });
@@ -87,7 +87,7 @@ export const registerUser = createAsyncThunk(
   'auth/registerUser',
   async (registerData: { uid: string; password: string; email: string; firstname: string; lastname: string }, { rejectWithValue }) => {
     try {
-      const response = await axios.post(`${API_URL}/hots_auth/pm/register`, registerData);
+      const response = await apiService.post(`${API_URL}/hots_auth/pm/register`, registerData);
       
       if (response.data.success) {
         return response.data;
@@ -105,7 +105,7 @@ export const getProfile = createAsyncThunk(
   'auth/getProfile',
   async (_, { rejectWithValue }) => {
     try {
-      const response = await axios.get(`${API_URL}/hots_auth/pm/profile`, {
+      const response = await apiService.get(`${API_URL}/hots_auth/pm/profile`, {
         headers: {
           Authorization: `Bearer ${localStorage.getItem('tokek')}`,
         }
@@ -127,7 +127,7 @@ export const updateProfile = createAsyncThunk(
   'auth/updateProfile',
   async (profileData: Partial<UserData>, { rejectWithValue }) => {
     try {
-      const response = await axios.put(`${API_URL}/hots_auth/pm/profile`, profileData, {
+      const response = await apiService.put(`${API_URL}/hots_auth/pm/profile`, profileData, {
         headers: {
           Authorization: `Bearer ${localStorage.getItem('tokek')}`,
           'Content-Type': 'application/json'
@@ -150,7 +150,7 @@ export const forgotPassword = createAsyncThunk(
   'auth/forgotPassword',
   async (email: string, { rejectWithValue }) => {
     try {
-      const response = await axios.post(`${API_URL}/hots_auth/pm/forgot-password`, { email });
+      const response = await apiService.post(`${API_URL}/hots_auth/pm/forgot-password`, { email });
       
       if (response.data.success) {
         return response.data.message;
@@ -168,7 +168,7 @@ export const resetPassword = createAsyncThunk(
   'auth/resetPassword',
   async ({ token, password }: { token: string; password: string }, { rejectWithValue }) => {
     try {
-      const response = await axios.post(`${API_URL}/hots_auth/pm/reset-password`, { token, password });
+      const response = await apiService.post(`${API_URL}/hots_auth/pm/reset-password`, { token, password });
       
       if (response.data.success) {
         return response.data.message;
@@ -181,10 +181,10 @@ export const resetPassword = createAsyncThunk(
   }
 );
 
-// Updated logout thunk to use PM endpoint
+// Updated logout thunk to use enhanced API service
 export const logoutUser = createAsyncThunk('auth/logoutUser', async () => {
   try {
-    await axios.post(`${API_URL}/hots_auth/pm/logout`, {}, {
+    await apiService.post(`${API_URL}/hots_auth/pm/logout`, {}, {
       headers: {
         Authorization: `Bearer ${localStorage.getItem('tokek')}`,
       }
