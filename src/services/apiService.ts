@@ -1,4 +1,3 @@
-
 import { supabase } from '@/integrations/supabase/client';
 import { API_URL } from '@/config/sourceConfig';
 
@@ -32,10 +31,22 @@ export class ApiService {
 
   // Auth methods
   async login(credentials: { uid: string; password: string }) {
-    if (this.useSupabase) {
-      return this.supabaseLogin(credentials);
+    try {
+      // Always try external API first
+      if (!this.useSupabase) {
+        try {
+          return await this.externalLogin(credentials);
+        } catch (error) {
+          console.warn('External API login failed, falling back to Supabase');
+          this.useSupabase = true;
+        }
+      }
+      
+      // Use Supabase if external API failed or is unavailable
+      return await this.supabaseLogin(credentials);
+    } catch (error: any) {
+      throw new Error(error.message || 'Login failed');
     }
-    return this.externalLogin(credentials);
   }
 
   private async supabaseLogin(credentials: { uid: string; password: string }) {
@@ -79,17 +90,51 @@ export class ApiService {
   }
 
   private async externalLogin(credentials: { uid: string; password: string }) {
-    const response = await fetch(`${API_URL}/hots_auth/pm/login`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(credentials)
-    });
-    return response.json();
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 10000);
+    
+    try {
+      const response = await fetch(`${API_URL}/hots_auth/pm/login`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(credentials),
+        signal: controller.signal
+      });
+      
+      clearTimeout(timeoutId);
+      
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      
+      return await response.json();
+    } catch (error: any) {
+      clearTimeout(timeoutId);
+      if (error.name === 'AbortError') {
+        throw new Error('Request timeout');
+      }
+      throw error;
+    }
   }
 
   // Projects methods
   async getProjects() {
-    if (this.useSupabase) {
+    try {
+      if (!this.useSupabase) {
+        try {
+          const response = await fetch(`${API_URL}/prjct_mngr/project`, {
+            headers: { Authorization: `Bearer ${localStorage.getItem('tokek')}` }
+          });
+          if (response.ok) {
+            return await response.json();
+          }
+          throw new Error('External API failed');
+        } catch (error) {
+          console.warn('External API failed, switching to Supabase');
+          this.useSupabase = true;
+        }
+      }
+
       const { data, error } = await supabase
         .from('pm_projects')
         .select('*')
@@ -97,16 +142,28 @@ export class ApiService {
 
       if (error) throw error;
       return { success: true, data: data || [] };
+    } catch (error: any) {
+      throw new Error(error.message || 'Failed to fetch projects');
     }
-
-    const response = await fetch(`${API_URL}/prjct_mngr/project`, {
-      headers: { Authorization: `Bearer ${localStorage.getItem('tokek')}` }
-    });
-    return response.json();
   }
 
   async getProject(id: number) {
-    if (this.useSupabase) {
+    try {
+      if (!this.useSupabase) {
+        try {
+          const response = await fetch(`${API_URL}/prjct_mngr/project/${id}`, {
+            headers: { Authorization: `Bearer ${localStorage.getItem('tokek')}` }
+          });
+          if (response.ok) {
+            return await response.json();
+          }
+          throw new Error('External API failed');
+        } catch (error) {
+          console.warn('External API failed, switching to Supabase');
+          this.useSupabase = true;
+        }
+      }
+
       const { data, error } = await supabase
         .from('pm_projects')
         .select('*')
@@ -115,16 +172,33 @@ export class ApiService {
 
       if (error) throw error;
       return { success: true, data };
+    } catch (error: any) {
+      throw new Error(error.message || 'Failed to fetch project');
     }
-
-    const response = await fetch(`${API_URL}/prjct_mngr/project/${id}`, {
-      headers: { Authorization: `Bearer ${localStorage.getItem('tokek')}` }
-    });
-    return response.json();
   }
 
   async createProject(projectData: any) {
-    if (this.useSupabase) {
+    try {
+      if (!this.useSupabase) {
+        try {
+          const response = await fetch(`${API_URL}/prjct_mngr/project`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              Authorization: `Bearer ${localStorage.getItem('tokek')}`
+            },
+            body: JSON.stringify(projectData)
+          });
+          if (response.ok) {
+            return await response.json();
+          }
+          throw new Error('External API failed');
+        } catch (error) {
+          console.warn('External API failed, switching to Supabase');
+          this.useSupabase = true;
+        }
+      }
+
       // Get next project_id
       const { data: lastProject } = await supabase
         .from('pm_projects')
@@ -142,21 +216,33 @@ export class ApiService {
 
       if (error) throw error;
       return { success: true, data };
+    } catch (error: any) {
+      throw new Error(error.message || 'Failed to create project');
     }
-
-    const response = await fetch(`${API_URL}/prjct_mngr/project`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${localStorage.getItem('tokek')}`
-      },
-      body: JSON.stringify(projectData)
-    });
-    return response.json();
   }
 
   async updateProject(id: number, projectData: any) {
-    if (this.useSupabase) {
+    try {
+      if (!this.useSupabase) {
+        try {
+          const response = await fetch(`${API_URL}/prjct_mngr/project/${id}`, {
+            method: 'PUT',
+            headers: {
+              'Content-Type': 'application/json',
+              Authorization: `Bearer ${localStorage.getItem('tokek')}`
+            },
+            body: JSON.stringify(projectData)
+          });
+          if (response.ok) {
+            return await response.json();
+          }
+          throw new Error('External API failed');
+        } catch (error) {
+          console.warn('External API failed, switching to Supabase');
+          this.useSupabase = true;
+        }
+      }
+
       const { data, error } = await supabase
         .from('pm_projects')
         .update(projectData)
@@ -166,21 +252,29 @@ export class ApiService {
 
       if (error) throw error;
       return { success: true, data };
+    } catch (error: any) {
+      throw new Error(error.message || 'Failed to update project');
     }
-
-    const response = await fetch(`${API_URL}/prjct_mngr/project/${id}`, {
-      method: 'PUT',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${localStorage.getItem('tokek')}`
-      },
-      body: JSON.stringify(projectData)
-    });
-    return response.json();
   }
 
   async deleteProject(id: number) {
-    if (this.useSupabase) {
+    try {
+      if (!this.useSupabase) {
+        try {
+          const response = await fetch(`${API_URL}/prjct_mngr/project/${id}`, {
+            method: 'DELETE',
+            headers: { Authorization: `Bearer ${localStorage.getItem('tokek')}` }
+          });
+          if (response.ok) {
+            return await response.json();
+          }
+          throw new Error('External API failed');
+        } catch (error) {
+          console.warn('External API failed, switching to Supabase');
+          this.useSupabase = true;
+        }
+      }
+
       const { error } = await supabase
         .from('pm_projects')
         .delete()
@@ -188,18 +282,30 @@ export class ApiService {
 
       if (error) throw error;
       return { success: true };
+    } catch (error: any) {
+      throw new Error(error.message || 'Failed to delete project');
     }
-
-    const response = await fetch(`${API_URL}/prjct_mngr/project/${id}`, {
-      method: 'DELETE',
-      headers: { Authorization: `Bearer ${localStorage.getItem('tokek')}` }
-    });
-    return response.json();
   }
 
   // Tasks methods
   async getTasks(projectId?: number) {
-    if (this.useSupabase) {
+    try {
+      if (!this.useSupabase) {
+        try {
+          const url = projectId ? `${API_URL}/prjct_mngr/project/${projectId}/tasks` : `${API_URL}/prjct_mngr/task`;
+          const response = await fetch(url, {
+            headers: { Authorization: `Bearer ${localStorage.getItem('tokek')}` }
+          });
+          if (response.ok) {
+            return await response.json();
+          }
+          throw new Error('External API failed');
+        } catch (error) {
+          console.warn('External API failed, switching to Supabase');
+          this.useSupabase = true;
+        }
+      }
+
       let query = supabase.from('pm_tasks').select('*');
       
       if (projectId) {
@@ -210,17 +316,28 @@ export class ApiService {
 
       if (error) throw error;
       return { success: true, data: data || [] };
+    } catch (error: any) {
+      throw new Error(error.message || 'Failed to fetch tasks');
     }
-
-    const url = projectId ? `${API_URL}/prjct_mngr/project/${projectId}/tasks` : `${API_URL}/prjct_mngr/task`;
-    const response = await fetch(url, {
-      headers: { Authorization: `Bearer ${localStorage.getItem('tokek')}` }
-    });
-    return response.json();
   }
 
   async getMyTasks() {
-    if (this.useSupabase) {
+    try {
+      if (!this.useSupabase) {
+        try {
+          const response = await fetch(`${API_URL}/prjct_mngr/task/my-tasks`, {
+            headers: { Authorization: `Bearer ${localStorage.getItem('tokek')}` }
+          });
+          if (response.ok) {
+            return await response.json();
+          }
+          throw new Error('External API failed');
+        } catch (error) {
+          console.warn('External API failed, switching to Supabase');
+          this.useSupabase = true;
+        }
+      }
+
       // For demo purposes, we'll get tasks assigned to user_id 2 (Jane Smith)
       const { data, error } = await supabase
         .from('pm_tasks')
@@ -230,16 +347,33 @@ export class ApiService {
 
       if (error) throw error;
       return { success: true, data: data || [] };
+    } catch (error: any) {
+      throw new Error(error.message || 'Failed to fetch my tasks');
     }
-
-    const response = await fetch(`${API_URL}/prjct_mngr/task/my-tasks`, {
-      headers: { Authorization: `Bearer ${localStorage.getItem('tokek')}` }
-    });
-    return response.json();
   }
 
   async createTask(taskData: any) {
-    if (this.useSupabase) {
+    try {
+      if (!this.useSupabase) {
+        try {
+          const response = await fetch(`${API_URL}/prjct_mngr/task`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              Authorization: `Bearer ${localStorage.getItem('tokek')}`
+            },
+            body: JSON.stringify(taskData)
+          });
+          if (response.ok) {
+            return await response.json();
+          }
+          throw new Error('External API failed');
+        } catch (error) {
+          console.warn('External API failed, switching to Supabase');
+          this.useSupabase = true;
+        }
+      }
+
       // Get next task_id
       const { data: lastTask } = await supabase
         .from('pm_tasks')
@@ -257,21 +391,33 @@ export class ApiService {
 
       if (error) throw error;
       return { success: true, data };
+    } catch (error: any) {
+      throw new Error(error.message || 'Failed to create task');
     }
-
-    const response = await fetch(`${API_URL}/prjct_mngr/task`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${localStorage.getItem('tokek')}`
-      },
-      body: JSON.stringify(taskData)
-    });
-    return response.json();
   }
 
   async updateTask(id: number, taskData: any) {
-    if (this.useSupabase) {
+    try {
+      if (!this.useSupabase) {
+        try {
+          const response = await fetch(`${API_URL}/prjct_mngr/task/${id}`, {
+            method: 'PUT',
+            headers: {
+              'Content-Type': 'application/json',
+              Authorization: `Bearer ${localStorage.getItem('tokek')}`
+            },
+            body: JSON.stringify(taskData)
+          });
+          if (response.ok) {
+            return await response.json();
+          }
+          throw new Error('External API failed');
+        } catch (error) {
+          console.warn('External API failed, switching to Supabase');
+          this.useSupabase = true;
+        }
+      }
+
       const { data, error } = await supabase
         .from('pm_tasks')
         .update(taskData)
@@ -281,22 +427,29 @@ export class ApiService {
 
       if (error) throw error;
       return { success: true, data };
+    } catch (error: any) {
+      throw new Error(error.message || 'Failed to update task');
     }
-
-    const response = await fetch(`${API_URL}/prjct_mngr/task/${id}`, {
-      method: 'PUT',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${localStorage.getItem('tokek')}`
-      },
-      body: JSON.stringify(taskData)
-    });
-    return response.json();
   }
 
   // Users methods
   async getUsers() {
-    if (this.useSupabase) {
+    try {
+      if (!this.useSupabase) {
+        try {
+          const response = await fetch(`${API_URL}/prjct_mngr/user`, {
+            headers: { Authorization: `Bearer ${localStorage.getItem('tokek')}` }
+          });
+          if (response.ok) {
+            return await response.json();
+          }
+          throw new Error('External API failed');
+        } catch (error) {
+          console.warn('External API failed, switching to Supabase');
+          this.useSupabase = true;
+        }
+      }
+
       const { data, error } = await supabase
         .from('pm_users')
         .select('*')
@@ -304,16 +457,28 @@ export class ApiService {
 
       if (error) throw error;
       return { success: true, data: data || [] };
+    } catch (error: any) {
+      throw new Error(error.message || 'Failed to fetch users');
     }
-
-    const response = await fetch(`${API_URL}/prjct_mngr/user`, {
-      headers: { Authorization: `Bearer ${localStorage.getItem('tokek')}` }
-    });
-    return response.json();
   }
 
   async getDepartments() {
-    if (this.useSupabase) {
+    try {
+      if (!this.useSupabase) {
+        try {
+          const response = await fetch(`${API_URL}/prjct_mngr/user/departments`, {
+            headers: { Authorization: `Bearer ${localStorage.getItem('tokek')}` }
+          });
+          if (response.ok) {
+            return await response.json();
+          }
+          throw new Error('External API failed');
+        } catch (error) {
+          console.warn('External API failed, switching to Supabase');
+          this.useSupabase = true;
+        }
+      }
+
       const { data, error } = await supabase
         .from('pm_departments')
         .select('*')
@@ -321,16 +486,28 @@ export class ApiService {
 
       if (error) throw error;
       return { success: true, data: data || [] };
+    } catch (error: any) {
+      throw new Error(error.message || 'Failed to fetch departments');
     }
-
-    const response = await fetch(`${API_URL}/prjct_mngr/user/departments`, {
-      headers: { Authorization: `Bearer ${localStorage.getItem('tokek')}` }
-    });
-    return response.json();
   }
 
   async getTeams() {
-    if (this.useSupabase) {
+    try {
+      if (!this.useSupabase) {
+        try {
+          const response = await fetch(`${API_URL}/prjct_mngr/user/teams`, {
+            headers: { Authorization: `Bearer ${localStorage.getItem('tokek')}` }
+          });
+          if (response.ok) {
+            return await response.json();
+          }
+          throw new Error('External API failed');
+        } catch (error) {
+          console.warn('External API failed, switching to Supabase');
+          this.useSupabase = true;
+        }
+      }
+
       const { data, error } = await supabase
         .from('pm_teams')
         .select('*')
@@ -338,12 +515,9 @@ export class ApiService {
 
       if (error) throw error;
       return { success: true, data: data || [] };
+    } catch (error: any) {
+      throw new Error(error.message || 'Failed to fetch teams');
     }
-
-    const response = await fetch(`${API_URL}/prjct_mngr/user/teams`, {
-      headers: { Authorization: `Bearer ${localStorage.getItem('tokek')}` }
-    });
-    return response.json();
   }
 }
 
