@@ -1,17 +1,17 @@
 
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import { Badge } from './badge';
-import { Database, Wifi, WifiOff, AlertCircle } from 'lucide-react';
+import { Database, Wifi, WifiOff } from 'lucide-react';
 import { useApiService } from '@/hooks/useApiService';
 
-const ConnectionStatus = () => {
+const SupabaseConnectionStatus = () => {
   const { isInitialized, isUsingSupabase } = useApiService();
 
   if (!isInitialized) {
     return (
       <Badge variant="outline" className="flex items-center space-x-1">
-        <AlertCircle className="w-3 h-3 animate-pulse" />
-        <span>Connecting...</span>
+        <Database className="w-3 h-3 animate-pulse" />
+        <span>Initializing...</span>
       </Badge>
     );
   }
@@ -24,7 +24,7 @@ const ConnectionStatus = () => {
       {isUsingSupabase ? (
         <>
           <Database className="w-3 h-3" />
-          <span>Supabase DB</span>
+          <span>Supabase</span>
         </>
       ) : (
         <>
@@ -36,4 +36,4 @@ const ConnectionStatus = () => {
   );
 };
 
-export default ConnectionStatus;
+export default SupabaseConnectionStatus;

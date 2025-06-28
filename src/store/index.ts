@@ -8,6 +8,8 @@ import customFunctionReducer from './slices/customFunctionSlice';
 import projectReducer from './slices/projectSlice';
 import taskReducer from './slices/taskSlice';
 import pmUserReducer from './slices/pmUserSlice';
+import supabaseProjectReducer from './slices/supabaseProjectSlice';
+import supabaseTaskReducer from './slices/supabaseTaskSlice';
 
 export const store = configureStore({
   reducer: {
@@ -19,6 +21,8 @@ export const store = configureStore({
     projects: projectReducer,
     tasks: taskReducer,
     pmUser: pmUserReducer,
+    supabaseProjects: supabaseProjectReducer,
+    supabaseTasks: supabaseTaskReducer,
   },
 });
 

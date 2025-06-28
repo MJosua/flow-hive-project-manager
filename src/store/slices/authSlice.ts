@@ -1,202 +1,51 @@
 
 import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit';
 import { apiService } from '@/services/apiService';
-import { API_URL } from '../../config/sourceConfig';
-
-interface UserData {
-  id: string;
-  username: string;
-  uid: string;
-  email?: string;
-  role?: string;
-  [key: string]: any;
-}
 
 interface AuthState {
-  user: UserData | null;
+  user: any | null;
   token: string | null;
-  isLoading: boolean;
   isAuthenticated: boolean;
+  isLoading: boolean;
   error: string | null;
-  loginAttempts: number;
-  isLocked: boolean;
 }
-
-// Helper functions for persistent user storage
-const persistUserData = (userData: UserData) => {
-  localStorage.setItem('persistentUser', JSON.stringify({
-    id: userData.id,
-    username: userData.username,
-    uid: userData.uid,
-    email: userData.email
-  }));
-};
-
-const getPersistentUserData = (): Partial<UserData> | null => {
-  try {
-    const stored = localStorage.getItem('persistentUser');
-    return stored ? JSON.parse(stored) : null;
-  } catch {
-    return null;
-  }
-};
-
-const clearPersistentUserData = () => {
-  localStorage.removeItem('persistentUser');
-};
 
 const initialState: AuthState = {
   user: null,
   token: localStorage.getItem('tokek'),
-  isLoading: false,
   isAuthenticated: !!localStorage.getItem('tokek'),
+  isLoading: false,
   error: null,
-  loginAttempts: 0,
-  isLocked: false,
 };
 
-// Updated login thunk to use enhanced API service
-export const loginUser = createAsyncThunk(
-  'auth/loginUser',
-  async ({ username, password }: { username: string; password: string }, { rejectWithValue }) => {
+export const login = createAsyncThunk(
+  'auth/login',
+  async ({ uid, password }: { uid: string; password: string }, { rejectWithValue }) => {
     try {
-      const response = await apiService.post(`${API_URL}/hots_auth/pm/login`, {
-        uid: username,
-        asin: password,
-      });
-
-      if (response.data.success) {
-        const { tokek, userData } = response.data;
-        localStorage.setItem('tokek', tokek);
-        localStorage.setItem('isAuthenticated', 'true');
-        
-        persistUserData(userData);
-        
-        return { token: tokek, userData };
+      const response = await apiService.login({ uid, password });
+      if (response.success) {
+        localStorage.setItem('tokek', response.tokek);
+        return response;
       } else {
-        return rejectWithValue(response.data.message);
+        return rejectWithValue(response.message || 'Login failed');
       }
     } catch (error: any) {
-      return rejectWithValue(error.response?.data?.message || error.message);
+      return rejectWithValue(error.message || 'Login failed');
     }
   }
 );
 
-// New register thunk
-export const registerUser = createAsyncThunk(
-  'auth/registerUser',
-  async (registerData: { uid: string; password: string; email: string; firstname: string; lastname: string }, { rejectWithValue }) => {
-    try {
-      const response = await apiService.post(`${API_URL}/hots_auth/pm/register`, registerData);
-      
-      if (response.data.success) {
-        return response.data;
-      } else {
-        return rejectWithValue(response.data.message);
-      }
-    } catch (error: any) {
-      return rejectWithValue(error.response?.data?.message || error.message);
-    }
-  }
-);
-
-// Get profile thunk
-export const getProfile = createAsyncThunk(
-  'auth/getProfile',
+export const logout = createAsyncThunk(
+  'auth/logout',
   async (_, { rejectWithValue }) => {
     try {
-      const response = await apiService.get(`${API_URL}/hots_auth/pm/profile`, {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem('tokek')}`,
-        }
-      });
-      
-      if (response.data.success) {
-        return response.data.data;
-      } else {
-        return rejectWithValue(response.data.message);
-      }
+      localStorage.removeItem('tokek');
+      return { success: true };
     } catch (error: any) {
-      return rejectWithValue(error.response?.data?.message || error.message);
+      return rejectWithValue(error.message || 'Logout failed');
     }
   }
 );
-
-// Update profile thunk
-export const updateProfile = createAsyncThunk(
-  'auth/updateProfile',
-  async (profileData: Partial<UserData>, { rejectWithValue }) => {
-    try {
-      const response = await apiService.put(`${API_URL}/hots_auth/pm/profile`, profileData, {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem('tokek')}`,
-          'Content-Type': 'application/json'
-        }
-      });
-      
-      if (response.data.success) {
-        return response.data.data;
-      } else {
-        return rejectWithValue(response.data.message);
-      }
-    } catch (error: any) {
-      return rejectWithValue(error.response?.data?.message || error.message);
-    }
-  }
-);
-
-// Forgot password thunk
-export const forgotPassword = createAsyncThunk(
-  'auth/forgotPassword',
-  async (email: string, { rejectWithValue }) => {
-    try {
-      const response = await apiService.post(`${API_URL}/hots_auth/pm/forgot-password`, { email });
-      
-      if (response.data.success) {
-        return response.data.message;
-      } else {
-        return rejectWithValue(response.data.message);
-      }
-    } catch (error: any) {
-      return rejectWithValue(error.response?.data?.message || error.message);
-    }
-  }
-);
-
-// Reset password thunk
-export const resetPassword = createAsyncThunk(
-  'auth/resetPassword',
-  async ({ token, password }: { token: string; password: string }, { rejectWithValue }) => {
-    try {
-      const response = await apiService.post(`${API_URL}/hots_auth/pm/reset-password`, { token, password });
-      
-      if (response.data.success) {
-        return response.data.message;
-      } else {
-        return rejectWithValue(response.data.message);
-      }
-    } catch (error: any) {
-      return rejectWithValue(error.response?.data?.message || error.message);
-    }
-  }
-);
-
-// Updated logout thunk to use enhanced API service
-export const logoutUser = createAsyncThunk('auth/logoutUser', async () => {
-  try {
-    await apiService.post(`${API_URL}/hots_auth/pm/logout`, {}, {
-      headers: {
-        Authorization: `Bearer ${localStorage.getItem('tokek')}`,
-      }
-    });
-  } catch (error) {
-    console.error('Logout error:', error);
-  }
-  
-  localStorage.removeItem('tokek');
-  localStorage.removeItem('isAuthenticated');
-  clearPersistentUserData();
-});
 
 const authSlice = createSlice({
   name: 'auth',
@@ -205,86 +54,44 @@ const authSlice = createSlice({
     clearError: (state) => {
       state.error = null;
     },
-    resetLoginAttempts: (state) => {
-      state.loginAttempts = 0;
-      state.isLocked = false;
-    },
-    setLocked: (state) => {
-      state.isLocked = true;
-    },
-    clearToken: (state) => {
-      state.token = null;
-      state.isAuthenticated = false;
-    },
-    loadPersistentUser: (state) => {
-      const persistentData = getPersistentUserData();
-      if (persistentData && !state.user?.uid) {
-        state.user = { ...state.user, ...persistentData } as UserData;
-      }
+    setCredentials: (state, action: PayloadAction<{ user: any; token: string }>) => {
+      state.user = action.payload.user;
+      state.token = action.payload.token;
+      state.isAuthenticated = true;
     },
   },
   extraReducers: (builder) => {
     builder
-      // Login cases
-      .addCase(loginUser.pending, (state) => {
+      .addCase(login.pending, (state) => {
         state.isLoading = true;
         state.error = null;
       })
-      .addCase(loginUser.fulfilled, (state, action) => {
+      .addCase(login.fulfilled, (state, action) => {
         state.isLoading = false;
-        state.isAuthenticated = true;
-        state.token = action.payload.token;
         state.user = action.payload.userData;
-        state.error = null;
-        state.loginAttempts = 0;
-        state.isLocked = false;
-        
-        persistUserData(action.payload.userData);
+        state.token = action.payload.tokek;
+        state.isAuthenticated = true;
       })
-      .addCase(loginUser.rejected, (state, action) => {
+      .addCase(login.rejected, (state, action) => {
         state.isLoading = false;
+        state.error = action.payload as string;
         state.isAuthenticated = false;
-        state.error = action.payload as string;
-        state.loginAttempts += 1;
-
-        if (action.payload && typeof action.payload === 'string' &&
-          action.payload.includes('Too many login attempt')) {
-          state.isLocked = true;
-        }
       })
-      // Register cases
-      .addCase(registerUser.pending, (state) => {
-        state.isLoading = true;
-        state.error = null;
-      })
-      .addCase(registerUser.fulfilled, (state) => {
-        state.isLoading = false;
-        state.error = null;
-      })
-      .addCase(registerUser.rejected, (state, action) => {
-        state.isLoading = false;
-        state.error = action.payload as string;
-      })
-      // Profile cases
-      .addCase(getProfile.fulfilled, (state, action) => {
-        state.user = { ...state.user, ...action.payload };
-      })
-      .addCase(updateProfile.fulfilled, (state, action) => {
-        state.user = { ...state.user, ...action.payload };
-        persistUserData(action.payload);
-      })
-      // Logout cases
-      .addCase(logoutUser.fulfilled, (state) => {
+      .addCase(logout.fulfilled, (state) => {
         state.user = null;
         state.token = null;
         state.isAuthenticated = false;
-        state.error = null;
-        state.loginAttempts = 0;
-        state.isLocked = false;
       });
   },
 });
 
-export const { clearError, resetLoginAttempts, setLocked, clearToken, loadPersistentUser } = authSlice.actions;
-export { getPersistentUserData };
+export const { clearError, setCredentials } = authSlice.actions;
+
+// Selectors
+export const selectAuth = (state: any) => state.auth;
+export const selectUser = (state: any) => state.auth.user;
+export const selectIsAuthenticated = (state: any) => state.auth.isAuthenticated;
+export const selectAuthLoading = (state: any) => state.auth.isLoading;
+export const selectAuthError = (state: any) => state.auth.error;
+
 export default authSlice.reducer;
