@@ -8,6 +8,8 @@ interface AuthState {
   isAuthenticated: boolean;
   isLoading: boolean;
   error: string | null;
+  isLocked: boolean;
+  loginAttempts: number;
 }
 
 const initialState: AuthState = {
@@ -16,6 +18,8 @@ const initialState: AuthState = {
   isAuthenticated: !!localStorage.getItem('tokek'),
   isLoading: false,
   error: null,
+  isLocked: false,
+  loginAttempts: 0,
 };
 
 export const login = createAsyncThunk(
@@ -23,6 +27,23 @@ export const login = createAsyncThunk(
   async ({ uid, password }: { uid: string; password: string }, { rejectWithValue }) => {
     try {
       const response = await apiService.login({ uid, password });
+      if (response.success) {
+        localStorage.setItem('tokek', response.tokek);
+        return response;
+      } else {
+        return rejectWithValue(response.message || 'Login failed');
+      }
+    } catch (error: any) {
+      return rejectWithValue(error.message || 'Login failed');
+    }
+  }
+);
+
+export const loginUser = createAsyncThunk(
+  'auth/loginUser',
+  async ({ username, password }: { username: string; password: string }, { rejectWithValue }) => {
+    try {
+      const response = await apiService.login({ uid: username, password });
       if (response.success) {
         localStorage.setItem('tokek', response.tokek);
         return response;
@@ -47,6 +68,28 @@ export const logout = createAsyncThunk(
   }
 );
 
+export const logoutUser = createAsyncThunk(
+  'auth/logoutUser',
+  async (_, { rejectWithValue }) => {
+    try {
+      localStorage.removeItem('tokek');
+      return { success: true };
+    } catch (error: any) {
+      return rejectWithValue(error.message || 'Logout failed');
+    }
+  }
+);
+
+// Helper functions
+export const getPersistentUserData = () => {
+  try {
+    const userData = localStorage.getItem('userData');
+    return userData ? JSON.parse(userData) : null;
+  } catch {
+    return null;
+  }
+};
+
 const authSlice = createSlice({
   name: 'auth',
   initialState,
@@ -58,6 +101,16 @@ const authSlice = createSlice({
       state.user = action.payload.user;
       state.token = action.payload.token;
       state.isAuthenticated = true;
+    },
+    resetLoginAttempts: (state) => {
+      state.loginAttempts = 0;
+      state.isLocked = false;
+    },
+    loadPersistentUser: (state) => {
+      const userData = getPersistentUserData();
+      if (userData) {
+        state.user = userData;
+      }
     },
   },
   extraReducers: (builder) => {
@@ -71,21 +124,63 @@ const authSlice = createSlice({
         state.user = action.payload.userData;
         state.token = action.payload.tokek;
         state.isAuthenticated = true;
+        state.loginAttempts = 0;
+        state.isLocked = false;
+        // Store user data persistently
+        localStorage.setItem('userData', JSON.stringify(action.payload.userData));
       })
       .addCase(login.rejected, (state, action) => {
         state.isLoading = false;
         state.error = action.payload as string;
         state.isAuthenticated = false;
+        state.loginAttempts += 1;
+        if (state.loginAttempts >= 5) {
+          state.isLocked = true;
+        }
+      })
+      .addCase(loginUser.pending, (state) => {
+        state.isLoading = true;
+        state.error = null;
+      })
+      .addCase(loginUser.fulfilled, (state, action) => {
+        state.isLoading = false;
+        state.user = action.payload.userData;
+        state.token = action.payload.tokek;
+        state.isAuthenticated = true;
+        state.loginAttempts = 0;
+        state.isLocked = false;
+        // Store user data persistently
+        localStorage.setItem('userData', JSON.stringify(action.payload.userData));
+      })
+      .addCase(loginUser.rejected, (state, action) => {
+        state.isLoading = false;
+        state.error = action.payload as string;
+        state.isAuthenticated = false;
+        state.loginAttempts += 1;
+        if (state.loginAttempts >= 5) {
+          state.isLocked = true;
+        }
       })
       .addCase(logout.fulfilled, (state) => {
         state.user = null;
         state.token = null;
         state.isAuthenticated = false;
+        state.loginAttempts = 0;
+        state.isLocked = false;
+        localStorage.removeItem('userData');
+      })
+      .addCase(logoutUser.fulfilled, (state) => {
+        state.user = null;
+        state.token = null;
+        state.isAuthenticated = false;
+        state.loginAttempts = 0;
+        state.isLocked = false;
+        localStorage.removeItem('userData');
       });
   },
 });
 
-export const { clearError, setCredentials } = authSlice.actions;
+export const { clearError, setCredentials, resetLoginAttempts, loadPersistentUser } = authSlice.actions;
 
 // Selectors
 export const selectAuth = (state: any) => state.auth;

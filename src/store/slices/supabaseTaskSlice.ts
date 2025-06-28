@@ -18,7 +18,7 @@ const initialState: TaskState = {
 
 export const fetchTasks = createAsyncThunk(
   'supabaseTasks/fetchTasks',
-  async (projectId?: number, { rejectWithValue }) => {
+  async (projectId: number | undefined, { rejectWithValue }) => {
     try {
       const response = await apiService.getTasks(projectId);
       if (response.success) {
