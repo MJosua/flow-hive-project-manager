@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { FolderOpen, CheckSquare, Clock, TrendingUp, Users, Target, Calendar, AlertCircle } from 'lucide-react';
+import { FolderOpen, CheckSquare, Clock, TrendingUp, Users, Target, Calendar, AlertCircle, FileText } from 'lucide-react';
 import AppLayoutNew from "@/components/layout/AppLayoutNew";
 import { useAppDispatch, useAppSelector } from '@/hooks/useAppSelector';
 import { 
@@ -87,82 +87,84 @@ const Index = () => {
     <AppLayoutNew>
       <div className="space-y-6">
         {/* Welcome Section */}
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-3xl font-bold text-gray-900">Project Management Dashboard</h1>
-            <p className="text-gray-600 mt-2">Overview of your projects and tasks</p>
-          </div>
-          <div className="text-right">
-            <p className="text-sm text-gray-500">Welcome back!</p>
-            <p className="text-lg font-semibold">Ready to manage your projects?</p>
+        <div className="gradient-primary rounded-2xl p-8 text-white">
+          <div className="flex items-center justify-between">
+            <div>
+              <h1 className="text-4xl font-bold mb-2">Project Management Hub</h1>
+              <p className="text-blue-100 text-lg">Streamline your workflow and boost productivity</p>
+            </div>
+            <div className="text-right">
+              <p className="text-blue-200">Welcome back!</p>
+              <p className="text-xl font-semibold">Ready to achieve excellence?</p>
+            </div>
           </div>
         </div>
 
         {/* Key Metrics */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-          <Card className="hover:shadow-md transition-shadow cursor-pointer" onClick={() => navigate('/projects')}>
+          <Card className="hover-lift cursor-pointer shadow-professional" onClick={() => navigate('/projects')}>
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-gray-600">Total Projects</p>
-                  <p className="text-3xl font-bold text-gray-900">{projects.length}</p>
-                  <p className="text-sm text-green-600 mt-1">
+                  <p className="text-sm font-medium text-muted-foreground">Total Projects</p>
+                  <p className="text-3xl font-bold text-foreground">{projects.length}</p>
+                  <p className="text-sm text-success mt-1">
                     {activeProjects.length} active
                   </p>
                 </div>
-                <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
-                  <FolderOpen className="w-6 h-6 text-blue-600" />
+                <div className="w-12 h-12 gradient-primary rounded-xl flex items-center justify-center">
+                  <FolderOpen className="w-6 h-6 text-white" />
                 </div>
               </div>
             </CardContent>
           </Card>
 
-          <Card className="hover:shadow-md transition-shadow cursor-pointer" onClick={() => navigate('/my-tasks')}>
+          <Card className="hover-lift cursor-pointer shadow-professional" onClick={() => navigate('/my-tasks')}>
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-gray-600">My Tasks</p>
-                  <p className="text-3xl font-bold text-gray-900">{myTasks.length}</p>
-                  <p className="text-sm text-orange-600 mt-1">
+                  <p className="text-sm font-medium text-muted-foreground">My Tasks</p>
+                  <p className="text-3xl font-bold text-foreground">{myTasks.length}</p>
+                  <p className="text-sm text-warning mt-1">
                     {pendingTasks.length} pending
                   </p>
                 </div>
-                <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
+                <div className="w-12 h-12 bg-green-100 rounded-xl flex items-center justify-center">
                   <CheckSquare className="w-6 h-6 text-green-600" />
                 </div>
               </div>
             </CardContent>
           </Card>
 
-          <Card>
+          <Card className="hover-lift shadow-professional" onClick={() => navigate('/approvals')}>
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-gray-600">Overall Progress</p>
-                  <p className="text-3xl font-bold text-gray-900">{overallProgress}%</p>
-                  <p className="text-sm text-blue-600 mt-1">
-                    Across all projects
+                  <p className="text-sm font-medium text-muted-foreground">Pending Approvals</p>
+                  <p className="text-3xl font-bold text-foreground">5</p>
+                  <p className="text-sm text-warning mt-1">
+                    Requires attention
                   </p>
                 </div>
-                <div className="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center">
-                  <TrendingUp className="w-6 h-6 text-purple-600" />
+                <div className="w-12 h-12 bg-yellow-100 rounded-xl flex items-center justify-center">
+                  <Clock className="w-6 h-6 text-yellow-600" />
                 </div>
               </div>
             </CardContent>
           </Card>
 
-          <Card>
+          <Card className="hover-lift shadow-professional">
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-gray-600">Urgent Tasks</p>
-                  <p className="text-3xl font-bold text-gray-900">{urgentTasks.length}</p>
-                  <p className="text-sm text-red-600 mt-1">
-                    {overdueTasks.length} overdue
+                  <p className="text-sm font-medium text-muted-foreground">Overall Progress</p>
+                  <p className="text-3xl font-bold text-foreground">{overallProgress}%</p>
+                  <p className="text-sm text-primary mt-1">
+                    Across all projects
                   </p>
                 </div>
-                <div className="w-12 h-12 bg-red-100 rounded-lg flex items-center justify-center">
-                  <AlertCircle className="w-6 h-6 text-red-600" />
+                <div className="w-12 h-12 bg-purple-100 rounded-xl flex items-center justify-center">
+                  <TrendingUp className="w-6 h-6 text-purple-600" />
                 </div>
               </div>
             </CardContent>
@@ -172,16 +174,16 @@ const Index = () => {
         {/* Recent Projects & Upcoming Tasks */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           {/* Recent Projects */}
-          <Card>
+          <Card className="shadow-professional">
             <CardHeader>
               <div className="flex items-center justify-between">
                 <CardTitle className="flex items-center space-x-2">
-                  <FolderOpen className="w-5 h-5" />
+                  <FolderOpen className="w-5 h-5 text-primary" />
                   <span>Recent Projects</span>
                 </CardTitle>
                 <button
                   onClick={() => navigate('/projects')}
-                  className="text-sm text-blue-600 hover:text-blue-800"
+                  className="text-sm text-primary hover:text-primary/80 font-medium"
                 >
                   View all
                 </button>
@@ -218,16 +220,16 @@ const Index = () => {
           </Card>
 
           {/* Upcoming Tasks */}
-          <Card>
+          <Card className="shadow-professional">
             <CardHeader>
               <div className="flex items-center justify-between">
                 <CardTitle className="flex items-center space-x-2">
-                  <Clock className="w-5 h-5" />
+                  <Clock className="w-5 h-5 text-primary" />
                   <span>Upcoming Tasks</span>
                 </CardTitle>
                 <button
                   onClick={() => navigate('/my-tasks')}
-                  className="text-sm text-blue-600 hover:text-blue-800"
+                  className="text-sm text-primary hover:text-primary/80 font-medium"
                 >
                   View all
                 </button>
@@ -269,49 +271,62 @@ const Index = () => {
         </div>
 
         {/* Quick Actions */}
-        <Card>
+        <Card className="shadow-professional">
           <CardHeader>
             <CardTitle>Quick Actions</CardTitle>
             <CardDescription>Common tasks to get you started</CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
               <button
                 onClick={() => navigate('/project/create')}
-                className="flex items-center space-x-3 p-4 bg-blue-50 hover:bg-blue-100 rounded-lg transition-colors text-left"
+                className="flex items-center space-x-3 p-6 bg-primary/5 hover:bg-primary/10 rounded-xl transition-all hover-lift text-left"
               >
-                <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
-                  <FolderOpen className="w-5 h-5 text-blue-600" />
+                <div className="w-12 h-12 gradient-primary rounded-xl flex items-center justify-center">
+                  <FolderOpen className="w-6 h-6 text-white" />
                 </div>
                 <div>
-                  <h3 className="font-medium text-gray-900">Create Project</h3>
-                  <p className="text-sm text-gray-600">Start a new project</p>
+                  <h3 className="font-semibold text-foreground">Create Project</h3>
+                  <p className="text-sm text-muted-foreground">Start a new project</p>
                 </div>
               </button>
 
               <button
                 onClick={() => navigate('/my-tasks')}
-                className="flex items-center space-x-3 p-4 bg-green-50 hover:bg-green-100 rounded-lg transition-colors text-left"
+                className="flex items-center space-x-3 p-6 bg-success/5 hover:bg-success/10 rounded-xl transition-all hover-lift text-left"
               >
-                <div className="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center">
-                  <CheckSquare className="w-5 h-5 text-green-600" />
+                <div className="w-12 h-12 bg-success rounded-xl flex items-center justify-center">
+                  <CheckSquare className="w-6 h-6 text-white" />
                 </div>
                 <div>
-                  <h3 className="font-medium text-gray-900">View My Tasks</h3>
-                  <p className="text-sm text-gray-600">Check your assignments</p>
+                  <h3 className="font-semibold text-foreground">View My Tasks</h3>
+                  <p className="text-sm text-muted-foreground">Check your assignments</p>
                 </div>
               </button>
 
               <button
-                onClick={() => navigate('/projects')}
-                className="flex items-center space-x-3 p-4 bg-purple-50 hover:bg-purple-100 rounded-lg transition-colors text-left"
+                onClick={() => navigate('/approvals')}
+                className="flex items-center space-x-3 p-6 bg-warning/5 hover:bg-warning/10 rounded-xl transition-all hover-lift text-left"
               >
-                <div className="w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center">
-                  <Target className="w-5 h-5 text-purple-600" />
+                <div className="w-12 h-12 bg-warning rounded-xl flex items-center justify-center">
+                  <Clock className="w-6 h-6 text-white" />
                 </div>
                 <div>
-                  <h3 className="font-medium text-gray-900">Browse Projects</h3>
-                  <p className="text-sm text-gray-600">Explore all projects</p>
+                  <h3 className="font-semibold text-foreground">Approvals</h3>
+                  <p className="text-sm text-muted-foreground">Review pending requests</p>
+                </div>
+              </button>
+
+              <button
+                onClick={() => navigate('/admin/team-management')}
+                className="flex items-center space-x-3 p-6 bg-purple-50 hover:bg-purple-100 rounded-xl transition-all hover-lift text-left"
+              >
+                <div className="w-12 h-12 bg-purple-500 rounded-xl flex items-center justify-center">
+                  <Users className="w-6 h-6 text-white" />
+                </div>
+                <div>
+                  <h3 className="font-semibold text-foreground">Team Management</h3>
+                  <p className="text-sm text-muted-foreground">Manage team members</p>
                 </div>
               </button>
             </div>

@@ -9,7 +9,9 @@ import {
   Settings,
   Kanban,
   Calendar as GanttIcon,
-  List
+  List,
+  Clock,
+  Shield
 } from 'lucide-react';
 import {
   Sidebar,
@@ -29,12 +31,14 @@ const sidebarItems = [
   { name: 'Projects', href: '/projects', icon: FolderOpen },
   { name: 'My Tasks', href: '/my-tasks', icon: CheckSquare },
   { name: 'Task List', href: '/task-list', icon: List },
+  { name: 'Approvals', href: '/approvals', icon: Clock },
   { name: 'Kanban Board', href: '/kanban', icon: Kanban },
   { name: 'Gantt Chart', href: '/gantt', icon: GanttIcon },
 ];
 
 const adminItems = [
-  { name: 'Team', href: '/admin/team-management', icon: Users },
+  { name: 'Team Management', href: '/admin/team-management', icon: Users },
+  { name: 'User Management', href: '/admin/user-management', icon: Shield },
   { name: 'Settings', href: '/admin/system-settings', icon: Settings },
 ];
 

@@ -34,6 +34,7 @@ import TicketDetail from "./pages/TicketDetail";
 import RecoveryForm from "./pages/login/form/Recoveryform";
 import Gantt from '@/pages/Gantt';
 import Kanban from '@/pages/Kanban';
+import Approvals from '@/pages/Approvals';
 
 // Create QueryClient instance outside of component to avoid recreation
 const queryClient = new QueryClient({
@@ -107,6 +108,11 @@ const AppContent = () => {
               <MyTasks />
             </ProtectedRoute>
           } />
+          <Route path="/approvals" element={
+            <ProtectedRoute>
+              <Approvals />
+            </ProtectedRoute>
+          } />
           <Route path="/kanban" element={
             <ProtectedRoute>
               <Kanban />
@@ -151,6 +157,11 @@ const AppContent = () => {
             </ProtectedRoute>
           } />
           <Route path="/admin/team-management" element={
+            <ProtectedRoute>
+              <UserManagement />
+            </ProtectedRoute>
+          } />
+          <Route path="/admin/user-management" element={
             <ProtectedRoute>
               <UserManagement />
             </ProtectedRoute>

@@ -6,77 +6,75 @@
 
 @layer base {
   :root {
-    --background: 37.75% 0.208 265.42;
-    /* #00549c */
-    --foreground: 230 86% 12%;
-    /* #01063D */
+    /* Modern Professional Blue Theme */
+    --background: 222 47% 98%;
+    --foreground: 217 33% 14%;
 
-    --card: 32.3% 0.14 264;
-    /* #F3F1EC */
-    --card-foreground: 32.33% 0.14 265.38;
-    /* #1A2A6C */
+    --card: 0 0% 100%;
+    --card-foreground: 217 33% 14%;
 
     --popover: 0 0% 100%;
-    /* #fff */
-    --popover-foreground: 230 86% 12%;
-    /* #01063D */
+    --popover-foreground: 217 33% 14%;
 
-    --primary: 208, 100%, 31%;
-    /* #01063D - changed from yellow to dark blue */
+    --primary: 212 95% 50%;
     --primary-foreground: 0 0% 100%;
-    /* white text on dark background */
 
-    --secondary: 0 0% 93%;
-    /* #EDEDED */
-    --secondary-foreground: 206 75% 14%;
-    /* #011B2F */
+    --secondary: 216 34% 96%;
+    --secondary-foreground: 217 33% 20%;
 
-    --muted: 0 0% 93%;
-    /* #EDEDED */
-    --muted-foreground: 206 75% 14%;
-    /* #011B2F */
+    --muted: 216 34% 96%;
+    --muted-foreground: 217 20% 50%;
 
-    --accent: 0 0% 88%;
-    /* #E0E0E0 - changed from yellow to gray */
-    --accent-foreground: 230 86% 12%;
-    /* #01063D */
+    --accent: 216 34% 92%;
+    --accent-foreground: 217 33% 20%;
 
     --destructive: 0 84% 60%;
     --destructive-foreground: 0 0% 98%;
 
-    --border: 0 0% 88%;
-    /* #E0E0E0 */
-    --input: 0 0% 88%;
-    /* #E0E0E0 */
-    --ring: 230 86% 12%;
-    /* #01063D - changed from blue to dark */
+    --success: 142 76% 36%;
+    --success-foreground: 0 0% 98%;
 
-    --radius: 0.5rem;
+    --warning: 38 92% 50%;
+    --warning-foreground: 217 33% 14%;
 
-    --sidebar-background: 89.06% 0.074 253.53;
-    /* #EDEDED */
-    --sidebar-foreground: 230 86% 12%;
-    /* #01063D */
-    --sidebar-primary: 230 86% 12%;
-    /* #01063D - changed from yellow */
+    --border: 214 32% 91%;
+    --input: 214 32% 91%;
+    --ring: 212 95% 50%;
+
+    --radius: 0.75rem;
+
+    /* Professional gradients */
+    --gradient-primary: linear-gradient(135deg, hsl(212, 95%, 50%), hsl(221, 100%, 45%));
+    --gradient-secondary: linear-gradient(135deg, hsl(216, 34%, 96%), hsl(214, 32%, 91%));
+    --gradient-accent: linear-gradient(135deg, hsl(216, 34%, 92%), hsl(210, 40%, 85%));
+
+    /* Status colors */
+    --status-pending: 39 84% 56%;
+    --status-approved: 142 76% 36%;
+    --status-rejected: 0 84% 60%;
+    --status-in-review: 212 95% 50%;
+
+    /* Priority colors */
+    --priority-low: 142 76% 36%;
+    --priority-medium: 39 84% 56%;
+    --priority-high: 25 95% 53%;
+    --priority-critical: 0 84% 60%;
+
+    /* Sidebar */
+    --sidebar-background: 217 33% 17%;
+    --sidebar-foreground: 216 34% 96%;
+    --sidebar-primary: 212 95% 50%;
     --sidebar-primary-foreground: 0 0% 100%;
-    /* white */
-    --sidebar-accent: 0 0% 88%;
-    /* #E0E0E0 - changed from yellow */
-    --sidebar-accent-foreground: 230 86% 12%;
-    /* #01063D */
-    --sidebar-border: 0 0% 88%;
-    /* #E0E0E0 */
-    --sidebar-ring: 230 86% 12%;
-    /* #01063D */
+    --sidebar-accent: 217 33% 22%;
+    --sidebar-accent-foreground: 216 34% 96%;
+    --sidebar-border: 217 33% 22%;
+    --sidebar-ring: 212 95% 50%;
 
-    /* Custom colors for buttons and specific elements */
-    --button-primary: 230 86% 12%;
-    /* #01063D - changed from yellow to dark */
-    --hover-gray: 0 0% 88%;
-    /* #E0E0E0 */
-    --text-link: 230 93% 42%;
-    /* #0817ba */
+    /* Professional shadows */
+    --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+    --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+    --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+    --shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
   }
 
   .dark {
@@ -137,15 +135,68 @@
   color: hsl(var(--accent-foreground));
 }
 
-/* Custom utility classes for the new color palette */
-.bg-button-primary {
-  background-color: hsl(var(--button-primary));
+/* Professional utility classes */
+.gradient-primary {
+  background: var(--gradient-primary);
 }
 
-.text-link {
-  color: hsl(var(--text-link));
+.gradient-secondary {
+  background: var(--gradient-secondary);
 }
 
-.hover-gray:hover {
-  background-color: hsl(var(--hover-gray));
+.gradient-accent {
+  background: var(--gradient-accent);
+}
+
+.status-pending {
+  background-color: hsl(var(--status-pending) / 0.1);
+  color: hsl(var(--status-pending));
+}
+
+.status-approved {
+  background-color: hsl(var(--status-approved) / 0.1);
+  color: hsl(var(--status-approved));
+}
+
+.status-rejected {
+  background-color: hsl(var(--status-rejected) / 0.1);
+  color: hsl(var(--status-rejected));
+}
+
+.status-in-review {
+  background-color: hsl(var(--status-in-review) / 0.1);
+  color: hsl(var(--status-in-review));
+}
+
+.priority-low {
+  background-color: hsl(var(--priority-low) / 0.1);
+  color: hsl(var(--priority-low));
+}
+
+.priority-medium {
+  background-color: hsl(var(--priority-medium) / 0.1);
+  color: hsl(var(--priority-medium));
+}
+
+.priority-high {
+  background-color: hsl(var(--priority-high) / 0.1);
+  color: hsl(var(--priority-high));
+}
+
+.priority-critical {
+  background-color: hsl(var(--priority-critical) / 0.1);
+  color: hsl(var(--priority-critical));
+}
+
+.shadow-professional {
+  box-shadow: var(--shadow-md);
+}
+
+.hover-lift {
+  transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+}
+
+.hover-lift:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-lg);
 }
