@@ -118,7 +118,7 @@ const Loginform = ({
 
     // Clear any existing validation errors
     setValidationErrors({});
-
+  console.log("credentials",credentials)
     // Dispatch login action
     try {
       await dispatch(loginUser({
