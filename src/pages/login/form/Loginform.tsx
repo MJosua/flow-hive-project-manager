@@ -118,7 +118,11 @@ const Loginform = ({
 
     // Clear any existing validation errors
     setValidationErrors({});
-    console.log("Login attempt with credentials:", { username: credentials.username, password: "***" });
+    
+    console.log("=== LOGIN FORM SUBMISSION ===");
+    console.log("Username:", credentials.username);
+    console.log("Password:", credentials.password ? "***" : "(empty)");
+    console.log("Current auth state:", { isLoading, error, isAuthenticated });
     
     // Dispatch login action
     try {
@@ -127,13 +131,17 @@ const Loginform = ({
         password: credentials.password,
       }));
       
-      console.log("Login result:", result);
+      console.log("=== LOGIN DISPATCH RESULT ===");
+      console.log("Result type:", result.type);
+      console.log("Result payload:", result.payload);
       
       if (loginUser.fulfilled.match(result)) {
-        console.log("Login successful, user data:", result.payload);
+        console.log("✅ Login successful, user data:", result.payload);
+      } else if (loginUser.rejected.match(result)) {
+        console.log("❌ Login failed:", result.payload);
       }
     } catch (err) {
-      console.error('Login failed:', err);
+      console.error('❌ Login dispatch error:', err);
     }
   };
 
@@ -244,7 +252,12 @@ const Loginform = ({
 
         <div className="mt-6 text-center text-sm text-gray-500">
           <p>For technical support, contact IT Department</p>
-          <p className="mt-2 text-xs">Test login: jane.smith / password (Supabase mode)</p>
+          <p className="mt-2 text-xs">
+            Test login: <strong>jane.smith</strong> / <strong>password</strong> (Supabase mode)
+          </p>
+          <p className="text-xs">
+            Or try: <strong>john.doe</strong> / <strong>password</strong>
+          </p>
         </div>
       </CardContent>
     </Card>

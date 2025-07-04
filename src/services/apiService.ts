@@ -40,6 +40,7 @@ export class ApiService {
       await this.initialize(); // Ensure initialization
       
       console.log(`Attempting login with ${this.useSupabase ? 'Supabase' : 'External API'}`);
+      console.log('Login credentials:', { uid: credentials.uid, password: '***' });
       
       // Always try external API first if not already using Supabase
       if (!this.useSupabase) {
@@ -67,18 +68,37 @@ export class ApiService {
     try {
       console.log('Supabase login attempt for:', credentials.uid);
       
-      // First try to find user by uid to get their details
-      const { data: user, error: userError } = await supabase
+      // First, let's check what users exist in the database
+      const { data: allUsers, error: allUsersError } = await supabase
+        .from('pm_users')
+        .select('uid, firstname, lastname, email, user_id')
+        .limit(10);
+        
+      console.log('All users in database:', allUsers);
+      if (allUsersError) {
+        console.error('Error fetching all users:', allUsersError);
+      }
+      
+      // Try to find user by uid
+      const { data: users, error: userError } = await supabase
         .from('pm_users')
         .select('email, user_id, firstname, lastname, role_name, department_name, uid')
-        .eq('uid', credentials.uid)
-        .single();
+        .eq('uid', credentials.uid);
 
-      if (userError || !user) {
-        console.error('User not found in Supabase:', userError);
-        throw new Error('User not found');
+      console.log('User search result:', { users, error: userError });
+
+      if (userError) {
+        console.error('Supabase query error:', userError);
+        throw new Error(`Database error: ${userError.message}`);
       }
 
+      if (!users || users.length === 0) {
+        console.error('No users found with uid:', credentials.uid);
+        console.log('Available users:', allUsers?.map(u => u.uid));
+        throw new Error('User not found. Available users: ' + (allUsers?.map(u => u.uid).join(', ') || 'none'));
+      }
+
+      const user = users[0];
       console.log('User found in Supabase:', user);
 
       // For demo purposes, we'll simulate authentication success
