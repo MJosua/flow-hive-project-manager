@@ -22,35 +22,24 @@ const initialState: AuthState = {
   loginAttempts: 0,
 };
 
-export const login = createAsyncThunk(
-  'auth/login',
-  async ({ uid, password }: { uid: string; password: string }, { rejectWithValue }) => {
-    try {
-      const response = await apiService.login({ uid, password });
-      if (response.success) {
-        localStorage.setItem('tokek', response.tokek);
-        return response;
-      } else {
-        return rejectWithValue(response.message || 'Login failed');
-      }
-    } catch (error: any) {
-      return rejectWithValue(error.message || 'Login failed');
-    }
-  }
-);
-
 export const loginUser = createAsyncThunk(
   'auth/loginUser',
   async ({ username, password }: { username: string; password: string }, { rejectWithValue }) => {
     try {
+      console.log('Attempting login with API service...');
       const response = await apiService.login({ uid: username, password });
+      console.log('API service response:', response);
+      
       if (response.success) {
         localStorage.setItem('tokek', response.tokek);
+        console.log('Login successful, token stored');
         return response;
       } else {
+        console.log('Login failed:', response.message);
         return rejectWithValue(response.message || 'Login failed');
       }
     } catch (error: any) {
+      console.error('Login error:', error);
       return rejectWithValue(error.message || 'Login failed');
     }
   }
@@ -61,6 +50,7 @@ export const logout = createAsyncThunk(
   async (_, { rejectWithValue }) => {
     try {
       localStorage.removeItem('tokek');
+      localStorage.removeItem('userData');
       return { success: true };
     } catch (error: any) {
       return rejectWithValue(error.message || 'Logout failed');
@@ -73,6 +63,7 @@ export const logoutUser = createAsyncThunk(
   async (_, { rejectWithValue }) => {
     try {
       localStorage.removeItem('tokek');
+      localStorage.removeItem('userData');
       return { success: true };
     } catch (error: any) {
       return rejectWithValue(error.message || 'Logout failed');
@@ -115,34 +106,13 @@ const authSlice = createSlice({
   },
   extraReducers: (builder) => {
     builder
-      .addCase(login.pending, (state) => {
-        state.isLoading = true;
-        state.error = null;
-      })
-      .addCase(login.fulfilled, (state, action) => {
-        state.isLoading = false;
-        state.user = action.payload.userData;
-        state.token = action.payload.tokek;
-        state.isAuthenticated = true;
-        state.loginAttempts = 0;
-        state.isLocked = false;
-        // Store user data persistently
-        localStorage.setItem('userData', JSON.stringify(action.payload.userData));
-      })
-      .addCase(login.rejected, (state, action) => {
-        state.isLoading = false;
-        state.error = action.payload as string;
-        state.isAuthenticated = false;
-        state.loginAttempts += 1;
-        if (state.loginAttempts >= 5) {
-          state.isLocked = true;
-        }
-      })
       .addCase(loginUser.pending, (state) => {
         state.isLoading = true;
         state.error = null;
+        console.log('Login pending...');
       })
       .addCase(loginUser.fulfilled, (state, action) => {
+        console.log('Login fulfilled with payload:', action.payload);
         state.isLoading = false;
         state.user = action.payload.userData;
         state.token = action.payload.tokek;
@@ -151,8 +121,10 @@ const authSlice = createSlice({
         state.isLocked = false;
         // Store user data persistently
         localStorage.setItem('userData', JSON.stringify(action.payload.userData));
+        console.log('Auth state updated successfully');
       })
       .addCase(loginUser.rejected, (state, action) => {
+        console.log('Login rejected with error:', action.payload);
         state.isLoading = false;
         state.error = action.payload as string;
         state.isAuthenticated = false;

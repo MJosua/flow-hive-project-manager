@@ -118,15 +118,21 @@ const Loginform = ({
 
     // Clear any existing validation errors
     setValidationErrors({});
-  console.log("credentials",credentials)
+    console.log("Login attempt with credentials:", { username: credentials.username, password: "***" });
+    
     // Dispatch login action
     try {
-      await dispatch(loginUser({
+      const result = await dispatch(loginUser({
         username: credentials.username.trim(),
         password: credentials.password,
-      })).unwrap();
+      }));
+      
+      console.log("Login result:", result);
+      
+      if (loginUser.fulfilled.match(result)) {
+        console.log("Login successful, user data:", result.payload);
+      }
     } catch (err) {
-      // Error handling is done in useEffect
       console.error('Login failed:', err);
     }
   };
@@ -238,6 +244,7 @@ const Loginform = ({
 
         <div className="mt-6 text-center text-sm text-gray-500">
           <p>For technical support, contact IT Department</p>
+          <p className="mt-2 text-xs">Test login: jane.smith / password (Supabase mode)</p>
         </div>
       </CardContent>
     </Card>
