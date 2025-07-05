@@ -1,4 +1,3 @@
-
 import { supabase } from '@/integrations/supabase/client';
 import { API_URL } from '@/config/sourceConfig';
 
@@ -6,7 +5,7 @@ import { API_URL } from '@/config/sourceConfig';
 export const checkApiAvailability = async (): Promise<boolean> => {
   try {
     const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 3000); // Reduced timeout
+    const timeoutId = setTimeout(() => controller.abort(), 3000);
     
     const response = await fetch(`${API_URL}/health`, {
       method: 'GET',
@@ -37,74 +36,71 @@ export class ApiService {
   // Auth methods
   async login(credentials: { uid: string; password: string }) {
     try {
-      await this.initialize(); // Ensure initialization
+      await this.initialize();
       
-      console.log(`Attempting login with ${this.useSupabase ? 'Supabase' : 'External API'}`);
-      console.log('Login credentials:', { uid: credentials.uid, password: '***' });
+      console.log('=== API SERVICE LOGIN ===');
+      console.log(`Using: ${this.useSupabase ? 'Supabase' : 'External API'}`);
+      console.log('Credentials received:', { uid: credentials.uid, password: '***' });
       
       // Always try external API first if not already using Supabase
       if (!this.useSupabase) {
         try {
-          console.log('Trying external API login...');
+          console.log('🔄 Trying external API login...');
           const result = await this.externalLogin(credentials);
-          console.log('External API login successful');
+          console.log('✅ External API login successful');
           return result;
         } catch (error) {
-          console.warn('External API login failed, switching to Supabase:', error);
+          console.warn('❌ External API login failed, switching to Supabase:', error);
           this.useSupabase = true;
         }
       }
       
       // Use Supabase if external API failed or is unavailable
-      console.log('Using Supabase login...');
+      console.log('🔄 Using Supabase login...');
       return await this.supabaseLogin(credentials);
     } catch (error: any) {
-      console.error('All login methods failed:', error);
+      console.error('❌ All login methods failed:', error);
       throw new Error(error.message || 'Login failed');
     }
   }
 
   private async supabaseLogin(credentials: { uid: string; password: string }) {
     try {
-      console.log('Supabase login attempt for:', credentials.uid);
+      console.log('=== SUPABASE LOGIN ===');
+      console.log('Looking for uid:', credentials.uid);
       
-      // First, let's check what users exist in the database
-      const { data: allUsers, error: allUsersError } = await supabase
-        .from('pm_users')
-        .select('uid, firstname, lastname, email, user_id')
-        .limit(10);
-        
-      console.log('All users in database:', allUsers);
-      if (allUsersError) {
-        console.error('Error fetching all users:', allUsersError);
-      }
-      
-      // Try to find user by uid
+      // FIXED: Query by uid field correctly
       const { data: users, error: userError } = await supabase
         .from('pm_users')
         .select('email, user_id, firstname, lastname, role_name, department_name, uid')
         .eq('uid', credentials.uid);
 
-      console.log('User search result:', { users, error: userError });
+      console.log('Supabase query result:', { users, error: userError });
 
       if (userError) {
-        console.error('Supabase query error:', userError);
+        console.error('❌ Supabase query error:', userError);
         throw new Error(`Database error: ${userError.message}`);
       }
 
       if (!users || users.length === 0) {
-        console.error('No users found with uid:', credentials.uid);
-        console.log('Available users:', allUsers?.map(u => u.uid));
-        throw new Error('User not found. Available users: ' + (allUsers?.map(u => u.uid).join(', ') || 'none'));
+        console.error('❌ No users found with uid:', credentials.uid);
+        
+        // Debug: Get all users to see what's available
+        const { data: allUsers } = await supabase
+          .from('pm_users')
+          .select('uid, firstname, lastname')
+          .limit(10);
+        
+        console.log('Available users:', allUsers);
+        const availableUids = allUsers?.map(u => u.uid).join(', ') || 'none';
+        throw new Error(`User not found. Available users: ${availableUids}`);
       }
 
       const user = users[0];
-      console.log('User found in Supabase:', user);
+      console.log('✅ User found:', user);
 
-      // For demo purposes, we'll simulate authentication success
-      // In a real app, you'd validate the password against a hash
+      // Simple password validation for demo
       if (credentials.password === 'password' || credentials.password === 'test123') {
-        // Create a mock session token
         const mockToken = `supabase_${user.user_id}_${Date.now()}`;
         
         const result = {
@@ -121,14 +117,14 @@ export class ApiService {
           }
         };
         
-        console.log('Supabase login successful:', result);
+        console.log('✅ Supabase login successful:', result);
         return result;
       } else {
-        console.error('Invalid password for user:', credentials.uid);
+        console.error('❌ Invalid password for user:', credentials.uid);
         throw new Error('Invalid credentials');
       }
     } catch (error: any) {
-      console.error('Supabase login error:', error);
+      console.error('❌ Supabase login error:', error);
       throw new Error(error.message || 'Login failed');
     }
   }

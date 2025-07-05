@@ -26,20 +26,24 @@ export const loginUser = createAsyncThunk(
   'auth/loginUser',
   async ({ username, password }: { username: string; password: string }, { rejectWithValue }) => {
     try {
-      console.log('Attempting login with API service...');
+      console.log('=== AUTH SLICE LOGIN ===');
+      console.log('Input username:', username);
+      console.log('Input password:', password ? '***' : '(empty)');
+      
+      // FIXED: Pass parameters correctly to apiService
       const response = await apiService.login({ uid: username, password });
       console.log('API service response:', response);
       
       if (response.success) {
         localStorage.setItem('tokek', response.tokek);
-        console.log('Login successful, token stored');
+        console.log('✅ Login successful, token stored');
         return response;
       } else {
-        console.log('Login failed:', response.message);
+        console.log('❌ Login failed:', response.message);
         return rejectWithValue(response.message || 'Login failed');
       }
     } catch (error: any) {
-      console.error('Login error:', error);
+      console.error('❌ Login error:', error);
       return rejectWithValue(error.message || 'Login failed');
     }
   }
@@ -109,10 +113,10 @@ const authSlice = createSlice({
       .addCase(loginUser.pending, (state) => {
         state.isLoading = true;
         state.error = null;
-        console.log('Login pending...');
+        console.log('🔄 Login pending...');
       })
       .addCase(loginUser.fulfilled, (state, action) => {
-        console.log('Login fulfilled with payload:', action.payload);
+        console.log('✅ Login fulfilled with payload:', action.payload);
         state.isLoading = false;
         state.user = action.payload.userData;
         state.token = action.payload.tokek;
@@ -121,10 +125,10 @@ const authSlice = createSlice({
         state.isLocked = false;
         // Store user data persistently
         localStorage.setItem('userData', JSON.stringify(action.payload.userData));
-        console.log('Auth state updated successfully');
+        console.log('✅ Auth state updated successfully');
       })
       .addCase(loginUser.rejected, (state, action) => {
-        console.log('Login rejected with error:', action.payload);
+        console.log('❌ Login rejected with error:', action.payload);
         state.isLoading = false;
         state.error = action.payload as string;
         state.isAuthenticated = false;

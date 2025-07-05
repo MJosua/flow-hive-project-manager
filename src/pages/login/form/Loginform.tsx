@@ -120,14 +120,14 @@ const Loginform = ({
     setValidationErrors({});
     
     console.log("=== LOGIN FORM SUBMISSION ===");
-    console.log("Username:", credentials.username);
+    console.log("Username (will be passed as uid):", credentials.username);
     console.log("Password:", credentials.password ? "***" : "(empty)");
     console.log("Current auth state:", { isLoading, error, isAuthenticated });
     
-    // Dispatch login action
+    // FIXED: Pass username correctly to auth slice
     try {
       const result = await dispatch(loginUser({
-        username: credentials.username.trim(),
+        username: credentials.username.trim(), // This gets mapped to uid in authSlice
         password: credentials.password,
       }));
       
