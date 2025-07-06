@@ -23,7 +23,7 @@ const Login = () => {
   // Redirect if already authenticated
   useEffect(() => {
     if (isAuthenticated) {
-      navigate('/');
+      navigate('/service-catalog');
     }
   }, [isAuthenticated, navigate]);
 

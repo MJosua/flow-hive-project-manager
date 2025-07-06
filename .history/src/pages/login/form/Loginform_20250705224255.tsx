@@ -60,7 +60,7 @@ const Loginform = ({
         title: "Login Successful",
         description: "Welcome back to HOTS",
       });
-      navigate("/");
+      navigate("/service-catalog");
     }
   }, [isAuthenticated, isLoading, navigate, toast]);
 
@@ -124,9 +124,8 @@ const Loginform = ({
       await dispatch(loginUser({
         username: credentials.username.trim(),
         password: credentials.password,
-        asin: credentials.password,
       })).unwrap();
-      console.log("credentials,",credentials)
+      console.log("credentials,")
     } catch (err) {
       // Error handling is done in useEffect
       console.error('Login failed:', err);

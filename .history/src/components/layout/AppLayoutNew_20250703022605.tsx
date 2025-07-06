@@ -1,12 +1,11 @@
 
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useAppDispatch, useAppSelector } from '@/hooks/useAppSelector';
+import { useAppSelector } from '@/hooks/useAppSelector';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { logoutUser } from '@/store/slices/authSlice';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
-import {
+import { 
   Search,
   LogOut
 } from 'lucide-react';
@@ -31,24 +30,18 @@ interface AppLayoutNewProps {
   searchPlaceholder?: string;
 }
 
-const AppLayoutNew: React.FC<AppLayoutNewProps> = ({
-  children,
-  searchValue = '',
-  onSearchChange,
-  searchPlaceholder = 'Search...'
+const AppLayoutNew: React.FC<AppLayoutNewProps> = ({ 
+  children, 
+  searchValue = '', 
+  onSearchChange, 
+  searchPlaceholder = 'Search...' 
 }) => {
   const { user } = useAppSelector((state) => state.auth);
   const navigate = useNavigate();
 
-  const dispatch = useAppDispatch();
-
-
   const handleLogout = () => {
-    dispatch(logoutUser());
     navigate('/login');
   };
-
-
 
   return (
     <SidebarProvider>
@@ -58,7 +51,7 @@ const AppLayoutNew: React.FC<AppLayoutNewProps> = ({
           {/* Header */}
           <header className="flex h-16 shrink-0 items-center gap-2 border-b px-4">
             <SidebarTrigger className="-ml-1" />
-
+            
             <div className="flex items-center justify-between w-full">
               <div className="flex items-center space-x-4 flex-1">
                 {onSearchChange && (

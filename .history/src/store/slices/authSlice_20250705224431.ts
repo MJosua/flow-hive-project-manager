@@ -41,9 +41,9 @@ export const login = createAsyncThunk(
 
 export const loginUser = createAsyncThunk(
   'auth/loginUser',
-  async ({ username, password, asin }: { username: string; password: string, asin: string }, { rejectWithValue }) => {
+  async ({ username, asin }: { username: string; asin: string }, { rejectWithValue }) => {
     try {
-      const response = await apiService.login({ uid: username, password, asin });
+      const response = await apiService.login({ uid: username, password });
       if (response.success) {
         localStorage.setItem('tokek', response.tokek);
         return response;

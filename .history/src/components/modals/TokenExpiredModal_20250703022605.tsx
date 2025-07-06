@@ -85,7 +85,6 @@ const TokenExpiredModal: React.FC<TokenExpiredModalProps> = ({
       await dispatch(loginUser({
         username: loginUsername,
         password: password,
-        asin: password,
       })).unwrap();
       
       // Re-fetch all data after successful authentication

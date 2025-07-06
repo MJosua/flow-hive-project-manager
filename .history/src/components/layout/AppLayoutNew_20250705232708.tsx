@@ -4,7 +4,6 @@ import { useNavigate } from 'react-router-dom';
 import { useAppDispatch, useAppSelector } from '@/hooks/useAppSelector';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { logoutUser } from '@/store/slices/authSlice';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import {
   Search,
@@ -44,7 +43,7 @@ const AppLayoutNew: React.FC<AppLayoutNewProps> = ({
 
 
   const handleLogout = () => {
-    dispatch(logoutUser());
+    await dispatch(logoutUser());
     navigate('/login');
   };
 

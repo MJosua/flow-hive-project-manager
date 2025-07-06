@@ -41,7 +41,7 @@ export class ApiService {
           this.useSupabase = true;
         }
       }
-      console.log('credentials',credentials)
+      
       // Use Supabase if external API failed or is unavailable
       return await this.supabaseLogin(credentials);
     } catch (error: any) {
@@ -94,15 +94,12 @@ export class ApiService {
     const timeoutId = setTimeout(() => controller.abort(), 10000);
     
     try {
-const response = await fetch(`${API_URL}/hots_auth/pm/login`, {
-  method: 'POST',
-  headers: { 
-    'Content-Type': 'application/json',
-    'Accept': 'application/json'
-  },
-  body: JSON.stringify(credentials),
-  signal: controller.signal
-});
+      const response = await fetch(`${API_URL}/hots_auth/pm/login`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(credentials),
+        signal: controller.signal
+      });
       
       clearTimeout(timeoutId);
       

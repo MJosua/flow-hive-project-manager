@@ -60,7 +60,7 @@ const Loginform = ({
         title: "Login Successful",
         description: "Welcome back to HOTS",
       });
-      navigate("/");
+      navigate("/service-catalog");
     }
   }, [isAuthenticated, isLoading, navigate, toast]);
 

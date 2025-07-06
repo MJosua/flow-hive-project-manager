@@ -30,7 +30,7 @@ export class ApiService {
   }
 
   // Auth methods
-  async login(credentials: { uid: string; password: string }) {
+  async login(credentials: { user_id: string; password: string }) {
     try {
       // Always try external API first
       if (!this.useSupabase) {
@@ -94,15 +94,12 @@ export class ApiService {
     const timeoutId = setTimeout(() => controller.abort(), 10000);
     
     try {
-const response = await fetch(`${API_URL}/hots_auth/pm/login`, {
-  method: 'POST',
-  headers: { 
-    'Content-Type': 'application/json',
-    'Accept': 'application/json'
-  },
-  body: JSON.stringify(credentials),
-  signal: controller.signal
-});
+      const response = await fetch(`${API_URL}/hots_auth/pm/login`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(credentials),
+        signal: controller.signal
+      });
       
       clearTimeout(timeoutId);
       

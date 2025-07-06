@@ -21,7 +21,7 @@ export const useAuthCheck = ({ userToken2, setIsTokenExpiredModalOpen }: UseAuth
         try {
           const res = await axios.get(`${API_URL}/hots_auth/keepLogin`, {
             headers: {
-              Authorization: `Bearer ${localStorage.getItem('tokek')}`,
+              Authorization: `Bearer ${userToken}`,
             },
           });
 
