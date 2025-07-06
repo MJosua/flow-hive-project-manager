@@ -3,17 +3,13 @@ import { useEffect, useState } from 'react';
 import { apiService } from '@/services/apiService';
 
 export const useApiService = () => {
-  const [isInitialized, setIsInitialized] = useState(false);
-  const [isUsingSupabase, setIsUsingSupabase] = useState(false);
+  const [isInitialized, setIsInitialized] = useState(true); // Always initialized for Node.js backend
+  const [isUsingSupabase, setIsUsingSupabase] = useState(false); // Always false now
 
   useEffect(() => {
-    const initializeApi = async () => {
-      await apiService.initialize();
-      setIsUsingSupabase((apiService as any).useSupabase);
-      setIsInitialized(true);
-    };
-
-    initializeApi();
+    // No initialization needed for Node.js backend
+    setIsInitialized(true);
+    setIsUsingSupabase(false);
   }, []);
 
   return {

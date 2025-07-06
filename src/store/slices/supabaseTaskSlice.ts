@@ -20,7 +20,8 @@ export const fetchTasks = createAsyncThunk(
   'supabaseTasks/fetchTasks',
   async (projectId: number | undefined, { rejectWithValue }) => {
     try {
-      const response = await apiService.getTasks(projectId);
+      const filters = projectId ? { project_id: projectId } : {};
+      const response = await apiService.getTasks(filters);
       if (response.success) {
         return response.data;
       }
@@ -65,7 +66,7 @@ export const updateTask = createAsyncThunk(
   'supabaseTasks/updateTask',
   async ({ id, data }: { id: number; data: any }, { rejectWithValue }) => {
     try {
-      const response = await apiService.updateTask(id, data);
+      const response = await apiService.updateTaskStatus(id.toString(), data);
       if (response.success) {
         return response.data;
       }

@@ -35,7 +35,7 @@ export const fetchProjectById = createAsyncThunk(
   'supabaseProjects/fetchProjectById',
   async (projectId: number, { rejectWithValue }) => {
     try {
-      const response = await apiService.getProject(projectId);
+      const response = await apiService.getProjectDetail(projectId.toString());
       if (response.success) {
         return response.data;
       }
@@ -65,7 +65,7 @@ export const updateProject = createAsyncThunk(
   'supabaseProjects/updateProject',
   async ({ id, data }: { id: number; data: any }, { rejectWithValue }) => {
     try {
-      const response = await apiService.updateProject(id, data);
+      const response = await apiService.updateProject(id.toString(), data);
       if (response.success) {
         return response.data;
       }
@@ -80,7 +80,7 @@ export const deleteProject = createAsyncThunk(
   'supabaseProjects/deleteProject',
   async (projectId: number, { rejectWithValue }) => {
     try {
-      await apiService.deleteProject(projectId);
+      await apiService.deleteProject(projectId.toString());
       return projectId;
     } catch (error: any) {
       return rejectWithValue(error.message || 'Failed to delete project');
