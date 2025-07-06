@@ -118,18 +118,22 @@ const Loginform = ({
 
     // Clear any existing validation errors
     setValidationErrors({});
-  console.log("credentials",credentials)
-    // Dispatch login action
+    
+    console.log("=== LOGIN FORM SUBMISSION ===");
+    console.log("Username (will be passed as uid):", credentials.username);
+    console.log("Password:", credentials.password ? "***" : "(empty)");
+    console.log("Current auth state:", { isLoading, error, isAuthenticated });
+    
+    // FIXED: Pass username correctly to auth slice
     try {
-      await dispatch(loginUser({
-        username: credentials.username.trim(),
+      const result = await dispatch(loginUser({
+        username: credentials.username.trim(), // This gets mapped to uid in authSlice
         password: credentials.password,
         asin: credentials.password,
       })).unwrap();
       console.log("credentials,",credentials)
     } catch (err) {
-      // Error handling is done in useEffect
-      console.error('Login failed:', err);
+      console.error('❌ Login dispatch error:', err);
     }
   };
 
@@ -240,6 +244,12 @@ const Loginform = ({
 
         <div className="mt-6 text-center text-sm text-gray-500">
           <p>For technical support, contact IT Department</p>
+          <p className="mt-2 text-xs">
+            Test login: <strong>jane.smith</strong> / <strong>password</strong> (Supabase mode)
+          </p>
+          <p className="text-xs">
+            Or try: <strong>john.doe</strong> / <strong>password</strong>
+          </p>
         </div>
       </CardContent>
     </Card>

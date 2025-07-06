@@ -5,7 +5,7 @@ import { API_URL } from '@/config/sourceConfig';
 export const checkApiAvailability = async (): Promise<boolean> => {
   try {
     const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 5000);
+    const timeoutId = setTimeout(() => controller.abort(), 3000);
     
     const response = await fetch(`${API_URL}/health`, {
       method: 'GET',
@@ -15,7 +15,7 @@ export const checkApiAvailability = async (): Promise<boolean> => {
     clearTimeout(timeoutId);
     return response.ok;
   } catch (error) {
-    console.warn('External API not reachable, using Supabase');
+    console.warn('External API not reachable, using Supabase fallback');
     return false;
   }
 };
@@ -23,56 +23,91 @@ export const checkApiAvailability = async (): Promise<boolean> => {
 // Unified API service that switches between external API and Supabase
 export class ApiService {
   private useSupabase = false;
+  private initialized = false;
 
   async initialize() {
+    if (this.initialized) return;
+    
     this.useSupabase = !(await checkApiAvailability());
+    this.initialized = true;
     console.log(this.useSupabase ? '🔄 Using Supabase backend' : '✅ Using external API');
   }
 
   // Auth methods
   async login(credentials: { uid: string; password: string }) {
     try {
-      // Always try external API first
+      await this.initialize();
+      
+      console.log('=== API SERVICE LOGIN ===');
+      console.log(`Using: ${this.useSupabase ? 'Supabase' : 'External API'}`);
+      console.log('Credentials received:', { uid: credentials.uid, password: '***' });
+      
+      // Always try external API first if not already using Supabase
       if (!this.useSupabase) {
         try {
-          return await this.externalLogin(credentials);
+          console.log('🔄 Trying external API login...');
+          const result = await this.externalLogin(credentials);
+          console.log('✅ External API login successful');
+          return result;
         } catch (error) {
-          console.warn('External API login failed, falling back to Supabase');
+          console.warn('❌ External API login failed, switching to Supabase:', error);
           this.useSupabase = true;
         }
       }
       console.log('credentials',credentials)
       // Use Supabase if external API failed or is unavailable
+      console.log('🔄 Using Supabase login...');
       return await this.supabaseLogin(credentials);
     } catch (error: any) {
+      console.error('❌ All login methods failed:', error);
       throw new Error(error.message || 'Login failed');
     }
   }
 
   private async supabaseLogin(credentials: { uid: string; password: string }) {
     try {
-      // First try to find user by uid to get their email
-      const { data: user, error: userError } = await supabase
+      console.log('=== SUPABASE LOGIN ===');
+      console.log('Looking for uid:', credentials.uid);
+      
+      // FIXED: Query by uid field correctly
+      const { data: users, error: userError } = await supabase
         .from('pm_users')
-        .select('email, user_id, firstname, lastname, role_name, department_name')
-        .eq('uid', credentials.uid)
-        .single();
+        .select('email, user_id, firstname, lastname, role_name, department_name, uid')
+        .eq('uid', credentials.uid);
 
-      if (userError || !user) {
-        throw new Error('User not found');
+      console.log('Supabase query result:', { users, error: userError });
+
+      if (userError) {
+        console.error('❌ Supabase query error:', userError);
+        throw new Error(`Database error: ${userError.message}`);
       }
 
-      // For demo purposes, we'll simulate authentication success
-      // In a real app, you'd validate the password against a hash
-      if (credentials.password === 'password') {
-        // Create a mock session token
+      if (!users || users.length === 0) {
+        console.error('❌ No users found with uid:', credentials.uid);
+        
+        // Debug: Get all users to see what's available
+        const { data: allUsers } = await supabase
+          .from('pm_users')
+          .select('uid, firstname, lastname')
+          .limit(10);
+        
+        console.log('Available users:', allUsers);
+        const availableUids = allUsers?.map(u => u.uid).join(', ') || 'none';
+        throw new Error(`User not found. Available users: ${availableUids}`);
+      }
+
+      const user = users[0];
+      console.log('✅ User found:', user);
+
+      // Simple password validation for demo
+      if (credentials.password === 'password' || credentials.password === 'test123') {
         const mockToken = `supabase_${user.user_id}_${Date.now()}`;
         
-        return {
+        const result = {
           success: true,
           tokek: mockToken,
           userData: {
-            uid: credentials.uid,
+            uid: user.uid,
             user_id: user.user_id,
             firstname: user.firstname,
             lastname: user.lastname,
@@ -81,17 +116,22 @@ export class ApiService {
             department_name: user.department_name
           }
         };
+        
+        console.log('✅ Supabase login successful:', result);
+        return result;
       } else {
+        console.error('❌ Invalid password for user:', credentials.uid);
         throw new Error('Invalid credentials');
       }
     } catch (error: any) {
+      console.error('❌ Supabase login error:', error);
       throw new Error(error.message || 'Login failed');
     }
   }
 
   private async externalLogin(credentials: { uid: string; password: string }) {
     const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 10000);
+    const timeoutId = setTimeout(() => controller.abort(), 8000);
     
     try {
 const response = await fetch(`${API_URL}/hots_auth/pm/login`, {
@@ -110,9 +150,12 @@ const response = await fetch(`${API_URL}/hots_auth/pm/login`, {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
       
-      return await response.json();
+      const result = await response.json();
+      console.log('External API response:', result);
+      return result;
     } catch (error: any) {
       clearTimeout(timeoutId);
+      console.error('External API error:', error);
       if (error.name === 'AbortError') {
         throw new Error('Request timeout');
       }
@@ -123,6 +166,8 @@ const response = await fetch(`${API_URL}/hots_auth/pm/login`, {
   // Projects methods
   async getProjects() {
     try {
+      await this.initialize();
+      
       if (!this.useSupabase) {
         try {
           const response = await fetch(`${API_URL}/prjct_mngr/project`, {
@@ -152,6 +197,8 @@ const response = await fetch(`${API_URL}/hots_auth/pm/login`, {
 
   async getProject(id: number) {
     try {
+      await this.initialize();
+      
       if (!this.useSupabase) {
         try {
           const response = await fetch(`${API_URL}/prjct_mngr/project/${id}`, {
@@ -182,6 +229,8 @@ const response = await fetch(`${API_URL}/hots_auth/pm/login`, {
 
   async createProject(projectData: any) {
     try {
+      await this.initialize();
+      
       if (!this.useSupabase) {
         try {
           const response = await fetch(`${API_URL}/prjct_mngr/project`, {
@@ -226,6 +275,8 @@ const response = await fetch(`${API_URL}/hots_auth/pm/login`, {
 
   async updateProject(id: number, projectData: any) {
     try {
+      await this.initialize();
+      
       if (!this.useSupabase) {
         try {
           const response = await fetch(`${API_URL}/prjct_mngr/project/${id}`, {
@@ -262,6 +313,8 @@ const response = await fetch(`${API_URL}/hots_auth/pm/login`, {
 
   async deleteProject(id: number) {
     try {
+      await this.initialize();
+      
       if (!this.useSupabase) {
         try {
           const response = await fetch(`${API_URL}/prjct_mngr/project/${id}`, {
@@ -293,6 +346,8 @@ const response = await fetch(`${API_URL}/hots_auth/pm/login`, {
   // Tasks methods
   async getTasks(projectId?: number) {
     try {
+      await this.initialize();
+      
       if (!this.useSupabase) {
         try {
           const url = projectId ? `${API_URL}/prjct_mngr/project/${projectId}/tasks` : `${API_URL}/prjct_mngr/task`;
@@ -326,6 +381,8 @@ const response = await fetch(`${API_URL}/hots_auth/pm/login`, {
 
   async getMyTasks() {
     try {
+      await this.initialize();
+      
       if (!this.useSupabase) {
         try {
           const response = await fetch(`${API_URL}/prjct_mngr/task/my-tasks`, {
@@ -357,6 +414,8 @@ const response = await fetch(`${API_URL}/hots_auth/pm/login`, {
 
   async createTask(taskData: any) {
     try {
+      await this.initialize();
+      
       if (!this.useSupabase) {
         try {
           const response = await fetch(`${API_URL}/prjct_mngr/task`, {
@@ -401,6 +460,8 @@ const response = await fetch(`${API_URL}/hots_auth/pm/login`, {
 
   async updateTask(id: number, taskData: any) {
     try {
+      await this.initialize();
+      
       if (!this.useSupabase) {
         try {
           const response = await fetch(`${API_URL}/prjct_mngr/task/${id}`, {
@@ -438,6 +499,8 @@ const response = await fetch(`${API_URL}/hots_auth/pm/login`, {
   // Users methods
   async getUsers() {
     try {
+      await this.initialize();
+      
       if (!this.useSupabase) {
         try {
           const response = await fetch(`${API_URL}/prjct_mngr/user`, {
@@ -467,6 +530,8 @@ const response = await fetch(`${API_URL}/hots_auth/pm/login`, {
 
   async getDepartments() {
     try {
+      await this.initialize();
+      
       if (!this.useSupabase) {
         try {
           const response = await fetch(`${API_URL}/prjct_mngr/user/departments`, {
@@ -496,6 +561,8 @@ const response = await fetch(`${API_URL}/hots_auth/pm/login`, {
 
   async getTeams() {
     try {
+      await this.initialize();
+      
       if (!this.useSupabase) {
         try {
           const response = await fetch(`${API_URL}/prjct_mngr/user/teams`, {
