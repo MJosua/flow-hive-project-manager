@@ -1,3 +1,4 @@
+
 const authController = require('./auth');
 const authTmController = require('./authTM');
 const cartController = require('./cart');
@@ -22,12 +23,16 @@ const hotscustomfunctionController = require('./hots/hotscustomfunctionControlle
 const hotsSRFController = require('./hots/hotsSRFController');
 
 const shortenerController = require('./shortenerController')
-
-
 const srtsController = require('./srtsController')
 
+// Project Manager controllers
 const projectmngr_task = require('./project_manager_controller/task_controller')
 const projectmngr_project = require('./project_manager_controller/project_controller')
+const projectmngr_gantt = require('./project_manager_controller/gantt_controller')
+const projectmngr_kanban = require('./project_manager_controller/kanban_controller')
+const projectmngr_approval = require('./project_manager_controller/approval_controller')
+const projectmngr_department = require('./project_manager_controller/department_controller')
+const projectmngr_team = require('./project_manager_controller/team_controller')
 
 module.exports = {
     authController,
@@ -51,11 +56,14 @@ module.exports = {
     hotsTps,
     hotscustomfunctionController,
     hotsSRFController,
-
-
     srtsController,
 
+    // Project Manager controllers
     projectmngr_task,
     projectmngr_project,
-
+    projectmngr_gantt,
+    projectmngr_kanban,
+    projectmngr_approval,
+    projectmngr_department,
+    projectmngr_team,
 };
