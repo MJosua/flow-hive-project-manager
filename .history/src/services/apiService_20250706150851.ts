@@ -12,8 +12,8 @@ class ApiService {
   // Authentication methods
   async login(credentials: { uid: string; password: string; asin?: string }) {
     try {
-      console.log('🔄 Attempting login to:', `${this.baseURL}/hots_auth/login`);
-      const response = await axios.post(`${this.baseURL}/hots_auth/login`, credentials);
+      console.log('🔄 Attempting login to:', `${this.baseURL}/hotsauth/login`);
+      const response = await axios.post(`${this.baseURL}/hotsauth/login`, credentials);
       console.log('✅ Login response:', response.data);
       return response.data;
     } catch (error: any) {
@@ -29,7 +29,7 @@ class ApiService {
         throw new Error('No token found');
       }
 
-      const response = await axios.get(`${this.baseURL}/hots_auth/keeplogin`, {
+      const response = await axios.get(`${this.baseURL}/auth/pm/profile`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       return response.data;

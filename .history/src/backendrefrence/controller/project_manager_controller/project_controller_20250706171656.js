@@ -23,7 +23,7 @@ module.exports = {
           d.department_name
         FROM t_project p
         LEFT join hots.user u ON p.manager_id = u.user_id
-        LEFT JOIN hots.m_department d ON p.department_id = d.department_id
+        LEFT JOIN m_department d ON p.department_id = d.department_id
         WHERE 1=1
       `;
       const params = [];
@@ -72,7 +72,7 @@ module.exports = {
           d.department_name
         FROM t_project p
         LEFT join hots.user u ON p.manager_id = u.user_id
-        LEFT JOIN hots.m_department d ON p.department_id = d.department_id
+        LEFT JOIN m_department d ON p.department_id = d.department_id
         WHERE p.project_id = ?
       `, [id]);
 

@@ -29,7 +29,7 @@ class ApiService {
         throw new Error('No token found');
       }
 
-      const response = await axios.get(`${this.baseURL}/hots_auth/keeplogin`, {
+      const response = await axios.get(`${this.baseURL}/auth/pm/profile`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       return response.data;

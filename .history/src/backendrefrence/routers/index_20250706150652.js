@@ -48,6 +48,8 @@ const teammngr = require('./project_manager/team_routes')
 
 const srtsRouter = require('./srtsRouter')
 
+const user = require('../controller/user')
+
 module.exports = {
     authRouter,
     authTmRouter,

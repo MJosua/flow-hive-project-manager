@@ -24,8 +24,8 @@ module.exports = {
           CONCAT(u_created.firstname, ' ', u_created.lastname) AS created_by_name
         FROM t_tasks t
         LEFT JOIN t_project p ON t.project_id = p.project_id
-        LEFT join hots.user u_assigned ON t.assigned_to = u_assigned.user_id
-        LEFT join hots.user u_created ON t.created_by = u_created.user_id
+        LEFT JOIN user u_assigned ON t.assigned_to = u_assigned.user_id
+        LEFT JOIN user u_created ON t.created_by = u_created.user_id
         WHERE 1=1
       `;
       const params = [];

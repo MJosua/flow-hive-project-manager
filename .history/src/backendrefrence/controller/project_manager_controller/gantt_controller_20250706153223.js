@@ -16,7 +16,7 @@ module.exports = {
           p.*,
           CONCAT(u.firstname, ' ', u.lastname) AS manager_name
         FROM t_project p
-        LEFT join hots.user u ON p.manager_id = u.user_id
+        LEFT JOIN user u ON p.manager_id = u.user_id
         WHERE p.project_id = ?
       `, [project_id]);
 
@@ -32,8 +32,8 @@ module.exports = {
           CONCAT(u_created.firstname, ' ', u_created.lastname) AS created_by_name,
           p.name AS project_name
         FROM t_tasks t
-        LEFT join hots.user u_assigned ON t.assigned_to = u_assigned.user_id
-        LEFT join hots.user u_created ON t.created_by = u_created.user_id
+        LEFT JOIN user u_assigned ON t.assigned_to = u_assigned.user_id
+        LEFT JOIN user u_created ON t.created_by = u_created.user_id
         LEFT JOIN t_project p ON t.project_id = p.project_id
         WHERE t.project_id = ?
         ORDER BY t.created_date ASC

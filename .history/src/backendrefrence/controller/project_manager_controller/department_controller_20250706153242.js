@@ -15,11 +15,11 @@ module.exports = {
           COUNT(DISTINCT p.project_id) as project_count,
           COUNT(DISTINCT t.team_id) as team_count,
           COUNT(DISTINCT usr.user_id) as member_count
-        FROM hots.m_department d
-        LEFT JOIN hots.user u ON d.department_head = u.user_id
-        LEFT JOIN prjct_mngr.t_project p ON d.department_id = p.department_id
-        LEFT JOIN hots.t_team t ON d.department_id = t.department_id
-        LEFT JOIN hots.user usr ON d.department_id = usr.department_id
+        FROM m_department d
+        LEFT JOIN user u ON d.department_head = u.user_id
+        LEFT JOIN t_project p ON d.department_id = p.department_id
+        LEFT JOIN t_team t ON d.department_id = t.department_id
+        LEFT JOIN user usr ON d.department_id = usr.department_id
         WHERE d.is_active = 1
         GROUP BY d.department_id
         ORDER BY d.department_name ASC
@@ -47,8 +47,8 @@ module.exports = {
         SELECT 
           d.*,
           CONCAT(u.firstname, ' ', u.lastname) AS head_name
-        FROM hots.m_department d
-        LEFT JOIN hots.user u ON d.department_head = u.user_id
+        FROM m_department d
+        LEFT JOIN user u ON d.department_head = u.user_id
         WHERE d.department_id = ?
       `, [id]);
 
@@ -61,8 +61,8 @@ module.exports = {
         SELECT 
           t.*,
           CONCAT(u.firstname, ' ', u.lastname) AS team_leader_name
-        FROM hots.t_team t
-        LEFT JOIN hots.user u ON t.team_leader_id = u.user_id
+        FROM t_team t
+        LEFT JOIN user u ON t.team_leader_id = u.user_id
         WHERE t.department_id = ?
       `, [id]);
 
@@ -70,7 +70,7 @@ module.exports = {
       const [users] = await dbPMS.promise().execute(`
         SELECT 
           user_id, uid, firstname, lastname, email, role_name, job_title, is_active
-        FROM hots.user
+        FROM user
         WHERE department_id = ?
         ORDER BY lastname, firstname
       `, [id]);

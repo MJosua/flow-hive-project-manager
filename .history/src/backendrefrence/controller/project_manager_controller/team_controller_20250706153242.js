@@ -16,10 +16,10 @@ module.exports = {
           CONCAT(u.firstname, ' ', u.lastname) AS team_leader_name,
           d.department_name,
           COUNT(DISTINCT usr.user_id) as member_count
-        FROM hots.t_team t
-        LEFT JOIN hots.user u ON t.team_leader_id = u.user_id
-        LEFT JOIN hots.m_department d ON t.department_id = d.department_id
-        LEFT JOIN hots.user usr ON t.team_id = usr.team_id
+        FROM t_team t
+        LEFT JOIN user u ON t.team_leader_id = u.user_id
+        LEFT JOIN m_department d ON t.department_id = d.department_id
+        LEFT JOIN user usr ON t.team_id = usr.team_id
         WHERE 1=1
       `;
       const params = [];
@@ -59,9 +59,9 @@ module.exports = {
           t.*,
           CONCAT(u.firstname, ' ', u.lastname) AS team_leader_name,
           d.department_name
-        FROM hots.t_team t
-        LEFT JOIN hots.user u ON t.team_leader_id = u.user_id
-        LEFT JOIN hots.m_department d ON t.department_id = d.department_id
+        FROM t_team t
+        LEFT JOIN user u ON t.team_leader_id = u.user_id
+        LEFT JOIN m_department d ON t.department_id = d.department_id
         WHERE t.team_id = ?
       `, [id]);
 
@@ -73,7 +73,7 @@ module.exports = {
       const [members] = await dbPMS.promise().execute(`
         SELECT 
           user_id, uid, firstname, lastname, email, role_name, job_title, is_active
-        FROM hots.user
+        FROM user
         WHERE team_id = ?
         ORDER BY lastname, firstname
       `, [id]);
@@ -97,7 +97,7 @@ module.exports = {
       const data = req.body;
 
       const [result] = await dbPMS.promise().execute(`
-        INSERT INTO hots.t_team 
+        INSERT INTO t_team 
         (team_id, team_name, description, department_id, team_leader_id, created_date, updated_date)
         VALUES (?, ?, ?, ?, ?, NOW(), NOW())
       `, [
@@ -130,7 +130,7 @@ module.exports = {
       const data = req.body;
 
       await dbPMS.promise().execute(`
-        UPDATE hots.t_team 
+        UPDATE t_team 
         SET team_name = ?, description = ?, department_id = ?, 
             team_leader_id = ?, updated_date = NOW()
         WHERE team_id = ?

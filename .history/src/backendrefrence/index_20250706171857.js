@@ -348,8 +348,8 @@ App.use("/hots_admin", hotsAdmin);
 //hots_ticket
 App.use("/hots_ticket", hotsTicket);
 
-//hots_settings
-App.use("/hots_settings", hotsSettings);
+//hots_setting
+App.use("/hots_setting", hotsSettings);
 
 //Shortener
 App.use("/shortener", shortener);

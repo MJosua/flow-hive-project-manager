@@ -285,11 +285,6 @@ const {
   projectmngr,
   taskmngr,
   hotscustomfunction,
-  kanbanmngr,
-  ganttmngr,
-  approvalmngr,
-  departmentmngr,
-  teammngr,
 } = require("./routers");
 
 // Auth: 
@@ -297,11 +292,7 @@ App.use("/auth", authRouter);
 
 // Project_manager: 
 App.use("/prjct_mngr/project", projectmngr);
-App.use("/prjct_mngr/kanban", kanbanmngr);
-App.use("/prjct_mngr/gantt", ganttmngr);
-App.use("/prjct_mngr/approval", approvalmngr);
-App.use("/prjct_mngr/department", departmentmngr);
-App.use("/prjct_mngr/team", teammngr);
+
 App.use("/prjct_mngr/task", taskmngr);
 
 
@@ -363,7 +354,8 @@ App.use("/hots_customfunction", hotscustomfunction);
 App.use('/public', express.static(path.join(__dirname, 'public')));
 
 
-// Removed duplicate static serving of 'public' folder
+App.use(express.static(path.join(__dirname, 'public')));
+
 
 App.use('/public/files/hots/it_support', express.static(path.join(__dirname, 'public', 'files', 'hots', 'it_support')));
 
@@ -398,9 +390,12 @@ App.get('/public/hots/generateddocuments/:fileName', (req, res) => {
     'Content-Type': 'application/pdf',
     'Cross-Origin-Resource-Policy': 'cross-origin', // Optional: needed if iframe loads cross-origin
     'Content-Disposition': 'inline', // or use 'attachment' to force download
+    'Content-Type': 'application/pdf',
+    'Cross-Origin-Resource-Policy': 'cross-origin',
     'Cross-Origin-Embedder-Policy': 'require-corp',
     'Cross-Origin-Opener-Policy': 'same-origin',
-    'X-Content-Type-Options': 'nosniff'
+    'X-Content-Type-Options': 'nosniff',
+    'Content-Disposition': 'inline'
   });
 
   // Send the PDF file
