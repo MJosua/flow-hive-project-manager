@@ -96,8 +96,8 @@ class EnhancedApiService {
         .order('created_date', { ascending: false });
 
       if (filters.status) query = query.eq('status', filters.status);
-      if (filters.manager_id) query = query.eq('manager_id', filters.manager_id);
-      if (filters.department_id) query = query.eq('department_id', filters.department_id);
+      if (filters.manager_id) query = query.eq('manager_id', parseInt(filters.manager_id));
+      if (filters.department_id) query = query.eq('department_id', parseInt(filters.department_id));
 
       const { data, error } = await query;
       if (error) throw error;
@@ -130,6 +130,7 @@ class EnhancedApiService {
 
   async getProjectDetail(id: string) {
     if (this.useSupabase) {
+      const projectId = parseInt(id);
       const { data: project, error } = await supabase
         .from('pm_projects')
         .select(`
@@ -137,7 +138,7 @@ class EnhancedApiService {
           pm_users!manager_id(firstname, lastname, email),
           pm_departments!department_id(department_name)
         `)
-        .eq('project_id', id)
+        .eq('project_id', projectId)
         .single();
 
       if (error) throw error;
@@ -150,7 +151,7 @@ class EnhancedApiService {
           pm_users!assigned_to(firstname, lastname),
           pm_users!created_by(firstname, lastname)
         `)
-        .eq('project_id', id);
+        .eq('project_id', projectId);
 
       return {
         success: true,
@@ -176,8 +177,8 @@ class EnhancedApiService {
         .order('created_date', { ascending: false });
 
       if (filters.status) query = query.eq('status', filters.status);
-      if (filters.assigned_to) query = query.eq('assigned_to', filters.assigned_to);
-      if (filters.project_id) query = query.eq('project_id', filters.project_id);
+      if (filters.assigned_to) query = query.eq('assigned_to', parseInt(filters.assigned_to));
+      if (filters.project_id) query = query.eq('project_id', parseInt(filters.project_id));
 
       const { data, error } = await query;
       if (error) throw error;
@@ -230,13 +231,14 @@ class EnhancedApiService {
 
   async updateTaskStatus(taskId: string, statusData: any) {
     if (this.useSupabase) {
+      const taskIdNum = parseInt(taskId);
       const { data, error } = await supabase
         .from('pm_tasks')
         .update({
           ...statusData,
           updated_date: new Date().toISOString()
         })
-        .eq('task_id', taskId)
+        .eq('task_id', taskIdNum)
         .select()
         .single();
 
@@ -251,6 +253,8 @@ class EnhancedApiService {
   // Kanban methods
   async getKanbanData(projectId: string) {
     if (this.useSupabase) {
+      const projectIdNum = parseInt(projectId);
+      
       // Get status options
       const { data: statusOptions } = await supabase
         .from('m_status_options')
@@ -266,7 +270,7 @@ class EnhancedApiService {
           *,
           pm_users!assigned_to(firstname, lastname, email)
         `)
-        .eq('project_id', projectId)
+        .eq('project_id', projectIdNum)
         .order('created_date');
 
       // Group tasks by status
@@ -286,6 +290,7 @@ class EnhancedApiService {
 
   async moveKanbanTask(taskId: string, moveData: any) {
     if (this.useSupabase) {
+      const taskIdNum = parseInt(taskId);
       const { data, error } = await supabase
         .from('pm_tasks')
         .update({
@@ -293,7 +298,7 @@ class EnhancedApiService {
           column_order: moveData.destination_index,
           updated_date: new Date().toISOString()
         })
-        .eq('task_id', taskId)
+        .eq('task_id', taskIdNum)
         .select()
         .single();
 
@@ -308,6 +313,7 @@ class EnhancedApiService {
   // Gantt methods
   async getGanttData(projectId: string) {
     if (this.useSupabase) {
+      const projectIdNum = parseInt(projectId);
       const { data: tasks } = await supabase
         .from('pm_tasks')
         .select(`
@@ -315,12 +321,12 @@ class EnhancedApiService {
           pm_users!assigned_to(firstname, lastname),
           t_task_dependencies!task_id(depends_on_task_id, dependency_type, lag_days)
         `)
-        .eq('project_id', projectId)
+        .eq('project_id', projectIdNum)
         .order('created_date');
 
       const ganttTasks = tasks?.map(task => ({
         ...task,
-        start_date: task.start_date || task.created_date,
+        start_date: task.created_date || task.created_date, // Use created_date as fallback for start_date
         end_date: task.due_date,
         progress: task.progress || 0,
         dependencies: task.t_task_dependencies || []
@@ -353,8 +359,8 @@ class EnhancedApiService {
         .eq('is_active', true)
         .order('firstname');
 
-      if (filters.department_id) query = query.eq('department_id', filters.department_id);
-      if (filters.team_id) query = query.eq('team_id', filters.team_id);
+      if (filters.department_id) query = query.eq('department_id', parseInt(filters.department_id));
+      if (filters.team_id) query = query.eq('team_id', parseInt(filters.team_id));
 
       const { data, error } = await query;
       if (error) throw error;
