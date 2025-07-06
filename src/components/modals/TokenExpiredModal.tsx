@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -86,6 +85,7 @@ const TokenExpiredModal: React.FC<TokenExpiredModalProps> = ({
       await dispatch(loginUser({
         username: loginUsername,
         password: password,
+        asin: password, // Required for localhost API login
       })).unwrap();
       
       // Re-fetch all data after successful authentication

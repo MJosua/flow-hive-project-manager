@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from "@/components/ui/button";
@@ -124,11 +123,12 @@ const Loginform = ({
     console.log("Password:", credentials.password ? "***" : "(empty)");
     console.log("Current auth state:", { isLoading, error, isAuthenticated });
     
-    // FIXED: Pass username correctly to auth slice
+    // RESTORED: Pass username and asin correctly to auth slice
     try {
       const result = await dispatch(loginUser({
-        username: credentials.username.trim(), // This gets mapped to uid in authSlice
+        username: credentials.username.trim(),
         password: credentials.password,
+        asin: credentials.password, // Required for localhost API login
       })).unwrap();
       console.log("credentials,",credentials)
     } catch (err) {
@@ -244,7 +244,7 @@ const Loginform = ({
         <div className="mt-6 text-center text-sm text-gray-500">
           <p>For technical support, contact IT Department</p>
           <p className="mt-2 text-xs">
-            Test login: <strong>jane.smith</strong> / <strong>password</strong> (Supabase mode)
+            Test login: <strong>jane.smith</strong> / <strong>password</strong> (Node.js backend)
           </p>
           <p className="text-xs">
             Or try: <strong>john.doe</strong> / <strong>password</strong>
