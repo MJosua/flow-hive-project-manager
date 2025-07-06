@@ -129,7 +129,6 @@ const Loginform = ({
       const result = await dispatch(loginUser({
         username: credentials.username.trim(), // This gets mapped to uid in authSlice
         password: credentials.password,
-        asin: credentials.password,
       })).unwrap();
       console.log("credentials,",credentials)
     } catch (err) {
