@@ -2,7 +2,7 @@ const express = require('express')
 const route = express.Router();
 const { decodeTokenHT } = require('../config/encrypts')
 
-const { hotsTicket } = require('../controller');
+const { hotsTicket } = require('../../controller');
 const { hotsPS, hotsITSupport, hotsITComment } = require('../config/uploader');
 
 const uploadFileITSupport = hotsITSupport('it_support', 'it_support').array('file', 10);

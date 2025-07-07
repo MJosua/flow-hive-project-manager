@@ -1,7 +1,7 @@
 const express = require("express");
 const route = express.Router();
 const { readToken } = require('../config/encrypts')
-const { hotscustomfunctionController } = require('../controller')
+const { hotscustomfunctionController } = require('../../controller')
 const { decodeTokenHT } = require('../config/encrypts')
 
 // Custom Functions Management

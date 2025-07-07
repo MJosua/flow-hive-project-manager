@@ -11,11 +11,11 @@ route.patch('/:id/status', decodeTokenHT, task_controller.updateTaskStatus);
 route.patch('/:id/move-group', decodeTokenHT, task_controller.moveTaskToGroup);
 
 // Task dependencies
-// route.get('/:id/dependencies', decodeTokenHT, task_controller.getTaskDependencies);
-// route.post('/:id/dependencies', decodeTokenHT, task_controller.addTaskDependency);
+ route.get('/:id/dependencies', decodeTokenHT, task_controller.getTaskDependencies);
+ route.post('/:id/dependencies', decodeTokenHT, task_controller.addTaskDependency);
 
 // Time tracking
-// route.get('/:id/time-entries', decodeTokenHT, task_controller.getTimeEntries);
-// route.post('/:id/time-entries', decodeTokenHT, task_controller.logTime);
+route.get('/:id/time-entries', decodeTokenHT, task_controller.getTimeEntries);
+route.post('/:id/time-entries', decodeTokenHT, task_controller.logTime);
 
 module.exports = route;

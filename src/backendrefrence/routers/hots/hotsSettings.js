@@ -1,7 +1,7 @@
 const express = require("express");
 const route = express.Router();
 const { generateTokenHT, decodeTokenHT } = require('../config/encrypts')
-const { hotsSettingsController, hotsSRFController } = require('../controller');
+const { hotsSettingsController, hotsSRFController } = require('../../controller');
 
 
 route.get('/get_menu', decodeTokenHT, hotsSettingsController.getmenu)

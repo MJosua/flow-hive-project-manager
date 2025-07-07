@@ -2,7 +2,7 @@ const express = require('express');
 const route = express.Router();
 
 const { decodeTokenHT } = require('../config/encrypts');
-const { hotsTps } = require('../controller');
+const { hotsTps } = require('../../controller');
 
 const { hotsPS } = require('../config/uploader')
 
