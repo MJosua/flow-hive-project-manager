@@ -4,7 +4,7 @@ import { Bell, Check, X, Clock, User, FolderOpen } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent } from '@/components/ui/card';
-import { ScrollArea } from '@/components/ui/scrollarea';
+import { ScrollArea } from '@/components/ui/scroll-area';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { apiService } from '@/services/apiService';
 import { toast } from '@/hooks/use-toast';

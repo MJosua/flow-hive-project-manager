@@ -4,7 +4,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent } from '@/components/ui/card';
-import { ScrollArea } from '@/components/ui/scrollarea';
+import { ScrollArea } from '@/components/ui/scroll-area';
 import { Users, Calendar, Target } from 'lucide-react';
 import { apiService } from '@/services/apiService';
 import { toast } from '@/hooks/use-toast';
