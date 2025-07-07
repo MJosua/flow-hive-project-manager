@@ -39,17 +39,23 @@ const Dashboard = () => {
     
     setIsLoading(true);
     try {
-      const [projectsResponse, departmentResponse, teamsResponse] = await Promise.all([
+      const [projectsResponse, departmentsResponse, teamsResponse] = await Promise.all([
         apiService.getProjects({ 
           department_id: user.department_id,
           limit: 5 
         }),
-        apiService.getDepartment(user.department_id),
+        apiService.getDepartments(),
         apiService.getTeams({ department_id: user.department_id })
       ]);
 
       setProjects(projectsResponse.data || []);
-      setDepartment(departmentResponse.data);
+      
+      // Find the current user's department from the departments list
+      const currentDepartment = departmentsResponse.data?.find(
+        (dept: Department) => dept.department_id === user.department_id
+      );
+      setDepartment(currentDepartment || null);
+      
       setTeams(teamsResponse.data || []);
     } catch (error) {
       console.error('Error fetching dashboard data:', error);
