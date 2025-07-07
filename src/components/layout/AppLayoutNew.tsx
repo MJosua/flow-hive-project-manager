@@ -4,7 +4,6 @@ import { useNavigate } from 'react-router-dom';
 import { useAppDispatch, useAppSelector } from '@/hooks/useAppSelector';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { logoutUser } from '@/store/slices/authSlice';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import {
   Search,
@@ -23,6 +22,7 @@ import {
   SidebarTrigger
 } from '@/components/ui/sidebar';
 import { AppSidebar } from './AppSidebar';
+import { logout } from '@/store/slices/authSlice';
 
 interface AppLayoutNewProps {
   children: React.ReactNode;
@@ -39,16 +39,21 @@ const AppLayoutNew: React.FC<AppLayoutNewProps> = ({
 }) => {
   const { user } = useAppSelector((state) => state.auth);
   const navigate = useNavigate();
-
   const dispatch = useAppDispatch();
 
-
-  const handleLogout = () => {
-    dispatch(logoutUser());
-    navigate('/login');
+  const handleLogout = async () => {
+    try {
+      console.log('🔄 AppLayout: Starting logout process');
+      await dispatch(logout()).unwrap();
+      console.log('✅ AppLayout: Logout successful, redirecting to login');
+      navigate('/login');
+    } catch (error) {
+      console.error('❌ AppLayout: Logout failed:', error);
+      // Force logout anyway
+      localStorage.removeItem('tokek');
+      navigate('/login');
+    }
   };
-
-
 
   return (
     <SidebarProvider>

@@ -1,4 +1,3 @@
-
 import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit';
 import axios from 'axios';
 import { API_URL } from '@/config/sourceConfig';
@@ -70,14 +69,48 @@ export const fetchProjects = createAsyncThunk(
   'projects/fetchProjects',
   async (_, { rejectWithValue }) => {
     try {
-      const response = await axios.get(`${API_URL}/prjct_mngr/project`, {
+      console.log('🔄 Redux: Starting fetchProjects thunk');
+      const token = localStorage.getItem('tokek');
+      
+      if (!token) {
+        console.error('❌ Redux: No authentication token found');
+        return rejectWithValue('No authentication token found');
+      }
+
+      console.log('🔄 Redux: Making request to PM/project endpoint');
+      const response = await axios.get(`${API_URL}/PM/project`, {
         headers: {
-          Authorization: `Bearer ${localStorage.getItem('tokek')}`,
+          Authorization: `Bearer ${token}`,
         }
       });
+      
+      console.log('✅ Redux: Projects fetch successful:', {
+        status: response.status,
+        dataCount: response.data?.data?.length || 0,
+        responseStructure: Object.keys(response.data || {})
+      });
+      
       return response.data.data || [];
     } catch (error: any) {
-      console.error('Error fetching projects:', error);
+      console.error('❌ Redux: Projects fetch failed:', {
+        status: error.response?.status,
+        statusText: error.response?.statusText,
+        data: error.response?.data,
+        message: error.message,
+        url: `${API_URL}/PM/project`,
+        hasToken: !!localStorage.getItem('tokek')
+      });
+      
+      // Detailed error logging for troubleshooting
+      if (error.response?.status === 401) {
+        console.error('🔒 Authentication Error - Token may be expired or invalid');
+        localStorage.removeItem('tokek'); // Clear invalid token
+      } else if (error.response?.status === 404) {
+        console.error('🔍 Endpoint Not Found - Check if PM routes are properly configured');
+      } else if (error.response?.status >= 500) {
+        console.error('🔥 Server Error - Check backend server and database connection');
+      }
+      
       return rejectWithValue(error.response?.data?.message || 'Failed to fetch projects');
     }
   }
@@ -87,14 +120,21 @@ export const fetchProjectById = createAsyncThunk(
   'projects/fetchProjectById',
   async (projectId: number, { rejectWithValue }) => {
     try {
-      const response = await axios.get(`${API_URL}/prjct_mngr/project/${projectId}`, {
+      console.log('🔄 Redux: Fetching project by ID:', projectId);
+      const response = await axios.get(`${API_URL}/PM/project/detail/${projectId}`, {
         headers: {
           Authorization: `Bearer ${localStorage.getItem('tokek')}`,
         }
       });
+      console.log('✅ Redux: Project detail fetch successful');
       return response.data.data;
     } catch (error: any) {
-      console.error('Error fetching project:', error);
+      console.error('❌ Redux: Project detail fetch failed:', {
+        projectId,
+        status: error.response?.status,
+        data: error.response?.data,
+        message: error.message
+      });
       return rejectWithValue(error.response?.data?.message || 'Failed to fetch project');
     }
   }
@@ -104,15 +144,22 @@ export const createProject = createAsyncThunk(
   'projects/createProject',
   async (projectData: Partial<Project>, { rejectWithValue }) => {
     try {
-      const response = await axios.post(`${API_URL}/prjct_mngr/project`, projectData, {
+      console.log('🔄 Redux: Creating project:', projectData.name);
+      const response = await axios.post(`${API_URL}/PM/project`, projectData, {
         headers: {
           Authorization: `Bearer ${localStorage.getItem('tokek')}`,
           'Content-Type': 'application/json'
         }
       });
+      console.log('✅ Redux: Project creation successful');
       return response.data.data;
     } catch (error: any) {
-      console.error('Error creating project:', error);
+      console.error('❌ Redux: Project creation failed:', {
+        projectData,
+        status: error.response?.status,
+        data: error.response?.data,
+        message: error.message
+      });
       return rejectWithValue(error.response?.data?.message || 'Failed to create project');
     }
   }
@@ -122,15 +169,23 @@ export const updateProject = createAsyncThunk(
   'projects/updateProject',
   async ({ id, data }: { id: number; data: Partial<Project> }, { rejectWithValue }) => {
     try {
-      const response = await axios.put(`${API_URL}/prjct_mngr/project/${id}`, data, {
+      console.log('🔄 Redux: Updating project:', id);
+      const response = await axios.put(`${API_URL}/PM/project/${id}`, data, {
         headers: {
           Authorization: `Bearer ${localStorage.getItem('tokek')}`,
           'Content-Type': 'application/json'
         }
       });
+      console.log('✅ Redux: Project update successful');
       return response.data.data;
     } catch (error: any) {
-      console.error('Error updating project:', error);
+      console.error('❌ Redux: Project update failed:', {
+        projectId: id,
+        updateData: data,
+        status: error.response?.status,
+        data: error.response?.data,
+        message: error.message
+      });
       return rejectWithValue(error.response?.data?.message || 'Failed to update project');
     }
   }
@@ -140,14 +195,21 @@ export const deleteProject = createAsyncThunk(
   'projects/deleteProject',
   async (projectId: number, { rejectWithValue }) => {
     try {
-      await axios.delete(`${API_URL}/prjct_mngr/project/${projectId}`, {
+      console.log('🔄 Redux: Deleting project:', projectId);
+      await axios.delete(`${API_URL}/PM/project/${projectId}`, {
         headers: {
           Authorization: `Bearer ${localStorage.getItem('tokek')}`,
         }
       });
+      console.log('✅ Redux: Project deletion successful');
       return projectId;
     } catch (error: any) {
-      console.error('Error deleting project:', error);
+      console.error('❌ Redux: Project deletion failed:', {
+        projectId,
+        status: error.response?.status,
+        data: error.response?.data,
+        message: error.message
+      });
       return rejectWithValue(error.response?.data?.message || 'Failed to delete project');
     }
   }
@@ -373,15 +435,19 @@ const projectSlice = createSlice({
   reducers: {
     setCurrentProject: (state, action: PayloadAction<Project | null>) => {
       state.currentProject = action.payload;
+      console.log('📝 Redux: Current project set:', action.payload?.name || 'null');
     },
     setProjectFilters: (state, action: PayloadAction<Partial<ProjectState['filters']>>) => {
       state.filters = { ...state.filters, ...action.payload };
+      console.log('🔍 Redux: Project filters updated:', state.filters);
     },
     clearProjectError: (state) => {
       state.error = null;
+      console.log('🧹 Redux: Project error cleared');
     },
     // Add dummy data for development
     useFallbackProjectData: (state) => {
+      console.log('🔄 Redux: Using fallback project data');
       state.projects = [
         {
           project_id: 1,
@@ -440,6 +506,7 @@ const projectSlice = createSlice({
           actual_hours: 1650
         }
       ];
+      console.log('✅ Redux: Fallback data loaded:', state.projects.length, 'projects');
     }
   },
   extraReducers: (builder) => {
@@ -447,72 +514,44 @@ const projectSlice = createSlice({
       .addCase(fetchProjects.pending, (state) => {
         state.isLoading = true;
         state.error = null;
+        console.log('⏳ Redux: Projects fetch pending');
       })
       .addCase(fetchProjects.fulfilled, (state, action) => {
         state.isLoading = false;
         state.projects = action.payload;
+        console.log('✅ Redux: Projects fetch fulfilled with', action.payload.length, 'projects');
       })
       .addCase(fetchProjects.rejected, (state, action) => {
         state.isLoading = false;
         state.error = action.payload as string;
+        console.log('❌ Redux: Projects fetch rejected, using fallback data');
         projectSlice.caseReducers.useFallbackProjectData(state);
+      })
+      .addCase(fetchProjectById.pending, (state) => {
+        console.log('⏳ Redux: Project detail fetch pending');
       })
       .addCase(fetchProjectById.fulfilled, (state, action) => {
         state.currentProject = action.payload;
+        console.log('✅ Redux: Project detail fetch fulfilled');
+      })
+      .addCase(fetchProjectById.rejected, (state, action) => {
+        state.error = action.payload as string;
+        console.log('❌ Redux: Project detail fetch rejected');
       })
       .addCase(createProject.fulfilled, (state, action) => {
         state.projects.push(action.payload);
+        console.log('✅ Redux: Project created and added to state');
       })
       .addCase(updateProject.fulfilled, (state, action) => {
         const index = state.projects.findIndex(p => p.project_id === action.payload.project_id);
         if (index !== -1) {
           state.projects[index] = action.payload;
+          console.log('✅ Redux: Project updated in state');
         }
       })
       .addCase(deleteProject.fulfilled, (state, action) => {
         state.projects = state.projects.filter(p => p.project_id !== action.payload);
-      })
-      .addCase(fetchProjectMembers.fulfilled, (state, action) => {
-        state.projectMembers = action.payload;
-      })
-      .addCase(addProjectMember.fulfilled, (state, action) => {
-        state.projectMembers.push(action.payload);
-      })
-      .addCase(updateProjectMember.fulfilled, (state, action) => {
-        const index = state.projectMembers.findIndex(m => m.user_id === action.payload.user_id);
-        if (index !== -1) {
-          state.projectMembers[index] = action.payload;
-        }
-      })
-      .addCase(removeProjectMember.fulfilled, (state, action) => {
-        state.projectMembers = state.projectMembers.filter(m => m.user_id !== action.payload.userId);
-      })
-      .addCase(fetchTaskGroups.fulfilled, (state, action) => {
-        state.taskGroups = action.payload;
-      })
-      .addCase(createTaskGroup.fulfilled, (state, action) => {
-        state.taskGroups.push(action.payload);
-      })
-      .addCase(updateTaskGroup.fulfilled, (state, action) => {
-        const index = state.taskGroups.findIndex(g => g.group_id === action.payload.group_id);
-        if (index !== -1) {
-          state.taskGroups[index] = action.payload;
-        }
-      })
-      .addCase(deleteTaskGroup.fulfilled, (state, action) => {
-        state.taskGroups = state.taskGroups.filter(g => g.group_id !== action.payload.groupId);
-      })
-      .addCase(fetchKanbanData.fulfilled, (state, action) => {
-        state.kanbanData = action.payload;
-      })
-      .addCase(fetchGanttData.fulfilled, (state, action) => {
-        state.ganttData = action.payload;
-      })
-      .addCase(fetchChatMessages.fulfilled, (state, action) => {
-        state.chatMessages = action.payload;
-      })
-      .addCase(sendChatMessage.fulfilled, (state, action) => {
-        state.chatMessages.push(action.payload);
+        console.log('✅ Redux: Project deleted from state');
       });
   },
 });
