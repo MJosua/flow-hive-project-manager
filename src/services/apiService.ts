@@ -1,4 +1,3 @@
-
 import axios from 'axios';
 
 class ApiService {
@@ -284,6 +283,100 @@ class ApiService {
       return response.data;
     } catch (error: any) {
       throw new Error(error.response?.data?.error || 'Failed to fetch users');
+    }
+  }
+
+  // Notification methods
+  async getNotifications() {
+    try {
+      const response = await this.makeRequest('GET', '/prjct_mngr/notifications');
+      return response.data;
+    } catch (error: any) {
+      throw new Error(error.response?.data?.error || 'Failed to fetch notifications');
+    }
+  }
+
+  async markNotificationAsRead(notificationId: number) {
+    try {
+      const response = await this.makeRequest('PUT', `/prjct_mngr/notifications/${notificationId}/read`);
+      return response.data;
+    } catch (error: any) {
+      throw new Error(error.response?.data?.error || 'Failed to mark notification as read');
+    }
+  }
+
+  // Project join methods
+  async requestProjectJoin(projectId: number) {
+    try {
+      const response = await this.makeRequest('POST', `/prjct_mngr/project/${projectId}/join-request`);
+      return response.data;
+    } catch (error: any) {
+      throw new Error(error.response?.data?.error || 'Failed to request project join');
+    }
+  }
+
+  async processProjectJoinRequest(requestId: number, action: { action: 'approve' | 'reject'; comments?: string }) {
+    try {
+      const response = await this.makeRequest('PUT', `/prjct_mngr/project/join-request/${requestId}`, action);
+      return response.data;
+    } catch (error: any) {
+      throw new Error(error.response?.data?.error || 'Failed to process join request');
+    }
+  }
+
+  // Team methods
+  async getUserTeams(userId: number) {
+    try {
+      const response = await this.makeRequest('GET', `/prjct_mngr/user/${userId}/teams`);
+      return response.data;
+    } catch (error: any) {
+      throw new Error(error.response?.data?.error || 'Failed to fetch user teams');
+    }
+  }
+
+  async requestTeamJoin(teamId: number) {
+    try {
+      const response = await this.makeRequest('POST', `/prjct_mngr/team/${teamId}/join-request`);
+      return response.data;
+    } catch (error: any) {
+      throw new Error(error.response?.data?.error || 'Failed to request team join');
+    }
+  }
+
+  async processProjectApproval(approvalId: string, action: { action: 'approve' | 'reject'; comments?: string }) {
+    try {
+      const response = await this.makeRequest('PUT', `/prjct_mngr/approval/project/${approvalId}/process`, action);
+      return response.data;
+    } catch (error: any) {
+      throw new Error(error.response?.data?.error || 'Failed to process project approval');
+    }
+  }
+
+  // Tag management methods
+  async getTags(entityType?: string) {
+    try {
+      const response = await this.makeRequest('GET', '/prjct_mngr/tags', null, { entity_type: entityType });
+      return response.data;
+    } catch (error: any) {
+      throw new Error(error.response?.data?.error || 'Failed to fetch tags');
+    }
+  }
+
+  async createTag(tagData: any) {
+    try {
+      const response = await this.makeRequest('POST', '/prjct_mngr/tags', tagData);
+      return response.data;
+    } catch (error: any) {
+      throw new Error(error.response?.data?.error || 'Failed to create tag');
+    }
+  }
+
+  async assignTagToEntity(entityType: string, entityId: number, tagIds: number[]) {
+    try {
+      const response = await this.makeRequest('POST', `/prjct_mngr/${entityType}/${entityId}/tags`, { tag_ids: tagIds });
+      return response.data;
+    } catch (error: any) {
+      throw new Error(error.response?.data?.error || 'Failed to assign tags');
     }
   }
 

@@ -4,14 +4,10 @@ import { Link, useLocation } from 'react-router-dom';
 import { 
   Home, 
   FolderOpen, 
-  CheckSquare, 
   Users, 
   Settings,
-  Kanban,
-  Calendar as GanttIcon,
-  List,
-  Clock,
-  Shield
+  Building,
+  UserCheck
 } from 'lucide-react';
 import {
   Sidebar,
@@ -25,21 +21,18 @@ import {
   SidebarHeader,
   SidebarFooter
 } from '@/components/ui/sidebar';
+import { NotificationCenter } from '@/components/notifications/NotificationCenter';
 
 const sidebarItems = [
   { name: 'Dashboard', href: '/', icon: Home },
   { name: 'Projects', href: '/projects', icon: FolderOpen },
-  { name: 'My Tasks', href: '/my-tasks', icon: CheckSquare },
-  { name: 'Task List', href: '/task-list', icon: List },
-  { name: 'Approvals', href: '/approvals', icon: Clock },
-  { name: 'Kanban Board', href: '/kanban', icon: Kanban },
-  { name: 'Gantt Chart', href: '/gantt', icon: GanttIcon },
+  { name: 'Department Info', href: '/department', icon: Building },
+  { name: 'Team Info', href: '/teams', icon: Users },
 ];
 
 const adminItems = [
-  { name: 'Team Management', href: '/admin/team-management', icon: Users },
-  { name: 'User Management', href: '/admin/user-management', icon: Shield },
-  { name: 'Settings', href: '/admin/system-settings', icon: Settings },
+  { name: 'User Management', href: '/admin/users', icon: UserCheck },
+  { name: 'Settings', href: '/admin/settings', icon: Settings },
 ];
 
 export function AppSidebar() {
@@ -48,11 +41,14 @@ export function AppSidebar() {
   return (
     <Sidebar>
       <SidebarHeader className="p-4">
-        <div className="flex items-center space-x-2">
-          <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center">
-            <span className="text-white font-bold text-sm">PM</span>
+        <div className="flex items-center justify-between">
+          <div className="flex items-center space-x-2">
+            <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center">
+              <span className="text-white font-bold text-sm">PM</span>
+            </div>
+            <span className="font-semibold text-lg">Project Manager</span>
           </div>
-          <span className="font-semibold text-lg">Project Manager</span>
+          <NotificationCenter />
         </div>
       </SidebarHeader>
       
@@ -96,7 +92,7 @@ export function AppSidebar() {
 
       <SidebarFooter className="p-4">
         <div className="text-xs text-muted-foreground">
-          Project Management System
+          Project Management System v2.0
         </div>
       </SidebarFooter>
     </Sidebar>
