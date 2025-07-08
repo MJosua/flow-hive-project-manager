@@ -1,5 +1,5 @@
+
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -33,7 +33,6 @@ const Loginform = ({
   setLockedAccount,
 }: LoginformProps) => {
   const dispatch = useAppDispatch();
-  const navigate = useNavigate();
   const { toast } = useToast();
   
   const { isLoading, error, isAuthenticated, isLocked, loginAttempts } = useAppSelector(
@@ -51,17 +50,6 @@ const Loginform = ({
       dispatch(clearError());
     }
   }, [credentials.username, credentials.password, dispatch]);
-
-  // Handle successful authentication
-  useEffect(() => {
-    if (isAuthenticated && !isLoading) {
-      toast({
-        title: "Login Successful",
-        description: "Welcome back to HOTS",
-      });
-      navigate("/");
-    }
-  }, [isAuthenticated, isLoading, navigate, toast]);
 
   // Handle account lock
   useEffect(() => {
@@ -91,6 +79,16 @@ const Loginform = ({
       }
     }
   }, [error, isLoading, toast, setLockedAccount]);
+
+  // Show success toast when login succeeds - but don't navigate here
+  useEffect(() => {
+    if (isAuthenticated && !isLoading && !error) {
+      toast({
+        title: "Login Successful",
+        description: "Welcome back to HOTS",
+      });
+    }
+  }, [isAuthenticated, isLoading, error, toast]);
 
   const handleInputChange = (field: 'username' | 'password', value: string) => {
     setCredentials({ ...credentials, [field]: value });
@@ -123,14 +121,13 @@ const Loginform = ({
     console.log("Password:", credentials.password ? "***" : "(empty)");
     console.log("Current auth state:", { isLoading, error, isAuthenticated });
     
-    // RESTORED: Pass username and asin correctly to auth slice
     try {
       const result = await dispatch(loginUser({
         username: credentials.username.trim(),
         password: credentials.password,
         asin: credentials.password, // Required for localhost API login
       })).unwrap();
-      console.log("credentials,",credentials)
+      console.log("credentials,", credentials);
     } catch (err) {
       console.error('❌ Login dispatch error:', err);
     }

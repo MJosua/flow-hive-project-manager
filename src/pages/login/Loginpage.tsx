@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAppSelector } from '@/hooks/useAppSelector';
@@ -19,13 +20,18 @@ const Login = () => {
   });
   const [forgotToggle, setForgotToggle] = useState(false);
   const [lockedAccount, setLockedAccount] = useState(false);
+  const [hasRedirected, setHasRedirected] = useState(false);
 
-  // Redirect if already authenticated
+  // Single redirect logic - only redirect once when authenticated
   useEffect(() => {
-    if (isAuthenticated) {
-      navigate('/');
+    if (isAuthenticated && !hasRedirected) {
+      setHasRedirected(true);
+      // Use setTimeout to prevent multiple rapid navigation calls
+      setTimeout(() => {
+        navigate('/', { replace: true });
+      }, 100);
     }
-  }, [isAuthenticated, navigate]);
+  }, [isAuthenticated, navigate, hasRedirected]);
 
   // Reset login attempts when going back to login
   useEffect(() => {
