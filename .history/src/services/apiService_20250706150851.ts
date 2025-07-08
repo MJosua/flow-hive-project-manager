@@ -57,7 +57,7 @@ class ApiService {
   // Project methods
   async getProjects(filters: any = {}) {
     try {
-      const response = await this.makeRequest('GET', '/prjct_mngr/project', null, filters);
+      const response = await this.makeRequest('GET', '/pm/project', null, filters);
       return response.data;
     } catch (error: any) {
       throw new Error(error.response?.data?.error || 'Failed to fetch projects');
@@ -66,7 +66,7 @@ class ApiService {
 
   async createProject(projectData: any) {
     try {
-      const response = await this.makeRequest('POST', '/prjct_mngr/project', projectData);
+      const response = await this.makeRequest('POST', '/pm/project', projectData);
       return response.data;
     } catch (error: any) {
       throw new Error(error.response?.data?.error || 'Failed to create project');
@@ -75,7 +75,7 @@ class ApiService {
 
   async getProjectDetail(id: string) {
     try {
-      const response = await this.makeRequest('GET', `/prjct_mngr/project/detail/${id}`);
+      const response = await this.makeRequest('GET', `/pm/project/detail/${id}`);
       return response.data;
     } catch (error: any) {
       throw new Error(error.response?.data?.error || 'Failed to fetch project detail');
@@ -84,7 +84,7 @@ class ApiService {
 
   async updateProject(id: string, projectData: any) {
     try {
-      const response = await this.makeRequest('PATCH', `/prjct_mngr/project/${id}`, projectData);
+      const response = await this.makeRequest('PATCH', `/pm/project/${id}`, projectData);
       return response.data;
     } catch (error: any) {
       throw new Error(error.response?.data?.error || 'Failed to update project');
@@ -93,7 +93,7 @@ class ApiService {
 
   async deleteProject(id: string) {
     try {
-      const response = await this.makeRequest('DELETE', `/prjct_mngr/project/${id}`);
+      const response = await this.makeRequest('DELETE', `/pm/project/${id}`);
       return response.data;
     } catch (error: any) {
       throw new Error(error.response?.data?.error || 'Failed to delete project');
@@ -103,7 +103,7 @@ class ApiService {
   // Task methods
   async getTasks(filters: any = {}) {
     try {
-      const response = await this.makeRequest('GET', '/prjct_mngr/task', null, filters);
+      const response = await this.makeRequest('GET', '/pm/task', null, filters);
       return response.data;
     } catch (error: any) {
       throw new Error(error.response?.data?.error || 'Failed to fetch tasks');
@@ -112,7 +112,7 @@ class ApiService {
 
   async getMyTasks() {
     try {
-      const response = await this.makeRequest('GET', '/prjct_mngr/task/my-tasks');
+      const response = await this.makeRequest('GET', '/pm/task/my-tasks');
       return response.data;
     } catch (error: any) {
       throw new Error(error.response?.data?.error || 'Failed to fetch my tasks');
@@ -121,7 +121,7 @@ class ApiService {
 
   async createTask(taskData: any) {
     try {
-      const response = await this.makeRequest('POST', '/prjct_mngr/task', taskData);
+      const response = await this.makeRequest('POST', '/pm/task', taskData);
       return response.data;
     } catch (error: any) {
       throw new Error(error.response?.data?.error || 'Failed to create task');
@@ -130,7 +130,7 @@ class ApiService {
 
   async updateTaskStatus(taskId: string, statusData: any) {
     try {
-      const response = await this.makeRequest('PATCH', `/prjct_mngr/task/${taskId}/status`, statusData);
+      const response = await this.makeRequest('PATCH', `/pm/task/${taskId}/status`, statusData);
       return response.data;
     } catch (error: any) {
       throw new Error(error.response?.data?.error || 'Failed to update task status');
@@ -139,7 +139,7 @@ class ApiService {
 
   async moveTaskToGroup(taskId: string, groupData: any) {
     try {
-      const response = await this.makeRequest('PATCH', `/prjct_mngr/task/${taskId}/move-group`, groupData);
+      const response = await this.makeRequest('PATCH', `/pm/task/${taskId}/move-group`, groupData);
       return response.data;
     } catch (error: any) {
       throw new Error(error.response?.data?.error || 'Failed to move task to group');
@@ -149,7 +149,7 @@ class ApiService {
   // Gantt methods
   async getGanttData(projectId: string) {
     try {
-      const response = await this.makeRequest('GET', `/prjct_mngr/gantt/project/${projectId}`);
+      const response = await this.makeRequest('GET', `/pm/gantt/project/${projectId}`);
       return response.data;
     } catch (error: any) {
       throw new Error(error.response?.data?.error || 'Failed to fetch Gantt data');
@@ -158,7 +158,7 @@ class ApiService {
 
   async updateTaskGantt(taskId: string, ganttData: any) {
     try {
-      const response = await this.makeRequest('PUT', `/prjct_mngr/gantt/task/${taskId}`, ganttData);
+      const response = await this.makeRequest('PUT', `/pm/gantt/task/${taskId}`, ganttData);
       return response.data;
     } catch (error: any) {
       throw new Error(error.response?.data?.error || 'Failed to update task in Gantt');
@@ -168,7 +168,7 @@ class ApiService {
   // Kanban methods
   async getKanbanData(projectId: string) {
     try {
-      const response = await this.makeRequest('GET', `/prjct_mngr/kanban/project/${projectId}`);
+      const response = await this.makeRequest('GET', `/pm/kanban/project/${projectId}`);
       return response.data;
     } catch (error: any) {
       throw new Error(error.response?.data?.error || 'Failed to fetch Kanban data');
@@ -177,7 +177,7 @@ class ApiService {
 
   async moveTaskKanban(taskId: string, moveData: any) {
     try {
-      const response = await this.makeRequest('PUT', `/prjct_mngr/kanban/task/${taskId}/move`, moveData);
+      const response = await this.makeRequest('PUT', `/pm/kanban/task/${taskId}/move`, moveData);
       return response.data;
     } catch (error: any) {
       throw new Error(error.response?.data?.error || 'Failed to move task in Kanban');
@@ -187,7 +187,7 @@ class ApiService {
   // Department methods
   async getDepartments() {
     try {
-      const response = await this.makeRequest('GET', '/prjct_mngr/department');
+      const response = await this.makeRequest('GET', '/pm/department');
       return response.data;
     } catch (error: any) {
       throw new Error(error.response?.data?.error || 'Failed to fetch departments');
@@ -196,7 +196,7 @@ class ApiService {
 
   async getDepartmentDetail(id: string) {
     try {
-      const response = await this.makeRequest('GET', `/prjct_mngr/department/${id}`);
+      const response = await this.makeRequest('GET', `/pm/department/${id}`);
       return response.data;
     } catch (error: any) {
       throw new Error(error.response?.data?.error || 'Failed to fetch department detail');
@@ -205,7 +205,7 @@ class ApiService {
 
   async createDepartment(departmentData: any) {
     try {
-      const response = await this.makeRequest('POST', '/prjct_mngr/department', departmentData);
+      const response = await this.makeRequest('POST', '/pm/department', departmentData);
       return response.data;
     } catch (error: any) {
       throw new Error(error.response?.data?.error || 'Failed to create department');
@@ -215,7 +215,7 @@ class ApiService {
   // Team methods
   async getTeams(filters: any = {}) {
     try {
-      const response = await this.makeRequest('GET', '/prjct_mngr/team', null, filters);
+      const response = await this.makeRequest('GET', '/pm/team', null, filters);
       return response.data;
     } catch (error: any) {
       throw new Error(error.response?.data?.error || 'Failed to fetch teams');
@@ -224,7 +224,7 @@ class ApiService {
 
   async getTeamDetail(id: string) {
     try {
-      const response = await this.makeRequest('GET', `/prjct_mngr/team/${id}`);
+      const response = await this.makeRequest('GET', `/pm/team/${id}`);
       return response.data;
     } catch (error: any) {
       throw new Error(error.response?.data?.error || 'Failed to fetch team detail');
@@ -233,7 +233,7 @@ class ApiService {
 
   async createTeam(teamData: any) {
     try {
-      const response = await this.makeRequest('POST', '/prjct_mngr/team', teamData);
+      const response = await this.makeRequest('POST', '/pm/team', teamData);
       return response.data;
     } catch (error: any) {
       throw new Error(error.response?.data?.error || 'Failed to create team');
@@ -243,7 +243,7 @@ class ApiService {
   // Approval methods
   async getApprovalHierarchy(userId: string) {
     try {
-      const response = await this.makeRequest('GET', `/prjct_mngr/approval/hierarchy/${userId}`);
+      const response = await this.makeRequest('GET', `/pm/approval/hierarchy/${userId}`);
       return response.data;
     } catch (error: any) {
       throw new Error(error.response?.data?.error || 'Failed to fetch approval hierarchy');
@@ -252,7 +252,7 @@ class ApiService {
 
   async getPendingApprovals() {
     try {
-      const response = await this.makeRequest('GET', '/prjct_mngr/approval/pending');
+      const response = await this.makeRequest('GET', '/pm/approval/pending');
       return response.data;
     } catch (error: any) {
       throw new Error(error.response?.data?.error || 'Failed to fetch pending approvals');
@@ -261,7 +261,7 @@ class ApiService {
 
   async submitTaskApproval(taskId: string, approvalData: any) {
     try {
-      const response = await this.makeRequest('POST', `/prjct_mngr/approval/task/${taskId}/submit`, approvalData);
+      const response = await this.makeRequest('POST', `/pm/approval/task/${taskId}/submit`, approvalData);
       return response.data;
     } catch (error: any) {
       throw new Error(error.response?.data?.error || 'Failed to submit task for approval');
@@ -270,7 +270,7 @@ class ApiService {
 
   async processTaskApproval(approvalId: string, action: any) {
     try {
-      const response = await this.makeRequest('PUT', `/prjct_mngr/approval/task/${approvalId}/process`, action);
+      const response = await this.makeRequest('PUT', `/pm/approval/task/${approvalId}/process`, action);
       return response.data;
     } catch (error: any) {
       throw new Error(error.response?.data?.error || 'Failed to process approval');

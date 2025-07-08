@@ -296,13 +296,13 @@ const {
 App.use("/auth", authRouter);
 
 // Project_manager: 
-App.use("/prjct_mngr/project", projectmngr);
-App.use("/prjct_mngr/kanban", kanbanmngr);
-App.use("/prjct_mngr/gantt", ganttmngr);
-App.use("/prjct_mngr/approval", approvalmngr);
-App.use("/prjct_mngr/department", departmentmngr);
-App.use("/prjct_mngr/team", teammngr);
-App.use("/prjct_mngr/task", taskmngr);
+App.use("/pm/project", projectmngr);
+App.use("/pm/kanban", kanbanmngr);
+App.use("/pm/gantt", ganttmngr);
+App.use("/pm/approval", approvalmngr);
+App.use("/pm/department", departmentmngr);
+App.use("/pm/team", teammngr);
+App.use("/pm/task", taskmngr);
 
 
 // Auth TM: 

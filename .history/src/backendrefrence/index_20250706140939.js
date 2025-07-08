@@ -291,9 +291,9 @@ const {
 App.use("/auth", authRouter);
 
 // Project_manager: 
-App.use("/prjct_mngr/project", projectmngr);
+App.use("/pm/project", projectmngr);
 
-App.use("/prjct_mngr/task", taskmngr);
+App.use("/pm/task", taskmngr);
 
 
 // Auth TM: 

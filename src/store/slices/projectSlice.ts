@@ -220,7 +220,7 @@ export const fetchProjectMembers = createAsyncThunk(
   'projects/fetchProjectMembers',
   async (projectId: number, { rejectWithValue }) => {
     try {
-      const response = await axios.get(`${API_URL}/prjct_mngr/project/${projectId}/members`, {
+      const response = await axios.get(`${API_URL}/pm/project/${projectId}/members`, {
         headers: {
           Authorization: `Bearer ${localStorage.getItem('tokek')}`,
         }
@@ -237,7 +237,7 @@ export const addProjectMember = createAsyncThunk(
   'projects/addProjectMember',
   async ({ projectId, memberData }: { projectId: number; memberData: any }, { rejectWithValue }) => {
     try {
-      const response = await axios.post(`${API_URL}/prjct_mngr/project/${projectId}/members`, memberData, {
+      const response = await axios.post(`${API_URL}/pm/project/${projectId}/members`, memberData, {
         headers: {
           Authorization: `Bearer ${localStorage.getItem('tokek')}`,
           'Content-Type': 'application/json'
@@ -255,7 +255,7 @@ export const updateProjectMember = createAsyncThunk(
   'projects/updateProjectMember',
   async ({ projectId, userId, memberData }: { projectId: number; userId: number; memberData: any }, { rejectWithValue }) => {
     try {
-      const response = await axios.put(`${API_URL}/prjct_mngr/project/${projectId}/members/${userId}`, memberData, {
+      const response = await axios.put(`${API_URL}/pm/project/${projectId}/members/${userId}`, memberData, {
         headers: {
           Authorization: `Bearer ${localStorage.getItem('tokek')}`,
           'Content-Type': 'application/json'
@@ -273,7 +273,7 @@ export const removeProjectMember = createAsyncThunk(
   'projects/removeProjectMember',
   async ({ projectId, userId }: { projectId: number; userId: number }, { rejectWithValue }) => {
     try {
-      await axios.delete(`${API_URL}/prjct_mngr/project/${projectId}/members/${userId}`, {
+      await axios.delete(`${API_URL}/pm/project/${projectId}/members/${userId}`, {
         headers: {
           Authorization: `Bearer ${localStorage.getItem('tokek')}`,
         }
@@ -291,7 +291,7 @@ export const fetchTaskGroups = createAsyncThunk(
   'projects/fetchTaskGroups',
   async (projectId: number, { rejectWithValue }) => {
     try {
-      const response = await axios.get(`${API_URL}/prjct_mngr/project/${projectId}/groups`, {
+      const response = await axios.get(`${API_URL}/pm/project/${projectId}/groups`, {
         headers: {
           Authorization: `Bearer ${localStorage.getItem('tokek')}`,
         }
@@ -308,7 +308,7 @@ export const createTaskGroup = createAsyncThunk(
   'projects/createTaskGroup',
   async ({ projectId, groupData }: { projectId: number; groupData: any }, { rejectWithValue }) => {
     try {
-      const response = await axios.post(`${API_URL}/prjct_mngr/project/${projectId}/groups`, groupData, {
+      const response = await axios.post(`${API_URL}/pm/project/${projectId}/groups`, groupData, {
         headers: {
           Authorization: `Bearer ${localStorage.getItem('tokek')}`,
           'Content-Type': 'application/json'
@@ -326,7 +326,7 @@ export const updateTaskGroup = createAsyncThunk(
   'projects/updateTaskGroup',
   async ({ projectId, groupId, groupData }: { projectId: number; groupId: number; groupData: any }, { rejectWithValue }) => {
     try {
-      const response = await axios.put(`${API_URL}/prjct_mngr/project/${projectId}/groups/${groupId}`, groupData, {
+      const response = await axios.put(`${API_URL}/pm/project/${projectId}/groups/${groupId}`, groupData, {
         headers: {
           Authorization: `Bearer ${localStorage.getItem('tokek')}`,
           'Content-Type': 'application/json'
@@ -344,7 +344,7 @@ export const deleteTaskGroup = createAsyncThunk(
   'projects/deleteTaskGroup',
   async ({ projectId, groupId }: { projectId: number; groupId: number }, { rejectWithValue }) => {
     try {
-      await axios.delete(`${API_URL}/prjct_mngr/project/${projectId}/groups/${groupId}`, {
+      await axios.delete(`${API_URL}/pm/project/${projectId}/groups/${groupId}`, {
         headers: {
           Authorization: `Bearer ${localStorage.getItem('tokek')}`,
         }
@@ -362,7 +362,7 @@ export const fetchKanbanData = createAsyncThunk(
   'projects/fetchKanbanData',
   async (projectId: number, { rejectWithValue }) => {
     try {
-      const response = await axios.get(`${API_URL}/prjct_mngr/project/${projectId}/kanban`, {
+      const response = await axios.get(`${API_URL}/pm/project/${projectId}/kanban`, {
         headers: {
           Authorization: `Bearer ${localStorage.getItem('tokek')}`,
         }
@@ -380,7 +380,7 @@ export const fetchGanttData = createAsyncThunk(
   'projects/fetchGanttData',
   async (projectId: number, { rejectWithValue }) => {
     try {
-      const response = await axios.get(`${API_URL}/prjct_mngr/project/${projectId}/gantt`, {
+      const response = await axios.get(`${API_URL}/pm/project/${projectId}/gantt`, {
         headers: {
           Authorization: `Bearer ${localStorage.getItem('tokek')}`,
         }
@@ -398,7 +398,7 @@ export const fetchChatMessages = createAsyncThunk(
   'projects/fetchChatMessages',
   async (projectId: number, { rejectWithValue }) => {
     try {
-      const response = await axios.get(`${API_URL}/prjct_mngr/project/${projectId}/messages`, {
+      const response = await axios.get(`${API_URL}/pm/project/${projectId}/messages`, {
         headers: {
           Authorization: `Bearer ${localStorage.getItem('tokek')}`,
         }
@@ -415,7 +415,7 @@ export const sendChatMessage = createAsyncThunk(
   'projects/sendChatMessage',
   async ({ projectId, messageData }: { projectId: number; messageData: any }, { rejectWithValue }) => {
     try {
-      const response = await axios.post(`${API_URL}/prjct_mngr/project/${projectId}/messages`, messageData, {
+      const response = await axios.post(`${API_URL}/pm/project/${projectId}/messages`, messageData, {
         headers: {
           Authorization: `Bearer ${localStorage.getItem('tokek')}`,
           'Content-Type': 'application/json'

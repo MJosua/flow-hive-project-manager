@@ -68,7 +68,7 @@ export const fetchPMUsers = createAsyncThunk(
   'pmUser/fetchUsers',
   async (_, { rejectWithValue }) => {
     try {
-      const response = await axios.get(`${API_URL}/prjct_mngr/user`, {
+      const response = await axios.get(`${API_URL}/pm/user`, {
         headers: {
           Authorization: `Bearer ${localStorage.getItem('tokek')}`,
         }
@@ -85,7 +85,7 @@ export const createPMUser = createAsyncThunk(
   'pmUser/createUser',
   async (userData: Partial<PMUser>, { rejectWithValue }) => {
     try {
-      const response = await axios.post(`${API_URL}/prjct_mngr/user`, userData, {
+      const response = await axios.post(`${API_URL}/pm/user`, userData, {
         headers: {
           Authorization: `Bearer ${localStorage.getItem('tokek')}`,
           'Content-Type': 'application/json'
@@ -103,7 +103,7 @@ export const fetchPMUserDetail = createAsyncThunk(
   'pmUser/fetchUserDetail',
   async (userId: number, { rejectWithValue }) => {
     try {
-      const response = await axios.get(`${API_URL}/prjct_mngr/user/${userId}`, {
+      const response = await axios.get(`${API_URL}/pm/user/${userId}`, {
         headers: {
           Authorization: `Bearer ${localStorage.getItem('tokek')}`,
         }
@@ -120,7 +120,7 @@ export const updatePMUser = createAsyncThunk(
   'pmUser/updateUser',
   async ({ id, data }: { id: number; data: Partial<PMUser> }, { rejectWithValue }) => {
     try {
-      const response = await axios.put(`${API_URL}/prjct_mngr/user/${id}`, data, {
+      const response = await axios.put(`${API_URL}/pm/user/${id}`, data, {
         headers: {
           Authorization: `Bearer ${localStorage.getItem('tokek')}`,
           'Content-Type': 'application/json'
@@ -138,7 +138,7 @@ export const deletePMUser = createAsyncThunk(
   'pmUser/deleteUser',
   async (userId: number, { rejectWithValue }) => {
     try {
-      await axios.delete(`${API_URL}/prjct_mngr/user/${userId}`, {
+      await axios.delete(`${API_URL}/pm/user/${userId}`, {
         headers: {
           Authorization: `Bearer ${localStorage.getItem('tokek')}`,
         }
@@ -156,7 +156,7 @@ export const fetchPMTeams = createAsyncThunk(
   'pmUser/fetchTeams',
   async (_, { rejectWithValue }) => {
     try {
-      const response = await axios.get(`${API_URL}/prjct_mngr/user/teams`, {
+      const response = await axios.get(`${API_URL}/pm/user/teams`, {
         headers: {
           Authorization: `Bearer ${localStorage.getItem('tokek')}`,
         }
@@ -173,7 +173,7 @@ export const createPMTeam = createAsyncThunk(
   'pmUser/createTeam',
   async (teamData: Partial<PMTeam>, { rejectWithValue }) => {
     try {
-      const response = await axios.post(`${API_URL}/prjct_mngr/user/teams`, teamData, {
+      const response = await axios.post(`${API_URL}/pm/user/teams`, teamData, {
         headers: {
           Authorization: `Bearer ${localStorage.getItem('tokek')}`,
           'Content-Type': 'application/json'
@@ -191,7 +191,7 @@ export const updatePMTeam = createAsyncThunk(
   'pmUser/updateTeam',
   async ({ id, data }: { id: number; data: Partial<PMTeam> }, { rejectWithValue }) => {
     try {
-      const response = await axios.put(`${API_URL}/prjct_mngr/user/teams/${id}`, data, {
+      const response = await axios.put(`${API_URL}/pm/user/teams/${id}`, data, {
         headers: {
           Authorization: `Bearer ${localStorage.getItem('tokek')}`,
           'Content-Type': 'application/json'
@@ -209,7 +209,7 @@ export const deletePMTeam = createAsyncThunk(
   'pmUser/deleteTeam',
   async (teamId: number, { rejectWithValue }) => {
     try {
-      await axios.delete(`${API_URL}/prjct_mngr/user/teams/${teamId}`, {
+      await axios.delete(`${API_URL}/pm/user/teams/${teamId}`, {
         headers: {
           Authorization: `Bearer ${localStorage.getItem('tokek')}`,
         }
@@ -227,7 +227,7 @@ export const fetchPMDepartments = createAsyncThunk(
   'pmUser/fetchDepartments',
   async (_, { rejectWithValue }) => {
     try {
-      const response = await axios.get(`${API_URL}/prjct_mngr/user/departments`, {
+      const response = await axios.get(`${API_URL}/pm/user/departments`, {
         headers: {
           Authorization: `Bearer ${localStorage.getItem('tokek')}`,
         }
@@ -244,7 +244,7 @@ export const createPMDepartment = createAsyncThunk(
   'pmUser/createDepartment',
   async (departmentData: Partial<PMDepartment>, { rejectWithValue }) => {
     try {
-      const response = await axios.post(`${API_URL}/prjct_mngr/user/departments`, departmentData, {
+      const response = await axios.post(`${API_URL}/pm/user/departments`, departmentData, {
         headers: {
           Authorization: `Bearer ${localStorage.getItem('tokek')}`,
           'Content-Type': 'application/json'
@@ -262,7 +262,7 @@ export const updatePMDepartment = createAsyncThunk(
   'pmUser/updateDepartment',
   async ({ id, data }: { id: number; data: Partial<PMDepartment> }, { rejectWithValue }) => {
     try {
-      const response = await axios.put(`${API_URL}/prjct_mngr/user/departments/${id}`, data, {
+      const response = await axios.put(`${API_URL}/pm/user/departments/${id}`, data, {
         headers: {
           Authorization: `Bearer ${localStorage.getItem('tokek')}`,
           'Content-Type': 'application/json'
@@ -280,7 +280,7 @@ export const deletePMDepartment = createAsyncThunk(
   'pmUser/deleteDepartment',
   async (departmentId: number, { rejectWithValue }) => {
     try {
-      await axios.delete(`${API_URL}/prjct_mngr/user/departments/${departmentId}`, {
+      await axios.delete(`${API_URL}/pm/user/departments/${departmentId}`, {
         headers: {
           Authorization: `Bearer ${localStorage.getItem('tokek')}`,
         }

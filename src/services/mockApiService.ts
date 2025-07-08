@@ -198,22 +198,22 @@ export const mockApiResponses = {
   },
 
   // Project endpoints
-  '/prjct_mngr/project': {
+  '/pm/project': {
     success: true,
     data: mockProjects
   },
 
-  '/prjct_mngr/project/1': {
+  '/pm/project/1': {
     success: true,
     data: mockProjects[0]
   },
 
-  '/prjct_mngr/project/1/tasks': {
+  '/pm/project/1/tasks': {
     success: true,
     data: mockTasks.filter(task => task.project_id === 1)
   },
 
-  '/prjct_mngr/project/1/kanban': {
+  '/pm/project/1/kanban': {
     success: true,
     data: {
       groups: [
@@ -232,28 +232,28 @@ export const mockApiResponses = {
   },
 
   // Task endpoints
-  '/prjct_mngr/task': {
+  '/pm/task': {
     success: true,
     data: mockTasks
   },
 
-  '/prjct_mngr/task/my-tasks': {
+  '/pm/task/my-tasks': {
     success: true,
     data: mockTasks.filter(task => task.assigned_to === 2)
   },
 
   // User endpoints
-  '/prjct_mngr/user': {
+  '/pm/user': {
     success: true,
     data: mockUsers
   },
 
-  '/prjct_mngr/user/departments': {
+  '/pm/user/departments': {
     success: true,
     data: mockDepartments
   },
 
-  '/prjct_mngr/user/teams': {
+  '/pm/user/teams': {
     success: true,
     data: mockTeams
   }

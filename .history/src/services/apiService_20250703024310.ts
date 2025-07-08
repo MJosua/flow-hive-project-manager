@@ -122,7 +122,7 @@ export class ApiService {
     try {
       if (!this.useSupabase) {
         try {
-          const response = await fetch(`${API_URL}/prjct_mngr/project`, {
+          const response = await fetch(`${API_URL}/pm/project`, {
             headers: { Authorization: `Bearer ${localStorage.getItem('tokek')}` }
           });
           if (response.ok) {
@@ -151,7 +151,7 @@ export class ApiService {
     try {
       if (!this.useSupabase) {
         try {
-          const response = await fetch(`${API_URL}/prjct_mngr/project/${id}`, {
+          const response = await fetch(`${API_URL}/pm/project/${id}`, {
             headers: { Authorization: `Bearer ${localStorage.getItem('tokek')}` }
           });
           if (response.ok) {
@@ -181,7 +181,7 @@ export class ApiService {
     try {
       if (!this.useSupabase) {
         try {
-          const response = await fetch(`${API_URL}/prjct_mngr/project`, {
+          const response = await fetch(`${API_URL}/pm/project`, {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
@@ -225,7 +225,7 @@ export class ApiService {
     try {
       if (!this.useSupabase) {
         try {
-          const response = await fetch(`${API_URL}/prjct_mngr/project/${id}`, {
+          const response = await fetch(`${API_URL}/pm/project/${id}`, {
             method: 'PUT',
             headers: {
               'Content-Type': 'application/json',
@@ -261,7 +261,7 @@ export class ApiService {
     try {
       if (!this.useSupabase) {
         try {
-          const response = await fetch(`${API_URL}/prjct_mngr/project/${id}`, {
+          const response = await fetch(`${API_URL}/pm/project/${id}`, {
             method: 'DELETE',
             headers: { Authorization: `Bearer ${localStorage.getItem('tokek')}` }
           });
@@ -292,7 +292,7 @@ export class ApiService {
     try {
       if (!this.useSupabase) {
         try {
-          const url = projectId ? `${API_URL}/prjct_mngr/project/${projectId}/tasks` : `${API_URL}/prjct_mngr/task`;
+          const url = projectId ? `${API_URL}/pm/project/${projectId}/tasks` : `${API_URL}/pm/task`;
           const response = await fetch(url, {
             headers: { Authorization: `Bearer ${localStorage.getItem('tokek')}` }
           });
@@ -325,7 +325,7 @@ export class ApiService {
     try {
       if (!this.useSupabase) {
         try {
-          const response = await fetch(`${API_URL}/prjct_mngr/task/my-tasks`, {
+          const response = await fetch(`${API_URL}/pm/task/my-tasks`, {
             headers: { Authorization: `Bearer ${localStorage.getItem('tokek')}` }
           });
           if (response.ok) {
@@ -356,7 +356,7 @@ export class ApiService {
     try {
       if (!this.useSupabase) {
         try {
-          const response = await fetch(`${API_URL}/prjct_mngr/task`, {
+          const response = await fetch(`${API_URL}/pm/task`, {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
@@ -400,7 +400,7 @@ export class ApiService {
     try {
       if (!this.useSupabase) {
         try {
-          const response = await fetch(`${API_URL}/prjct_mngr/task/${id}`, {
+          const response = await fetch(`${API_URL}/pm/task/${id}`, {
             method: 'PUT',
             headers: {
               'Content-Type': 'application/json',
@@ -437,7 +437,7 @@ export class ApiService {
     try {
       if (!this.useSupabase) {
         try {
-          const response = await fetch(`${API_URL}/prjct_mngr/user`, {
+          const response = await fetch(`${API_URL}/pm/user`, {
             headers: { Authorization: `Bearer ${localStorage.getItem('tokek')}` }
           });
           if (response.ok) {
@@ -466,7 +466,7 @@ export class ApiService {
     try {
       if (!this.useSupabase) {
         try {
-          const response = await fetch(`${API_URL}/prjct_mngr/user/departments`, {
+          const response = await fetch(`${API_URL}/pm/user/departments`, {
             headers: { Authorization: `Bearer ${localStorage.getItem('tokek')}` }
           });
           if (response.ok) {
@@ -495,7 +495,7 @@ export class ApiService {
     try {
       if (!this.useSupabase) {
         try {
-          const response = await fetch(`${API_URL}/prjct_mngr/user/teams`, {
+          const response = await fetch(`${API_URL}/pm/user/teams`, {
             headers: { Authorization: `Bearer ${localStorage.getItem('tokek')}` }
           });
           if (response.ok) {

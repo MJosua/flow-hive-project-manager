@@ -80,7 +80,7 @@ export const fetchTasks = createAsyncThunk(
   'tasks/fetchTasks',
   async (params: { projectId?: number } = {}, { rejectWithValue }) => {
     try {
-      const url = `${API_URL}/prjct_mngr/task`;
+      const url = `${API_URL}/pm/task`;
       const response = await axios.get(url, {
         headers: {
           Authorization: `Bearer ${localStorage.getItem('tokek')}`,
@@ -98,7 +98,7 @@ export const fetchMyTasks = createAsyncThunk(
   'tasks/fetchMyTasks',
   async (_, { rejectWithValue }) => {
     try {
-      const response = await axios.get(`${API_URL}/prjct_mngr/task/my-tasks`, {
+      const response = await axios.get(`${API_URL}/pm/task/my-tasks`, {
         headers: {
           Authorization: `Bearer ${localStorage.getItem('tokek')}`,
         }
@@ -115,7 +115,7 @@ export const fetchTaskById = createAsyncThunk(
   'tasks/fetchTaskById',
   async (taskId: number, { rejectWithValue }) => {
     try {
-      const response = await axios.get(`${API_URL}/prjct_mngr/task/${taskId}`, {
+      const response = await axios.get(`${API_URL}/pm/task/${taskId}`, {
         headers: {
           Authorization: `Bearer ${localStorage.getItem('tokek')}`,
         }
@@ -132,7 +132,7 @@ export const createTask = createAsyncThunk(
   'tasks/createTask',
   async (taskData: Partial<Task>, { rejectWithValue }) => {
     try {
-      const response = await axios.post(`${API_URL}/prjct_mngr/task`, taskData, {
+      const response = await axios.post(`${API_URL}/pm/task`, taskData, {
         headers: {
           Authorization: `Bearer ${localStorage.getItem('tokek')}`,
           'Content-Type': 'application/json'
@@ -150,7 +150,7 @@ export const updateTask = createAsyncThunk(
   'tasks/updateTask',
   async ({ id, data }: { id: number; data: Partial<Task> }, { rejectWithValue }) => {
     try {
-      const response = await axios.put(`${API_URL}/prjct_mngr/task/${id}`, data, {
+      const response = await axios.put(`${API_URL}/pm/task/${id}`, data, {
         headers: {
           Authorization: `Bearer ${localStorage.getItem('tokek')}`,
           'Content-Type': 'application/json'
@@ -168,7 +168,7 @@ export const updateTaskStatus = createAsyncThunk(
   'tasks/updateTaskStatus',
   async ({ taskId, status }: { taskId: number; status: Task['status'] }, { rejectWithValue }) => {
     try {
-      const response = await axios.patch(`${API_URL}/prjct_mngr/task/${taskId}/status`, { status }, {
+      const response = await axios.patch(`${API_URL}/pm/task/${taskId}/status`, { status }, {
         headers: {
           Authorization: `Bearer ${localStorage.getItem('tokek')}`,
           'Content-Type': 'application/json'
@@ -186,7 +186,7 @@ export const moveTaskToGroup = createAsyncThunk(
   'tasks/moveTaskToGroup',
   async ({ taskId, groupId }: { taskId: number; groupId: number }, { rejectWithValue }) => {
     try {
-      const response = await axios.patch(`${API_URL}/prjct_mngr/task/${taskId}/move-group`, { groupId }, {
+      const response = await axios.patch(`${API_URL}/pm/task/${taskId}/move-group`, { groupId }, {
         headers: {
           Authorization: `Bearer ${localStorage.getItem('tokek')}`,
           'Content-Type': 'application/json'
@@ -204,7 +204,7 @@ export const deleteTask = createAsyncThunk(
   'tasks/deleteTask',
   async (taskId: number, { rejectWithValue }) => {
     try {
-      await axios.delete(`${API_URL}/prjct_mngr/task/${taskId}`, {
+      await axios.delete(`${API_URL}/pm/task/${taskId}`, {
         headers: {
           Authorization: `Bearer ${localStorage.getItem('tokek')}`,
         }
@@ -222,7 +222,7 @@ export const fetchTaskDependencies = createAsyncThunk(
   'tasks/fetchTaskDependencies',
   async (taskId: number, { rejectWithValue }) => {
     try {
-      const response = await axios.get(`${API_URL}/prjct_mngr/task/${taskId}/dependencies`, {
+      const response = await axios.get(`${API_URL}/pm/task/${taskId}/dependencies`, {
         headers: {
           Authorization: `Bearer ${localStorage.getItem('tokek')}`,
         }
@@ -239,7 +239,7 @@ export const addTaskDependency = createAsyncThunk(
   'tasks/addTaskDependency',
   async ({ taskId, dependsOnTaskId, dependencyType }: { taskId: number; dependsOnTaskId: number; dependencyType: string }, { rejectWithValue }) => {
     try {
-      const response = await axios.post(`${API_URL}/prjct_mngr/task/${taskId}/dependencies`, 
+      const response = await axios.post(`${API_URL}/pm/task/${taskId}/dependencies`, 
         { depends_on_task_id: dependsOnTaskId, dependency_type: dependencyType }, {
         headers: {
           Authorization: `Bearer ${localStorage.getItem('tokek')}`,
@@ -258,7 +258,7 @@ export const removeTaskDependency = createAsyncThunk(
   'tasks/removeTaskDependency',
   async ({ taskId, depId }: { taskId: number; depId: number }, { rejectWithValue }) => {
     try {
-      await axios.delete(`${API_URL}/prjct_mngr/task/${taskId}/dependencies/${depId}`, {
+      await axios.delete(`${API_URL}/pm/task/${taskId}/dependencies/${depId}`, {
         headers: {
           Authorization: `Bearer ${localStorage.getItem('tokek')}`,
         }
@@ -276,7 +276,7 @@ export const fetchTimeEntries = createAsyncThunk(
   'tasks/fetchTimeEntries',
   async (taskId: number, { rejectWithValue }) => {
     try {
-      const response = await axios.get(`${API_URL}/prjct_mngr/task/${taskId}/time-entries`, {
+      const response = await axios.get(`${API_URL}/pm/task/${taskId}/time-entries`, {
         headers: {
           Authorization: `Bearer ${localStorage.getItem('tokek')}`,
         }
@@ -293,7 +293,7 @@ export const logTime = createAsyncThunk(
   'tasks/logTime',
   async ({ taskId, timeData }: { taskId: number; timeData: any }, { rejectWithValue }) => {
     try {
-      const response = await axios.post(`${API_URL}/prjct_mngr/task/${taskId}/time-entries`, timeData, {
+      const response = await axios.post(`${API_URL}/pm/task/${taskId}/time-entries`, timeData, {
         headers: {
           Authorization: `Bearer ${localStorage.getItem('tokek')}`,
           'Content-Type': 'application/json'
@@ -311,7 +311,7 @@ export const updateTimeEntry = createAsyncThunk(
   'tasks/updateTimeEntry',
   async ({ entryId, timeData }: { entryId: number; timeData: any }, { rejectWithValue }) => {
     try {
-      const response = await axios.put(`${API_URL}/prjct_mngr/task/time-entries/${entryId}`, timeData, {
+      const response = await axios.put(`${API_URL}/pm/task/time-entries/${entryId}`, timeData, {
         headers: {
           Authorization: `Bearer ${localStorage.getItem('tokek')}`,
           'Content-Type': 'application/json'
@@ -329,7 +329,7 @@ export const deleteTimeEntry = createAsyncThunk(
   'tasks/deleteTimeEntry',
   async (entryId: number, { rejectWithValue }) => {
     try {
-      await axios.delete(`${API_URL}/prjct_mngr/task/time-entries/${entryId}`, {
+      await axios.delete(`${API_URL}/pm/task/time-entries/${entryId}`, {
         headers: {
           Authorization: `Bearer ${localStorage.getItem('tokek')}`,
         }
@@ -347,7 +347,7 @@ export const fetchTaskAttachments = createAsyncThunk(
   'tasks/fetchTaskAttachments',
   async (taskId: number, { rejectWithValue }) => {
     try {
-      const response = await axios.get(`${API_URL}/prjct_mngr/task/${taskId}/attachments`, {
+      const response = await axios.get(`${API_URL}/pm/task/${taskId}/attachments`, {
         headers: {
           Authorization: `Bearer ${localStorage.getItem('tokek')}`,
         }
@@ -364,7 +364,7 @@ export const uploadAttachment = createAsyncThunk(
   'tasks/uploadAttachment',
   async ({ taskId, formData }: { taskId: number; formData: FormData }, { rejectWithValue }) => {
     try {
-      const response = await axios.post(`${API_URL}/prjct_mngr/task/${taskId}/attachments`, formData, {
+      const response = await axios.post(`${API_URL}/pm/task/${taskId}/attachments`, formData, {
         headers: {
           Authorization: `Bearer ${localStorage.getItem('tokek')}`,
           'Content-Type': 'multipart/form-data'
@@ -382,7 +382,7 @@ export const deleteAttachment = createAsyncThunk(
   'tasks/deleteAttachment',
   async (attachmentId: number, { rejectWithValue }) => {
     try {
-      await axios.delete(`${API_URL}/prjct_mngr/task/attachments/${attachmentId}`, {
+      await axios.delete(`${API_URL}/pm/task/attachments/${attachmentId}`, {
         headers: {
           Authorization: `Bearer ${localStorage.getItem('tokek')}`,
         }
