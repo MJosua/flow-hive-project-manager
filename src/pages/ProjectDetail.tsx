@@ -12,6 +12,11 @@ import { ArrowLeft, Plus, Calendar, DollarSign, Clock, Users } from "lucide-reac
 import { useAppDispatch, useAppSelector } from '@/hooks/useAppSelector';
 import { fetchProjectById, selectCurrentProject } from '@/store/slices/projectSlice';
 import { fetchTasks, selectTasks } from '@/store/slices/taskSlice';
+import CreateTaskModal from '@/components/modals/CreateTaskModal';
+import ProjectMembersList from '@/components/project/ProjectMembersList';
+import KanbanBoard from '@/components/kanban/KanbanBoard';
+import GanttChart from '@/components/gantt/GanttChart';
+import { logger } from '@/services/loggingService';
 
 const ProjectDetail = () => {
   const { id } = useParams();
@@ -19,10 +24,13 @@ const ProjectDetail = () => {
   const dispatch = useAppDispatch();
   const project = useAppSelector(selectCurrentProject);
   const tasks = useAppSelector(selectTasks);
+  const [isTaskModalOpen, setIsTaskModalOpen] = useState(false);
+  const [activeTab, setActiveTab] = useState('overview');
 
   useEffect(() => {
     if (id) {
       const projectId = parseInt(id);
+      logger.logInfo('ProjectDetail: Loading project', { projectId });
       dispatch(fetchProjectById(projectId));
       dispatch(fetchTasks({ projectId }));
     }
@@ -64,6 +72,14 @@ const ProjectDetail = () => {
 
   const projectTasks = tasks.filter(task => task.project_id === displayProject.project_id);
 
+  const handleTaskCreated = (newTask: any) => {
+    logger.logInfo('ProjectDetail: New task created', { taskId: newTask.task_id });
+    // Refresh tasks after creation
+    if (id) {
+      dispatch(fetchTasks({ projectId: parseInt(id) }));
+    }
+  };
+
   return (
     <AppLayoutNew>
       <div className="space-y-6">
@@ -78,7 +94,7 @@ const ProjectDetail = () => {
               <p className="text-gray-600">{displayProject.description}</p>
             </div>
           </div>
-          <Button onClick={() => navigate(`/project/${id}/create-task`)}>
+          <Button onClick={() => setIsTaskModalOpen(true)}>
             <Plus className="w-4 h-4 mr-2" />
             Add Task
           </Button>
@@ -135,12 +151,13 @@ const ProjectDetail = () => {
           </Card>
         </div>
 
-        <Tabs defaultValue="overview" className="space-y-4">
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4">
           <TabsList>
             <TabsTrigger value="overview">Overview</TabsTrigger>
             <TabsTrigger value="tasks">Tasks</TabsTrigger>
+            <TabsTrigger value="kanban">Kanban</TabsTrigger>
+            <TabsTrigger value="gantt">Gantt</TabsTrigger>
             <TabsTrigger value="team">Team</TabsTrigger>
-            <TabsTrigger value="files">Files</TabsTrigger>
           </TabsList>
 
           <TabsContent value="overview" className="space-y-4">
@@ -202,7 +219,13 @@ const ProjectDetail = () => {
           <TabsContent value="tasks">
             <Card>
               <CardHeader>
-                <CardTitle>Project Tasks</CardTitle>
+                <div className="flex items-center justify-between">
+                  <CardTitle>Project Tasks</CardTitle>
+                  <Button onClick={() => setIsTaskModalOpen(true)} size="sm">
+                    <Plus className="w-4 h-4 mr-2" />
+                    Add Task
+                  </Button>
+                </div>
               </CardHeader>
               <CardContent>
                 <Table>
@@ -227,7 +250,7 @@ const ProjectDetail = () => {
                           <Badge className={priorityColors[task.priority]}>{task.priority}</Badge>
                         </TableCell>
                         <TableCell>{task.assigned_to_name}</TableCell>
-                        <TableCell>{new Date(task.due_date).toLocaleDateString()}</TableCell>
+                        <TableCell>{task.due_date ? new Date(task.due_date).toLocaleDateString() : 'No due date'}</TableCell>
                         <TableCell>
                           <Button variant="ghost" size="sm" onClick={() => navigate(`/task/${task.task_id}`)}>
                             View
@@ -248,28 +271,29 @@ const ProjectDetail = () => {
             </Card>
           </TabsContent>
 
-          <TabsContent value="team">
-            <Card>
-              <CardHeader>
-                <CardTitle>Team Members</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <p className="text-center text-gray-500 py-8">Team management will be implemented next</p>
-              </CardContent>
-            </Card>
+          <TabsContent value="kanban">
+            <KanbanBoard projectId={displayProject.project_id} />
           </TabsContent>
 
-          <TabsContent value="files">
-            <Card>
-              <CardHeader>
-                <CardTitle>Project Files</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <p className="text-center text-gray-500 py-8">File management will be implemented next</p>
-              </CardContent>
-            </Card>
+          <TabsContent value="gantt">
+            <GanttChart />
+          </TabsContent>
+
+          <TabsContent value="team">
+            <ProjectMembersList 
+              projectId={displayProject.project_id} 
+              currentUserId={10098} // This should come from auth state
+              isManager={true} // This should be determined based on user role
+            />
           </TabsContent>
         </Tabs>
+
+        <CreateTaskModal
+          isOpen={isTaskModalOpen}
+          onClose={() => setIsTaskModalOpen(false)}
+          onTaskCreated={handleTaskCreated}
+          projectId={displayProject.project_id}
+        />
       </div>
     </AppLayoutNew>
   );
