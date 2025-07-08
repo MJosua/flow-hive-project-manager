@@ -17,18 +17,20 @@ interface CreateTaskModalProps {
   onClose: () => void;
   onTaskCreated: (task: any) => void;
   projectId: number;
+  defaultStatus?: string;
 }
 
 const CreateTaskModal: React.FC<CreateTaskModalProps> = ({
   isOpen,
   onClose,
   onTaskCreated,
-  projectId
+  projectId,
+  defaultStatus = 'todo'
 }) => {
   const [formData, setFormData] = useState({
     name: '',
     description: '',
-    status: 'todo',
+    status: defaultStatus,
     priority: 'medium',
     assigned_to: '',
     due_date: '',
@@ -39,43 +41,27 @@ const CreateTaskModal: React.FC<CreateTaskModalProps> = ({
   const [newTag, setNewTag] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [users, setUsers] = useState<Array<{ user_id: number; username: string; firstname: string; lastname: string }>>([]);
-  const [taskGroups, setTaskGroups] = useState<Array<{ group_id: number; name: string; status_mapping: string }>>([]);
 
   useEffect(() => {
     if (isOpen) {
+      setFormData(prev => ({ ...prev, status: defaultStatus }));
       loadUsers();
-      loadTaskGroups();
     }
-  }, [isOpen, projectId]);
+  }, [isOpen, projectId, defaultStatus]);
 
   const loadUsers = async () => {
     try {
       logger.logInfo('CreateTaskModal: Loading users for assignment');
-      const response = await apiService.getUsers({ department_id: 10 }); // Current user's department
-      if (response.success) {
-        setUsers(response.data || []);
-        logger.logInfo('CreateTaskModal: Users loaded successfully', { count: response.data?.length });
+      const response = await apiService.getUsers({ department_id: 10 });
+      if (response.success && Array.isArray(response.data)) {
+        setUsers(response.data);
+        logger.logInfo('CreateTaskModal: Users loaded successfully', { count: response.data.length });
+      } else {
+        setUsers([]);
       }
     } catch (error: any) {
       logger.logError('CreateTaskModal: Failed to load users', error);
-      setUsers([]); // Set empty array as fallback
-    }
-  };
-
-  const loadTaskGroups = async () => {
-    try {
-      logger.logInfo('CreateTaskModal: Loading task groups for project', { projectId });
-      // For now, use default groups - in production this would come from t_task_groups
-      const defaultGroups = [
-        { group_id: 1, name: 'To Do', status_mapping: 'todo' },
-        { group_id: 2, name: 'In Progress', status_mapping: 'in-progress' },
-        { group_id: 3, name: 'Review', status_mapping: 'review' },
-        { group_id: 4, name: 'Done', status_mapping: 'done' }
-      ];
-      setTaskGroups(defaultGroups);
-      logger.logInfo('CreateTaskModal: Task groups loaded', { count: defaultGroups.length });
-    } catch (error: any) {
-      logger.logError('CreateTaskModal: Failed to load task groups', error);
+      setUsers([]);
     }
   };
 
@@ -114,7 +100,8 @@ const CreateTaskModal: React.FC<CreateTaskModalProps> = ({
     setIsLoading(true);
     logger.logInfo('CreateTaskModal: Creating new task', { 
       projectId, 
-      taskName: formData.name 
+      taskName: formData.name,
+      status: formData.status
     });
 
     try {
@@ -136,7 +123,7 @@ const CreateTaskModal: React.FC<CreateTaskModalProps> = ({
       setFormData({
         name: '',
         description: '',
-        status: 'todo',
+        status: defaultStatus,
         priority: 'medium',
         assigned_to: '',
         due_date: '',
@@ -236,10 +223,10 @@ const CreateTaskModal: React.FC<CreateTaskModalProps> = ({
                   <SelectValue placeholder="Select assignee" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">Unassigned</SelectItem>
+                  <SelectItem value="unassigned">Unassigned</SelectItem>
                   {users.map(user => (
                     <SelectItem key={user.user_id} value={user.user_id.toString()}>
-                      {user.firstname} {user.lastname} ({user.username})
+                      {user.firstname} {user.lastname} ({user.uid || user.username})
                     </SelectItem>
                   ))}
                 </SelectContent>

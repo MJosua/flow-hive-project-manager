@@ -13,8 +13,11 @@ import LoginPage from './pages/login/Loginpage';
 import Dashboard from './pages/Dashboard';
 import Projects from './pages/Projects';
 import ProjectDetail from './pages/ProjectDetail';
+import ProjectCreate from './pages/ProjectCreate';
 import Department from './pages/Department';
 import Teams from './pages/Teams';
+import UserManagement from './pages/UserManagement';
+import Settings from './pages/Settings';
 
 // Project-specific pages
 import Gantt from './pages/Gantt';
@@ -43,6 +46,14 @@ function App() {
               element={
                 <ProtectedRoute>
                   <Projects />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/projects/create"
+              element={
+                <ProtectedRoute>
+                  <ProjectCreate />
                 </ProtectedRoute>
               }
             />
@@ -83,6 +94,22 @@ function App() {
               element={
                 <ProtectedRoute>
                   <Teams />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/users"
+              element={
+                <ProtectedRoute>
+                  <UserManagement />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/settings"
+              element={
+                <ProtectedRoute>
+                  <Settings />
                 </ProtectedRoute>
               }
             />

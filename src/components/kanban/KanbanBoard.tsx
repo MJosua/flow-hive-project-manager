@@ -7,6 +7,7 @@ import { Plus, MoreHorizontal, User, Calendar } from 'lucide-react';
 import { apiService } from '@/services/apiService';
 import { useToast } from '@/hooks/use-toast';
 import { logger } from '@/services/loggingService';
+import CreateTaskModal from '@/components/modals/CreateTaskModal';
 
 interface KanbanTask {
   task_id: number;
@@ -33,6 +34,10 @@ interface KanbanBoardProps {
 const KanbanBoard: React.FC<KanbanBoardProps> = ({ projectId = 1 }) => {
   const [columns, setColumns] = useState<KanbanColumn[]>([]);
   const [loading, setLoading] = useState(true);
+  const [draggedTask, setDraggedTask] = useState<KanbanTask | null>(null);
+  const [draggedFromColumn, setDraggedFromColumn] = useState<string | null>(null);
+  const [isTaskModalOpen, setIsTaskModalOpen] = useState(false);
+  const [selectedColumnStatus, setSelectedColumnStatus] = useState<string>('');
   const { toast } = useToast();
 
   useEffect(() => {
@@ -45,9 +50,11 @@ const KanbanBoard: React.FC<KanbanBoardProps> = ({ projectId = 1 }) => {
       logger.logInfo('KanbanBoard: Fetching kanban data', { projectId });
       
       const response = await apiService.getKanbanData(projectId.toString());
-      if (response.success) {
+      if (response.success && Array.isArray(response.data)) {
         setColumns(response.data);
         logger.logInfo('KanbanBoard: Data loaded successfully');
+      } else {
+        throw new Error('Invalid response format');
       }
     } catch (error: any) {
       logger.logError('KanbanBoard: Failed to fetch data', error);
@@ -156,34 +163,52 @@ const KanbanBoard: React.FC<KanbanBoardProps> = ({ projectId = 1 }) => {
     }
   };
 
-  const handleTaskMove = async (taskId: number, newColumnId: string) => {
+  const handleDragStart = (e: React.DragEvent, task: KanbanTask, columnId: string) => {
+    setDraggedTask(task);
+    setDraggedFromColumn(columnId);
+    e.dataTransfer.effectAllowed = 'move';
+  };
+
+  const handleDragOver = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.dataTransfer.dropEffect = 'move';
+  };
+
+  const handleDrop = async (e: React.DragEvent, targetColumnId: string) => {
+    e.preventDefault();
+    
+    if (!draggedTask || !draggedFromColumn || draggedFromColumn === targetColumnId) {
+      setDraggedTask(null);
+      setDraggedFromColumn(null);
+      return;
+    }
+
     try {
-      logger.logInfo('KanbanBoard: Moving task', { taskId, newColumnId });
+      logger.logInfo('KanbanBoard: Moving task via drag & drop', { 
+        taskId: draggedTask.task_id, 
+        from: draggedFromColumn, 
+        to: targetColumnId 
+      });
       
-      await apiService.moveTaskKanban(taskId.toString(), {
-        status: newColumnId,
-        group_id: newColumnId
+      await apiService.moveTaskKanban(draggedTask.task_id.toString(), {
+        status: targetColumnId,
+        group_id: targetColumnId
       });
       
       // Update local state
       setColumns(prevColumns => {
         const newColumns = [...prevColumns];
-        let taskToMove: KanbanTask | null = null;
         
-        // Remove task from current column
-        newColumns.forEach(column => {
-          const taskIndex = column.tasks.findIndex(task => task.task_id === taskId);
-          if (taskIndex !== -1) {
-            taskToMove = column.tasks.splice(taskIndex, 1)[0];
-          }
-        });
+        // Remove task from source column
+        const sourceColumn = newColumns.find(col => col.id === draggedFromColumn);
+        if (sourceColumn) {
+          sourceColumn.tasks = sourceColumn.tasks.filter(task => task.task_id !== draggedTask.task_id);
+        }
         
-        // Add task to new column
-        if (taskToMove) {
-          const targetColumn = newColumns.find(col => col.id === newColumnId);
-          if (targetColumn) {
-            targetColumn.tasks.push(taskToMove);
-          }
+        // Add task to target column
+        const targetColumn = newColumns.find(col => col.id === targetColumnId);
+        if (targetColumn) {
+          targetColumn.tasks.push(draggedTask);
         }
         
         return newColumns;
@@ -193,15 +218,48 @@ const KanbanBoard: React.FC<KanbanBoardProps> = ({ projectId = 1 }) => {
         title: "Success",
         description: "Task moved successfully",
       });
-      logger.logInfo('KanbanBoard: Task moved successfully');
+      logger.logInfo('KanbanBoard: Task moved successfully via drag & drop');
     } catch (error: any) {
-      logger.logError('KanbanBoard: Failed to move task', error);
+      logger.logError('KanbanBoard: Failed to move task via drag & drop', error);
       toast({
         title: "Error",
         description: error.message || "Failed to move task",
         variant: "destructive",
       });
     }
+    
+    setDraggedTask(null);
+    setDraggedFromColumn(null);
+  };
+
+  const handleAddTaskToColumn = (columnStatus: string) => {
+    setSelectedColumnStatus(columnStatus);
+    setIsTaskModalOpen(true);
+  };
+
+  const handleTaskCreated = (newTask: any) => {
+    // Add the new task to the appropriate column
+    setColumns(prevColumns => {
+      const newColumns = [...prevColumns];
+      const targetColumn = newColumns.find(col => col.status === selectedColumnStatus);
+      if (targetColumn) {
+        targetColumn.tasks.push({
+          task_id: newTask.task_id,
+          name: newTask.name,
+          description: newTask.description,
+          priority: newTask.priority,
+          assigned_to_name: newTask.assigned_to_name,
+          due_date: newTask.due_date,
+          tags: newTask.tags || []
+        });
+      }
+      return newColumns;
+    });
+    
+    logger.logInfo('KanbanBoard: New task added to column', { 
+      taskId: newTask.task_id, 
+      columnStatus: selectedColumnStatus 
+    });
   };
 
   if (loading) {
@@ -230,17 +288,27 @@ const KanbanBoard: React.FC<KanbanBoardProps> = ({ projectId = 1 }) => {
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         {columns.map((column) => (
-          <div key={column.id} className="space-y-4">
+          <div 
+            key={column.id} 
+            className="space-y-4"
+            onDragOver={handleDragOver}
+            onDrop={(e) => handleDrop(e, column.id)}
+          >
             <div className={`p-4 rounded-lg ${column.color}`}>
               <div className="flex items-center justify-between">
                 <h3 className="font-semibold">{column.title}</h3>
-                <Badge variant="secondary">{column.tasks.length}</Badge>
+                <Badge variant="secondary">{column.tasks?.length || 0}</Badge>
               </div>
             </div>
 
             <div className="space-y-3 min-h-[400px]">
-              {column.tasks.map((task) => (
-                <Card key={task.task_id} className="cursor-pointer hover:shadow-md transition-shadow">
+              {(column.tasks || []).map((task) => (
+                <Card 
+                  key={task.task_id} 
+                  className="cursor-move hover:shadow-md transition-shadow"
+                  draggable
+                  onDragStart={(e) => handleDragStart(e, task, column.id)}
+                >
                   <CardContent className="p-4">
                     <div className="space-y-3">
                       <div className="flex items-start justify-between">
@@ -287,27 +355,15 @@ const KanbanBoard: React.FC<KanbanBoardProps> = ({ projectId = 1 }) => {
                           )}
                         </div>
                       )}
-
-                      {/* Quick move buttons */}
-                      <div className="flex gap-1 pt-2">
-                        {columns.filter(col => col.id !== column.id).map((targetCol) => (
-                          <Button
-                            key={targetCol.id}
-                            variant="outline"
-                            size="sm"
-                            className="text-xs h-6 px-2"
-                            onClick={() => handleTaskMove(task.task_id, targetCol.id)}
-                          >
-                            → {targetCol.title}
-                          </Button>
-                        ))}
-                      </div>
                     </div>
                   </CardContent>
                 </Card>
               ))}
 
-              <Card className="border-dashed border-2 border-gray-300 hover:border-gray-400 transition-colors">
+              <Card 
+                className="border-dashed border-2 border-gray-300 hover:border-gray-400 transition-colors cursor-pointer"
+                onClick={() => handleAddTaskToColumn(column.status)}
+              >
                 <CardContent className="p-4">
                   <Button variant="ghost" className="w-full justify-start text-gray-500 hover:text-gray-700">
                     <Plus className="h-4 w-4 mr-2" />
@@ -319,6 +375,17 @@ const KanbanBoard: React.FC<KanbanBoardProps> = ({ projectId = 1 }) => {
           </div>
         ))}
       </div>
+
+      <CreateTaskModal
+        isOpen={isTaskModalOpen}
+        onClose={() => {
+          setIsTaskModalOpen(false);
+          setSelectedColumnStatus('');
+        }}
+        onTaskCreated={handleTaskCreated}
+        projectId={projectId}
+        defaultStatus={selectedColumnStatus}
+      />
     </div>
   );
 };

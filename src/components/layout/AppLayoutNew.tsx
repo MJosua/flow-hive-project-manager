@@ -1,119 +1,187 @@
-
-import React from 'react';
-import { useNavigate } from 'react-router-dom';
-import { useAppDispatch, useAppSelector } from '@/hooks/useAppSelector';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Avatar, AvatarFallback } from '@/components/ui/avatar';
-import {
-  Search,
-  LogOut
-} from 'lucide-react';
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
-import {
-  SidebarProvider,
-  SidebarInset,
-  SidebarTrigger
-} from '@/components/ui/sidebar';
-import { AppSidebar } from './AppSidebar';
-import { logout } from '@/store/slices/authSlice';
+import React, { useState, useEffect } from 'react';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { Home, FolderOpen, CheckSquare, Users, Building, UserCheck, Settings, Bell } from 'lucide-react';
+import { useAppSelector, useAppDispatch } from '@/hooks/useAppSelector';
+import { selectCurrentUser, logout } from '@/store/slices/authSlice';
+import { apiService } from '@/services/apiService';
+import NotificationCenter from '@/components/notifications/NotificationCenter';
 
 interface AppLayoutNewProps {
   children: React.ReactNode;
-  searchValue?: string;
-  onSearchChange?: (value: string) => void;
-  searchPlaceholder?: string;
 }
 
-const AppLayoutNew: React.FC<AppLayoutNewProps> = ({
-  children,
-  searchValue = '',
-  onSearchChange,
-  searchPlaceholder = 'Search...'
-}) => {
-  const { user } = useAppSelector((state) => state.auth);
-  const navigate = useNavigate();
-  const dispatch = useAppDispatch();
+interface NavItem {
+  name: string;
+  href: string;
+  icon: React.ComponentType<React.SVGProps<SVGSVGElement>>;
+  current: boolean;
+}
 
-  const handleLogout = async () => {
-    try {
-      console.log('🔄 AppLayout: Starting logout process');
-      await dispatch(logout()).unwrap();
-      console.log('✅ AppLayout: Logout successful, redirecting to login');
+interface Notification {
+  id: string;
+  message: string;
+  read: boolean;
+}
+
+const AppLayoutNew: React.FC<AppLayoutNewProps> = ({ children }) => {
+  const user = useAppSelector(selectCurrentUser);
+  const dispatch = useAppDispatch();
+  const navigate = useNavigate();
+  const location = useLocation();
+  const [showUserMenu, setShowUserMenu] = useState(false);
+  const [showNotifications, setShowNotifications] = useState(false);
+  const [notifications, setNotifications] = useState<Notification[]>([
+    { id: '1', message: 'New task assigned to you', read: false },
+    { id: '2', message: 'Project deadline approaching', read: false },
+  ]);
+
+  useEffect(() => {
+    // Optional: Fetch notifications from API
+  }, []);
+
+  const handleLogout = () => {
+    apiService.logout().then(() => {
+      dispatch(logout());
       navigate('/login');
-    } catch (error) {
-      console.error('❌ AppLayout: Logout failed:', error);
-      // Force logout anyway
-      localStorage.removeItem('tokek');
-      navigate('/login');
-    }
+    });
   };
 
-  return (
-    <SidebarProvider>
-      <div className="min-h-screen flex w-full">
-        <AppSidebar />
-        <SidebarInset>
-          {/* Header */}
-          <header className="flex h-16 shrink-0 items-center gap-2 border-b px-4">
-            <SidebarTrigger className="-ml-1" />
+  const handleMarkNotificationAsRead = (id: string) => {
+    setNotifications(notifications.map(n => n.id === id ? { ...n, read: true } : n));
+  };
 
-            <div className="flex items-center justify-between w-full">
-              <div className="flex items-center space-x-4 flex-1">
-                {onSearchChange && (
-                  <div className="relative flex-1 max-w-md">
-                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
-                    <Input
-                      placeholder={searchPlaceholder}
-                      value={searchValue}
-                      onChange={(e) => onSearchChange(e.target.value)}
-                      className="pl-10"
-                    />
+  const navItems = [
+    { name: 'Dashboard', href: '/', icon: Home, current: location.pathname === '/' },
+    { name: 'Projects', href: '/projects', icon: FolderOpen, current: location.pathname.startsWith('/project') },
+    { name: 'Tasks', href: '/tasks', icon: CheckSquare, current: location.pathname === '/tasks' },
+    { name: 'Teams', href: '/teams', icon: Users, current: location.pathname === '/teams' },
+    { name: 'Department', href: '/department', icon: Building, current: location.pathname === '/department' },
+    { name: 'Users', href: '/users', icon: UserCheck, current: location.pathname === '/users' },
+    { name: 'Settings', href: '/settings', icon: Settings, current: location.pathname === '/settings' },
+  ];
+
+  return (
+    <div className="min-h-screen bg-gray-50">
+      {/* Navigation */}
+      <nav className="bg-white shadow-sm border-b">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+          <div className="flex justify-between h-16">
+            <div className="flex">
+              <div className="flex-shrink-0 flex items-center">
+                <h1 className="text-xl font-bold text-gray-900">Project Manager</h1>
+              </div>
+              <div className="hidden sm:ml-6 sm:flex sm:space-x-8">
+                {navItems.map((item) => (
+                  <Link
+                    key={item.name}
+                    to={item.href}
+                    className={`${
+                      item.current
+                        ? 'border-blue-500 text-gray-900'
+                        : 'border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700'
+                    } inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium`}
+                  >
+                    <item.icon className="w-4 h-4 mr-2" />
+                    {item.name}
+                  </Link>
+                ))}
+              </div>
+            </div>
+
+            <div className="flex items-center space-x-4">
+              {/* Notifications */}
+              <button
+                className="relative p-2 text-gray-400 hover:text-gray-500"
+                onClick={() => setShowNotifications(!showNotifications)}
+              >
+                <Bell className="w-5 h-5" />
+                {notifications.length > 0 && (
+                  <span className="absolute top-0 right-0 block h-2 w-2 rounded-full bg-red-400 ring-2 ring-white" />
+                )}
+              </button>
+
+              {/* User menu */}
+              <div className="relative">
+                <button
+                  className="flex items-center text-sm rounded-full focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                  onClick={() => setShowUserMenu(!showUserMenu)}
+                >
+                  <div className="w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center text-white text-sm font-medium">
+                    {user?.firstname?.[0] || 'U'}
+                  </div>
+                </button>
+
+                {showUserMenu && (
+                  <div className="origin-top-right absolute right-0 mt-2 w-48 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5">
+                    <div className="py-1">
+                      <div className="px-4 py-2 text-sm text-gray-700 border-b">
+                        {user?.firstname} {user?.lastname}
+                      </div>
+                      <Link
+                        to="/profile"
+                        className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                        onClick={() => setShowUserMenu(false)}
+                      >
+                        Profile
+                      </Link>
+                      <Link
+                        to="/settings"
+                        className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                        onClick={() => setShowUserMenu(false)}
+                      >
+                        Settings
+                      </Link>
+                      <button
+                        onClick={handleLogout}
+                        className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                      >
+                        Sign out
+                      </button>
+                    </div>
                   </div>
                 )}
               </div>
-
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" className="flex items-center space-x-2">
-                    <Avatar className="w-8 h-8">
-                      <AvatarFallback>
-                        {user?.username ? user.username.charAt(0).toUpperCase() : 'U'}
-                      </AvatarFallback>
-                    </Avatar>
-                    <span className="hidden md:block">{user?.username || 'User'}</span>
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end">
-                  <DropdownMenuItem onClick={() => navigate('/profile')}>
-                    Profile
-                  </DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => navigate('/settings')}>
-                    Settings
-                  </DropdownMenuItem>
-                  <DropdownMenuSeparator />
-                  <DropdownMenuItem onClick={handleLogout}>
-                    <LogOut className="w-4 h-4 mr-2" />
-                    Logout
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
             </div>
-          </header>
+          </div>
+        </div>
 
-          {/* Page content */}
-          <main className="flex-1 overflow-auto p-6">
-            {children}
-          </main>
-        </SidebarInset>
-      </div>
-    </SidebarProvider>
+        {/* Mobile menu */}
+        <div className="sm:hidden">
+          <div className="pt-2 pb-3 space-y-1">
+            {navItems.map((item) => (
+              <Link
+                key={item.name}
+                to={item.href}
+                className={`${
+                  item.current
+                    ? 'bg-blue-50 border-blue-500 text-blue-700'
+                    : 'border-transparent text-gray-500 hover:bg-gray-50 hover:border-gray-300 hover:text-gray-700'
+                } block pl-3 pr-4 py-2 border-l-4 text-base font-medium flex items-center`}
+              >
+                <item.icon className="w-4 h-4 mr-3" />
+                {item.name}
+              </Link>
+            ))}
+          </div>
+        </div>
+      </nav>
+
+      {/* Notifications */}
+      {showNotifications && (
+        <NotificationCenter
+          notifications={notifications}
+          onClose={() => setShowNotifications(false)}
+          onMarkAsRead={handleMarkNotificationAsRead}
+        />
+      )}
+
+      {/* Main content */}
+      <main className="mx-auto max-w-7xl py-6 sm:px-6 lg:px-8">
+        <div className="px-4 py-6 sm:px-0">
+          {children}
+        </div>
+      </main>
+    </div>
   );
 };
 
