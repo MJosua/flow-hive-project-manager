@@ -35,22 +35,35 @@ const initialState: AuthState = {
   loginAttempts: 0,
 };
 
+import { apiService } from '@/services/apiService';
+
 export const loginUser = createAsyncThunk(
   'auth/loginUser',
   async (credentials: { username: string; password: string; asin?: string }) => {
-    // Implementation for login
-    return { user: null, token: '' };
+    try {
+      const response = await apiService.login({
+        uid: credentials.username,
+        password: credentials.password,
+        asin: credentials.asin,
+      });
+      return {
+        user: response.userData,
+        token: response.tokek,
+      };
+    } catch (error: any) {
+      throw new Error(error.message || 'Login failed');
+    }
   }
 );
 
 export const logoutUser = createAsyncThunk('auth/logoutUser', async () => {
-  localStorage.removeItem('token');
+  localStorage.removeItem('tokek');
   localStorage.removeItem('user');
   return null;
 });
 
 export const logout = createAsyncThunk('auth/logout', async () => {
-  localStorage.removeItem('token');
+  localStorage.removeItem('tokek');
   localStorage.removeItem('user');
   return null;
 });
@@ -114,6 +127,10 @@ const authSlice = createSlice({
           state.user = action.payload.user;
           state.token = action.payload.token;
           state.isAuthenticated = true;
+
+          // ✅ Add this:
+          localStorage.setItem('tokek', action.payload.token);
+          localStorage.setItem('user', JSON.stringify(action.payload.user));
         }
         state.isLoading = false;
       })
