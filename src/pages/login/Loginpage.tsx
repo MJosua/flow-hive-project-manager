@@ -21,17 +21,27 @@ const Login = () => {
   const [forgotToggle, setForgotToggle] = useState(false);
   const [lockedAccount, setLockedAccount] = useState(false);
   const [hasRedirected, setHasRedirected] = useState(false);
+  const [redirectTimeout, setRedirectTimeout] = useState<NodeJS.Timeout | null>(null);
 
   // Single redirect logic - only redirect once when authenticated
   useEffect(() => {
     if (isAuthenticated && !hasRedirected) {
       setHasRedirected(true);
+      
+      // Clear any existing timeout
+      if (redirectTimeout) {
+        clearTimeout(redirectTimeout);
+      }
+      
       // Use setTimeout to prevent multiple rapid navigation calls
-      setTimeout(() => {
+      const timeout = setTimeout(() => {
+        console.log('Redirecting to dashboard...');
         navigate('/', { replace: true });
-      }, 100);
+      }, 500); // Slightly longer delay to ensure state is settled
+      
+      setRedirectTimeout(timeout);
     }
-  }, [isAuthenticated, navigate, hasRedirected]);
+  }, [isAuthenticated, hasRedirected, navigate, redirectTimeout]);
 
   // Reset login attempts when going back to login
   useEffect(() => {
@@ -39,6 +49,26 @@ const Login = () => {
       dispatch(resetLoginAttempts());
     }
   }, [forgotToggle, lockedAccount, dispatch]);
+
+  // Reset redirect flag when authentication changes
+  useEffect(() => {
+    if (!isAuthenticated) {
+      setHasRedirected(false);
+      if (redirectTimeout) {
+        clearTimeout(redirectTimeout);
+        setRedirectTimeout(null);
+      }
+    }
+  }, [isAuthenticated, redirectTimeout]);
+
+  // Cleanup timeout on unmount
+  useEffect(() => {
+    return () => {
+      if (redirectTimeout) {
+        clearTimeout(redirectTimeout);
+      }
+    };
+  }, [redirectTimeout]);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-0 to-blue-100 flex items-center justify-center p-4">

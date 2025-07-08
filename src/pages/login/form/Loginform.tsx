@@ -43,6 +43,7 @@ const Loginform = ({
     username?: string;
     password?: string;
   }>({});
+  const [hasShownSuccessToast, setHasShownSuccessToast] = useState(false);
 
   // Clear error when component mounts or credentials change
   useEffect(() => {
@@ -80,15 +81,23 @@ const Loginform = ({
     }
   }, [error, isLoading, toast, setLockedAccount]);
 
-  // Show success toast when login succeeds - but don't navigate here
+  // Show success toast when login succeeds - but only once
   useEffect(() => {
-    if (isAuthenticated && !isLoading && !error) {
+    if (isAuthenticated && !isLoading && !error && !hasShownSuccessToast) {
       toast({
         title: "Login Successful",
         description: "Welcome back to HOTS",
       });
+      setHasShownSuccessToast(true);
     }
-  }, [isAuthenticated, isLoading, error, toast]);
+  }, [isAuthenticated, isLoading, error, toast, hasShownSuccessToast]);
+
+  // Reset success toast flag when authentication changes
+  useEffect(() => {
+    if (!isAuthenticated) {
+      setHasShownSuccessToast(false);
+    }
+  }, [isAuthenticated]);
 
   const handleInputChange = (field: 'username' | 'password', value: string) => {
     setCredentials({ ...credentials, [field]: value });
@@ -105,6 +114,11 @@ const Loginform = ({
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    // Prevent multiple submissions
+    if (isLoading) {
+      return;
+    }
     
     // Validate form
     const validation = validateLoginForm(credentials.username, credentials.password);
