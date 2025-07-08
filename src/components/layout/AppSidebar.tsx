@@ -21,7 +21,6 @@ import {
   SidebarHeader,
   SidebarFooter
 } from '@/components/ui/sidebar';
-import { NotificationCenter } from '@/components/notifications/NotificationCenter';
 
 const sidebarItems = [
   { name: 'Dashboard', href: '/', icon: Home },
@@ -41,14 +40,11 @@ export function AppSidebar() {
   return (
     <Sidebar>
       <SidebarHeader className="p-4">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center space-x-2">
-            <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center">
-              <span className="text-white font-bold text-sm">PM</span>
-            </div>
-            <span className="font-semibold text-lg">Project Manager</span>
+        <div className="flex items-center space-x-2">
+          <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center">
+            <span className="text-white font-bold text-sm">PM</span>
           </div>
-          <NotificationCenter />
+          <span className="font-semibold text-lg">Project Manager</span>
         </div>
       </SidebarHeader>
       

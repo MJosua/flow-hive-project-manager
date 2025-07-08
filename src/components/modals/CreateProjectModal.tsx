@@ -43,7 +43,7 @@ export const CreateProjectModal: React.FC<CreateProjectModalProps> = ({
   const [isDepartmentLeader, setIsDepartmentLeader] = useState(false);
 
   useEffect(() => {
-    if (user) {
+    if (user && user.department_id) {
       // Check if user is department leader
       checkDepartmentLeadership();
     }
@@ -51,8 +51,10 @@ export const CreateProjectModal: React.FC<CreateProjectModalProps> = ({
 
   const checkDepartmentLeadership = async () => {
     try {
-      const response = await apiService.getDepartmentDetail(user?.department_id?.toString() || '');
-      setIsDepartmentLeader(response.data?.department_head === user?.user_id);
+      if (user?.department_id) {
+        const response = await apiService.getDepartmentDetail(user.department_id.toString());
+        setIsDepartmentLeader(response.data?.department_head === user?.user_id);
+      }
     } catch (error) {
       console.error('Error checking department leadership:', error);
     }
@@ -66,7 +68,7 @@ export const CreateProjectModal: React.FC<CreateProjectModalProps> = ({
       const projectData = {
         ...formData,
         manager_id: user?.user_id,
-        department_id: user?.department_id,
+        department_id: user?.department_id || 1,
         custom_attributes: customAttributes.reduce((acc, attr) => {
           acc[attr.name] = attr.value;
           return acc;
