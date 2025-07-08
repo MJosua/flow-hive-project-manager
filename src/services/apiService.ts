@@ -1,28 +1,24 @@
 
 import axios from 'axios';
+import { logger } from './loggingService';
 
 class ApiService {
   private baseURL: string;
 
   constructor() {
     this.baseURL = import.meta.env.VITE_API_URL || 'http://localhost:8888';
-    console.log('🔧 API Service initialized with base URL:', this.baseURL);
+    logger.logInfo('API Service initialized', { baseURL: this.baseURL });
   }
 
   // Authentication methods
   async login(credentials: { uid: string; password: string; asin?: string }) {
     try {
-      console.log('🔄 Attempting login to:', `${this.baseURL}/hots_auth/login`);
+      logger.logApiRequest('/hots_auth/login', 'POST', credentials);
       const response = await axios.post(`${this.baseURL}/hots_auth/login`, credentials);
-      console.log('✅ Login successful:', response.data);
+      logger.logApiSuccess('/hots_auth/login', 'POST', response.status, response.data);
       return response.data;
     } catch (error: any) {
-      console.error('❌ Login API Error:', {
-        url: `${this.baseURL}/hots_auth/login`,
-        status: error.response?.status,
-        data: error.response?.data,
-        message: error.message
-      });
+      logger.logApiError('/hots_auth/login', 'POST', error, credentials);
       throw new Error(error.response?.data?.message || 'Login failed');
     }
   }
@@ -31,23 +27,18 @@ class ApiService {
     try {
       const token = localStorage.getItem('tokek');
       if (!token) {
-        console.warn('⚠️ No token found for keepLogin');
+        logger.logWarn('No token found for keepLogin');
         throw new Error('No token found');
       }
 
-      console.log('🔄 Keep login request with token');
+      logger.logApiRequest('/hots_auth/keeplogin', 'GET');
       const response = await axios.get(`${this.baseURL}/hots_auth/keeplogin`, {
         headers: { Authorization: `Bearer ${token}` }
       });
-      console.log('✅ Keep login successful');
+      logger.logApiSuccess('/hots_auth/keeplogin', 'GET', response.status);
       return response.data;
     } catch (error: any) {
-      console.error('❌ Keep Login API Error:', {
-        url: `${this.baseURL}/hots_auth/keeplogin`,
-        status: error.response?.status,
-        data: error.response?.data,
-        message: error.message
-      });
+      logger.logApiError('/hots_auth/keeplogin', 'GET', error);
       throw error;
     }
   }
@@ -56,20 +47,15 @@ class ApiService {
     try {
       const token = localStorage.getItem('tokek');
       if (token) {
-        console.log('🔄 Logging out user');
+        logger.logApiRequest('/hots_auth/pm/logout', 'POST');
         await axios.post(`${this.baseURL}/hots_auth/pm/logout`, {}, {
           headers: { Authorization: `Bearer ${token}` }
         });
-        console.log('✅ Logout successful');
+        logger.logApiSuccess('/hots_auth/pm/logout', 'POST', 200);
       }
       return { success: true };
     } catch (error: any) {
-      console.error('❌ Logout API Error:', {
-        url: `${this.baseURL}/hots_auth/pm/logout`,
-        status: error.response?.status,
-        data: error.response?.data,
-        message: error.message
-      });
+      logger.logApiError('/hots_auth/pm/logout', 'POST', error);
       return { success: true }; // Always return success for logout
     }
   }
@@ -77,91 +63,60 @@ class ApiService {
   // Project methods using PM database
   async getProjects(filters: any = {}) {
     try {
-      console.log('🔄 Fetching projects with filters:', filters);
+      logger.logApiRequest('/PM/project', 'GET', filters);
       const response = await this.makeRequest('GET', '/PM/project', null, filters);
-      console.log('✅ Projects fetched successfully:', response.data?.length || 0, 'projects');
+      logger.logApiSuccess('/PM/project', 'GET', 200, response.data);
       return response.data;
     } catch (error: any) {
-      console.error('❌ Get Projects API Error:', {
-        url: `${this.baseURL}/PM/project`,
-        status: error.response?.status,
-        data: error.response?.data,
-        message: error.message,
-        filters
-      });
+      logger.logApiError('/PM/project', 'GET', error, filters);
       throw new Error(error.response?.data?.error || 'Failed to fetch projects');
     }
   }
 
   async createProject(projectData: any) {
     try {
-      console.log('🔄 Creating project:', projectData.name);
+      logger.logApiRequest('/PM/project', 'POST', projectData);
       const response = await this.makeRequest('POST', '/PM/project', projectData);
-      console.log('✅ Project created successfully:', response.data);
+      logger.logApiSuccess('/PM/project', 'POST', 201, response.data);
       return response.data;
     } catch (error: any) {
-      console.error('❌ Create Project API Error:', {
-        url: `${this.baseURL}/PM/project`,
-        status: error.response?.status,
-        data: error.response?.data,
-        message: error.message,
-        projectData
-      });
+      logger.logApiError('/PM/project', 'POST', error, projectData);
       throw new Error(error.response?.data?.error || 'Failed to create project');
     }
   }
 
   async getProjectDetail(id: string) {
     try {
-      console.log('🔄 Fetching project detail for ID:', id);
+      logger.logApiRequest(`/PM/project/detail/${id}`, 'GET');
       const response = await this.makeRequest('GET', `/PM/project/detail/${id}`);
-      console.log('✅ Project detail fetched successfully');
+      logger.logApiSuccess(`/PM/project/detail/${id}`, 'GET', 200, response.data);
       return response.data;
     } catch (error: any) {
-      console.error('❌ Get Project Detail API Error:', {
-        url: `${this.baseURL}/PM/project/detail/${id}`,
-        status: error.response?.status,
-        data: error.response?.data,
-        message: error.message,
-        projectId: id
-      });
+      logger.logApiError(`/PM/project/detail/${id}`, 'GET', error, { projectId: id });
       throw new Error(error.response?.data?.error || 'Failed to fetch project detail');
     }
   }
 
   async updateProject(id: string, projectData: any) {
     try {
-      console.log('🔄 Updating project ID:', id);
+      logger.logApiRequest(`/PM/project/${id}`, 'PATCH', projectData);
       const response = await this.makeRequest('PATCH', `/PM/project/${id}`, projectData);
-      console.log('✅ Project updated successfully');
+      logger.logApiSuccess(`/PM/project/${id}`, 'PATCH', 200, response.data);
       return response.data;
     } catch (error: any) {
-      console.error('❌ Update Project API Error:', {
-        url: `${this.baseURL}/PM/project/${id}`,
-        status: error.response?.status,
-        data: error.response?.data,
-        message: error.message,
-        projectId: id,
-        projectData
-      });
+      logger.logApiError(`/PM/project/${id}`, 'PATCH', error, { projectId: id, projectData });
       throw new Error(error.response?.data?.error || 'Failed to update project');
     }
   }
 
   async deleteProject(id: string) {
     try {
-      console.log('🔄 Deleting project ID:', id);
+      logger.logApiRequest(`/PM/project/${id}`, 'DELETE');
       const response = await this.makeRequest('DELETE', `/PM/project/${id}`);
-      console.log('✅ Project deleted successfully');
+      logger.logApiSuccess(`/PM/project/${id}`, 'DELETE', 200);
       return response.data;
     } catch (error: any) {
-      console.error('❌ Delete Project API Error:', {
-        url: `${this.baseURL}/PM/project/${id}`,
-        status: error.response?.status,
-        data: error.response?.data,
-        message: error.message,
-        projectId: id
-      });
+      logger.logApiError(`/PM/project/${id}`, 'DELETE', error, { projectId: id });
       throw new Error(error.response?.data?.error || 'Failed to delete project');
     }
   }
@@ -169,91 +124,60 @@ class ApiService {
   // Task methods using PM database
   async getTasks(filters: any = {}) {
     try {
-      console.log('🔄 Fetching tasks with filters:', filters);
+      logger.logApiRequest('/PM/task', 'GET', filters);
       const response = await this.makeRequest('GET', '/PM/task', null, filters);
-      console.log('✅ Tasks fetched successfully:', response.data?.length || 0, 'tasks');
+      logger.logApiSuccess('/PM/task', 'GET', 200, response.data);
       return response.data;
     } catch (error: any) {
-      console.error('❌ Get Tasks API Error:', {
-        url: `${this.baseURL}/PM/task`,
-        status: error.response?.status,
-        data: error.response?.data,
-        message: error.message,
-        filters
-      });
+      logger.logApiError('/PM/task', 'GET', error, filters);
       throw new Error(error.response?.data?.error || 'Failed to fetch tasks');
     }
   }
 
   async getMyTasks() {
     try {
-      console.log('🔄 Fetching my tasks');
+      logger.logApiRequest('/PM/task/my-tasks', 'GET');
       const response = await this.makeRequest('GET', '/PM/task/my-tasks');
-      console.log('✅ My tasks fetched successfully:', response.data?.length || 0, 'tasks');
+      logger.logApiSuccess('/PM/task/my-tasks', 'GET', 200, response.data);
       return response.data;
     } catch (error: any) {
-      console.error('❌ Get My Tasks API Error:', {
-        url: `${this.baseURL}/PM/task/my-tasks`,
-        status: error.response?.status,
-        data: error.response?.data,
-        message: error.message
-      });
+      logger.logApiError('/PM/task/my-tasks', 'GET', error);
       throw new Error(error.response?.data?.error || 'Failed to fetch my tasks');
     }
   }
 
   async createTask(taskData: any) {
     try {
-      console.log('🔄 Creating task:', taskData.name);
+      logger.logApiRequest('/PM/task', 'POST', taskData);
       const response = await this.makeRequest('POST', '/PM/task', taskData);
-      console.log('✅ Task created successfully:', response.data);
+      logger.logApiSuccess('/PM/task', 'POST', 201, response.data);
       return response.data;
     } catch (error: any) {
-      console.error('❌ Create Task API Error:', {
-        url: `${this.baseURL}/PM/task`,
-        status: error.response?.status,
-        data: error.response?.data,
-        message: error.message,
-        taskData
-      });
+      logger.logApiError('/PM/task', 'POST', error, taskData);
       throw new Error(error.response?.data?.error || 'Failed to create task');
     }
   }
 
   async updateTaskStatus(taskId: string, statusData: any) {
     try {
-      console.log('🔄 Updating task status for ID:', taskId);
+      logger.logApiRequest(`/PM/task/${taskId}/status`, 'PATCH', statusData);
       const response = await this.makeRequest('PATCH', `/PM/task/${taskId}/status`, statusData);
-      console.log('✅ Task status updated successfully');
+      logger.logApiSuccess(`/PM/task/${taskId}/status`, 'PATCH', 200, response.data);
       return response.data;
     } catch (error: any) {
-      console.error('❌ Update Task Status API Error:', {
-        url: `${this.baseURL}/PM/task/${taskId}/status`,
-        status: error.response?.status,
-        data: error.response?.data,
-        message: error.message,
-        taskId,
-        statusData
-      });
+      logger.logApiError(`/PM/task/${taskId}/status`, 'PATCH', error, { taskId, statusData });
       throw new Error(error.response?.data?.error || 'Failed to update task status');
     }
   }
 
   async moveTaskToGroup(taskId: string, groupData: any) {
     try {
-      console.log('🔄 Moving task to group for ID:', taskId);
+      logger.logApiRequest(`/PM/task/${taskId}/move-group`, 'PATCH', groupData);
       const response = await this.makeRequest('PATCH', `/PM/task/${taskId}/move-group`, groupData);
-      console.log('✅ Task moved to group successfully');
+      logger.logApiSuccess(`/PM/task/${taskId}/move-group`, 'PATCH', 200, response.data);
       return response.data;
     } catch (error: any) {
-      console.error('❌ Move Task to Group API Error:', {
-        url: `${this.baseURL}/PM/task/${taskId}/move-group`,
-        status: error.response?.status,
-        data: error.response?.data,
-        message: error.message,
-        taskId,
-        groupData
-      });
+      logger.logApiError(`/PM/task/${taskId}/move-group`, 'PATCH', error, { taskId, groupData });
       throw new Error(error.response?.data?.error || 'Failed to move task to group');
     }
   }
@@ -261,37 +185,24 @@ class ApiService {
   // Gantt methods using PM database
   async getGanttData(projectId: string) {
     try {
-      console.log('🔄 Fetching Gantt data for project:', projectId);
+      logger.logApiRequest(`/PM/gantt/project/${projectId}`, 'GET');
       const response = await this.makeRequest('GET', `/PM/gantt/project/${projectId}`);
-      console.log('✅ Gantt data fetched successfully');
+      logger.logApiSuccess(`/PM/gantt/project/${projectId}`, 'GET', 200, response.data);
       return response.data;
     } catch (error: any) {
-      console.error('❌ Get Gantt Data API Error:', {
-        url: `${this.baseURL}/PM/gantt/project/${projectId}`,
-        status: error.response?.status,
-        data: error.response?.data,
-        message: error.message,
-        projectId
-      });
+      logger.logApiError(`/PM/gantt/project/${projectId}`, 'GET', error, { projectId });
       throw new Error(error.response?.data?.error || 'Failed to fetch Gantt data');
     }
   }
 
   async updateTaskGantt(taskId: string, ganttData: any) {
     try {
-      console.log('🔄 Updating task in Gantt for ID:', taskId);
+      logger.logApiRequest(`/PM/gantt/task/${taskId}`, 'PUT', ganttData);
       const response = await this.makeRequest('PUT', `/PM/gantt/task/${taskId}`, ganttData);
-      console.log('✅ Task updated in Gantt successfully');
+      logger.logApiSuccess(`/PM/gantt/task/${taskId}`, 'PUT', 200, response.data);
       return response.data;
     } catch (error: any) {
-      console.error('❌ Update Task Gantt API Error:', {
-        url: `${this.baseURL}/PM/gantt/task/${taskId}`,
-        status: error.response?.status,
-        data: error.response?.data,
-        message: error.message,
-        taskId,
-        ganttData
-      });
+      logger.logApiError(`/PM/gantt/task/${taskId}`, 'PUT', error, { taskId, ganttData });
       throw new Error(error.response?.data?.error || 'Failed to update task in Gantt');
     }
   }
@@ -299,37 +210,24 @@ class ApiService {
   // Kanban methods using PM database
   async getKanbanData(projectId: string) {
     try {
-      console.log('🔄 Fetching Kanban data for project:', projectId);
+      logger.logApiRequest(`/PM/kanban/project/${projectId}`, 'GET');
       const response = await this.makeRequest('GET', `/PM/kanban/project/${projectId}`);
-      console.log('✅ Kanban data fetched successfully');
+      logger.logApiSuccess(`/PM/kanban/project/${projectId}`, 'GET', 200, response.data);
       return response.data;
     } catch (error: any) {
-      console.error('❌ Get Kanban Data API Error:', {
-        url: `${this.baseURL}/PM/kanban/project/${projectId}`,
-        status: error.response?.status,
-        data: error.response?.data,
-        message: error.message,
-        projectId
-      });
+      logger.logApiError(`/PM/kanban/project/${projectId}`, 'GET', error, { projectId });
       throw new Error(error.response?.data?.error || 'Failed to fetch Kanban data');
     }
   }
 
   async moveTaskKanban(taskId: string, moveData: any) {
     try {
-      console.log('🔄 Moving task in Kanban for ID:', taskId);
+      logger.logApiRequest(`/PM/kanban/task/${taskId}/move`, 'PUT', moveData);
       const response = await this.makeRequest('PUT', `/PM/kanban/task/${taskId}/move`, moveData);
-      console.log('✅ Task moved in Kanban successfully');
+      logger.logApiSuccess(`/PM/kanban/task/${taskId}/move`, 'PUT', 200, response.data);
       return response.data;
     } catch (error: any) {
-      console.error('❌ Move Task Kanban API Error:', {
-        url: `${this.baseURL}/PM/kanban/task/${taskId}/move`,
-        status: error.response?.status,
-        data: error.response?.data,
-        message: error.message,
-        taskId,
-        moveData
-      });
+      logger.logApiError(`/PM/kanban/task/${taskId}/move`, 'PUT', error, { taskId, moveData });
       throw new Error(error.response?.data?.error || 'Failed to move task in Kanban');
     }
   }
@@ -337,53 +235,36 @@ class ApiService {
   // Department methods using PM database
   async getDepartments() {
     try {
-      console.log('🔄 Fetching departments');
+      logger.logApiRequest('/PM/department', 'GET');
       const response = await this.makeRequest('GET', '/PM/department');
-      console.log('✅ Departments fetched successfully:', response.data?.length || 0, 'departments');
+      logger.logApiSuccess('/PM/department', 'GET', 200, response.data);
       return response.data;
     } catch (error: any) {
-      console.error('❌ Get Departments API Error:', {
-        url: `${this.baseURL}/PM/department`,
-        status: error.response?.status,
-        data: error.response?.data,
-        message: error.message
-      });
+      logger.logApiError('/PM/department', 'GET', error);
       throw new Error(error.response?.data?.error || 'Failed to fetch departments');
     }
   }
 
   async getDepartmentDetail(id: string) {
     try {
-      console.log('🔄 Fetching department detail for ID:', id);
+      logger.logApiRequest(`/PM/department/${id}`, 'GET');
       const response = await this.makeRequest('GET', `/PM/department/${id}`);
-      console.log('✅ Department detail fetched successfully');
+      logger.logApiSuccess(`/PM/department/${id}`, 'GET', 200, response.data);
       return response.data;
     } catch (error: any) {
-      console.error('❌ Get Department Detail API Error:', {
-        url: `${this.baseURL}/PM/department/${id}`,
-        status: error.response?.status,
-        data: error.response?.data,
-        message: error.message,
-        departmentId: id
-      });
+      logger.logApiError(`/PM/department/${id}`, 'GET', error, { departmentId: id });
       throw new Error(error.response?.data?.error || 'Failed to fetch department detail');
     }
   }
 
   async createDepartment(departmentData: any) {
     try {
-      console.log('🔄 Creating department:', departmentData.name);
+      logger.logApiRequest('/PM/department', 'POST', departmentData);
       const response = await this.makeRequest('POST', '/PM/department', departmentData);
-      console.log('✅ Department created successfully:', response.data);
+      logger.logApiSuccess('/PM/department', 'POST', 201, response.data);
       return response.data;
     } catch (error: any) {
-      console.error('❌ Create Department API Error:', {
-        url: `${this.baseURL}/PM/department`,
-        status: error.response?.status,
-        data: error.response?.data,
-        message: error.message,
-        departmentData
-      });
+      logger.logApiError('/PM/department', 'POST', error, departmentData);
       throw new Error(error.response?.data?.error || 'Failed to create department');
     }
   }
@@ -391,54 +272,60 @@ class ApiService {
   // Team methods using PM database
   async getTeams(filters: any = {}) {
     try {
-      console.log('🔄 Fetching teams with filters:', filters);
+      logger.logApiRequest('/PM/team', 'GET', filters);
       const response = await this.makeRequest('GET', '/PM/team', null, filters);
-      console.log('✅ Teams fetched successfully:', response.data?.length || 0, 'teams');
+      logger.logApiSuccess('/PM/team', 'GET', 200, response.data);
       return response.data;
     } catch (error: any) {
-      console.error('❌ Get Teams API Error:', {
-        url: `${this.baseURL}/PM/team`,
-        status: error.response?.status,
-        data: error.response?.data,
-        message: error.message,
-        filters
-      });
+      logger.logApiError('/PM/team', 'GET', error, filters);
       throw new Error(error.response?.data?.error || 'Failed to fetch teams');
+    }
+  }
+
+  async getUserTeams(userId: number) {
+    try {
+      logger.logApiRequest(`/PM/user/${userId}/teams`, 'GET');
+      const response = await this.makeRequest('GET', `/PM/user/${userId}/teams`);
+      logger.logApiSuccess(`/PM/user/${userId}/teams`, 'GET', 200, response.data);
+      return response.data;
+    } catch (error: any) {
+      logger.logApiError(`/PM/user/${userId}/teams`, 'GET', error, { userId });
+      throw new Error(error.response?.data?.error || 'Failed to fetch user teams');
+    }
+  }
+
+  async requestTeamJoin(teamId: number) {
+    try {
+      logger.logApiRequest(`/PM/team/${teamId}/join-request`, 'POST');
+      const response = await this.makeRequest('POST', `/PM/team/${teamId}/join-request`);
+      logger.logApiSuccess(`/PM/team/${teamId}/join-request`, 'POST', 201, response.data);
+      return response.data;
+    } catch (error: any) {
+      logger.logApiError(`/PM/team/${teamId}/join-request`, 'POST', error, { teamId });
+      throw new Error(error.response?.data?.error || 'Failed to request team join');
     }
   }
 
   async getTeamDetail(id: string) {
     try {
-      console.log('🔄 Fetching team detail for ID:', id);
+      logger.logApiRequest(`/PM/team/${id}`, 'GET');
       const response = await this.makeRequest('GET', `/PM/team/${id}`);
-      console.log('✅ Team detail fetched successfully');
+      logger.logApiSuccess(`/PM/team/${id}`, 'GET', 200, response.data);
       return response.data;
     } catch (error: any) {
-      console.error('❌ Get Team Detail API Error:', {
-        url: `${this.baseURL}/PM/team/${id}`,
-        status: error.response?.status,
-        data: error.response?.data,
-        message: error.message,
-        teamId: id
-      });
+      logger.logApiError(`/PM/team/${id}`, 'GET', error, { teamId: id });
       throw new Error(error.response?.data?.error || 'Failed to fetch team detail');
     }
   }
 
   async createTeam(teamData: any) {
     try {
-      console.log('🔄 Creating team:', teamData.name);
+      logger.logApiRequest('/PM/team', 'POST', teamData);
       const response = await this.makeRequest('POST', '/PM/team', teamData);
-      console.log('✅ Team created successfully:', response.data);
+      logger.logApiSuccess('/PM/team', 'POST', 201, response.data);
       return response.data;
     } catch (error: any) {
-      console.error('❌ Create Team API Error:', {
-        url: `${this.baseURL}/PM/team`,
-        status: error.response?.status,
-        data: error.response?.data,
-        message: error.message,
-        teamData
-      });
+      logger.logApiError('/PM/team', 'POST', error, teamData);
       throw new Error(error.response?.data?.error || 'Failed to create team');
     }
   }
@@ -446,92 +333,73 @@ class ApiService {
   // Approval methods
   async getApprovalHierarchy(userId: string) {
     try {
-      console.log('🔄 Fetching approval hierarchy for user:', userId);
+      logger.logApiRequest(`/PM/approval/hierarchy/${userId}`, 'GET');
       const response = await this.makeRequest('GET', `/PM/approval/hierarchy/${userId}`);
-      console.log('✅ Approval hierarchy fetched successfully');
+      logger.logApiSuccess(`/PM/approval/hierarchy/${userId}`, 'GET', 200, response.data);
       return response.data;
     } catch (error: any) {
-      console.error('❌ Get Approval Hierarchy API Error:', {
-        url: `${this.baseURL}/PM/approval/hierarchy/${userId}`,
-        status: error.response?.status,
-        data: error.response?.data,
-        message: error.message,
-        userId
-      });
+      logger.logApiError(`/PM/approval/hierarchy/${userId}`, 'GET', error, { userId });
       throw new Error(error.response?.data?.error || 'Failed to fetch approval hierarchy');
     }
   }
 
   async getPendingApprovals() {
     try {
-      console.log('🔄 Fetching pending approvals');
+      logger.logApiRequest('/PM/approval/pending', 'GET');
       const response = await this.makeRequest('GET', '/PM/approval/pending');
-      console.log('✅ Pending approvals fetched successfully:', response.data?.length || 0, 'approvals');
+      logger.logApiSuccess('/PM/approval/pending', 'GET', 200, response.data);
       return response.data;
     } catch (error: any) {
-      console.error('❌ Get Pending Approvals API Error:', {
-        url: `${this.baseURL}/PM/approval/pending`,
-        status: error.response?.status,
-        data: error.response?.data,
-        message: error.message
-      });
+      logger.logApiError('/PM/approval/pending', 'GET', error);
       throw new Error(error.response?.data?.error || 'Failed to fetch pending approvals');
     }
   }
 
   async submitTaskApproval(taskId: string, approvalData: any) {
     try {
-      console.log('🔄 Submitting task approval for ID:', taskId);
+      logger.logApiRequest(`/PM/approval/task/${taskId}/submit`, 'POST', approvalData);
       const response = await this.makeRequest('POST', `/PM/approval/task/${taskId}/submit`, approvalData);
-      console.log('✅ Task approval submitted successfully');
+      logger.logApiSuccess(`/PM/approval/task/${taskId}/submit`, 'POST', 201, response.data);
       return response.data;
     } catch (error: any) {
-      console.error('❌ Submit Task Approval API Error:', {
-        url: `${this.baseURL}/PM/approval/task/${taskId}/submit`,
-        status: error.response?.status,
-        data: error.response?.data,
-        message: error.message,
-        taskId,
-        approvalData
-      });
+      logger.logApiError(`/PM/approval/task/${taskId}/submit`, 'POST', error, { taskId, approvalData });
       throw new Error(error.response?.data?.error || 'Failed to submit task for approval');
     }
   }
 
   async processTaskApproval(approvalId: string, action: any) {
     try {
-      console.log('🔄 Processing task approval ID:', approvalId);
+      logger.logApiRequest(`/PM/approval/task/${approvalId}/process`, 'PUT', action);
       const response = await this.makeRequest('PUT', `/PM/approval/task/${approvalId}/process`, action);
-      console.log('✅ Task approval processed successfully');
+      logger.logApiSuccess(`/PM/approval/task/${approvalId}/process`, 'PUT', 200, response.data);
       return response.data;
     } catch (error: any) {
-      console.error('❌ Process Task Approval API Error:', {
-        url: `${this.baseURL}/PM/approval/task/${approvalId}/process`,
-        status: error.response?.status,
-        data: error.response?.data,
-        message: error.message,
-        approvalId,
-        action
-      });
+      logger.logApiError(`/PM/approval/task/${approvalId}/process`, 'PUT', error, { approvalId, action });
       throw new Error(error.response?.data?.error || 'Failed to process approval');
+    }
+  }
+
+  async processProjectApproval(projectId: string, action: any) {
+    try {
+      logger.logApiRequest(`/PM/approval/project/${projectId}/process`, 'PUT', action);
+      const response = await this.makeRequest('PUT', `/PM/approval/project/${projectId}/process`, action);
+      logger.logApiSuccess(`/PM/approval/project/${projectId}/process`, 'PUT', 200, response.data);
+      return response.data;
+    } catch (error: any) {
+      logger.logApiError(`/PM/approval/project/${projectId}/process`, 'PUT', error, { projectId, action });
+      throw new Error(error.response?.data?.error || 'Failed to process project approval');
     }
   }
 
   // User methods
   async getUsers(filters: any = {}) {
     try {
-      console.log('🔄 Fetching users with filters:', filters);
+      logger.logApiRequest('/hots_admin/account', 'GET', filters);
       const response = await this.makeRequest('GET', '/hots_admin/account', null, filters);
-      console.log('✅ Users fetched successfully:', response.data?.length || 0, 'users');
+      logger.logApiSuccess('/hots_admin/account', 'GET', 200, response.data);
       return response.data;
     } catch (error: any) {
-      console.error('❌ Get Users API Error:', {
-        url: `${this.baseURL}/hots_admin/account`,
-        status: error.response?.status,
-        data: error.response?.data,
-        message: error.message,
-        filters
-      });
+      logger.logApiError('/hots_admin/account', 'GET', error, filters);
       throw new Error(error.response?.data?.error || 'Failed to fetch users');
     }
   }
@@ -539,35 +407,24 @@ class ApiService {
   // Notification methods
   async getNotifications() {
     try {
-      console.log('🔄 Fetching notifications');
+      logger.logApiRequest('/PM/notifications', 'GET');
       const response = await this.makeRequest('GET', '/PM/notifications');
-      console.log('✅ Notifications fetched successfully:', response.data?.length || 0, 'notifications');
+      logger.logApiSuccess('/PM/notifications', 'GET', 200, response.data);
       return response.data;
     } catch (error: any) {
-      console.error('❌ Get Notifications API Error:', {
-        url: `${this.baseURL}/PM/notifications`,
-        status: error.response?.status,
-        data: error.response?.data,
-        message: error.message
-      });
+      logger.logApiError('/PM/notifications', 'GET', error);
       throw new Error(error.response?.data?.error || 'Failed to fetch notifications');
     }
   }
 
   async markNotificationAsRead(notificationId: number) {
     try {
-      console.log('🔄 Marking notification as read:', notificationId);
+      logger.logApiRequest(`/PM/notifications/${notificationId}/read`, 'PUT');
       const response = await this.makeRequest('PUT', `/PM/notifications/${notificationId}/read`);
-      console.log('✅ Notification marked as read successfully');
+      logger.logApiSuccess(`/PM/notifications/${notificationId}/read`, 'PUT', 200, response.data);
       return response.data;
     } catch (error: any) {
-      console.error('❌ Mark Notification Read API Error:', {
-        url: `${this.baseURL}/PM/notifications/${notificationId}/read`,
-        status: error.response?.status,
-        data: error.response?.data,
-        message: error.message,
-        notificationId
-      });
+      logger.logApiError(`/PM/notifications/${notificationId}/read`, 'PUT', error, { notificationId });
       throw new Error(error.response?.data?.error || 'Failed to mark notification as read');
     }
   }
@@ -575,37 +432,24 @@ class ApiService {
   // Project join methods
   async requestProjectJoin(projectId: number) {
     try {
-      console.log('🔄 Requesting to join project:', projectId);
+      logger.logApiRequest(`/PM/project/${projectId}/join-request`, 'POST');
       const response = await this.makeRequest('POST', `/PM/project/${projectId}/join-request`);
-      console.log('✅ Project join request submitted successfully');
+      logger.logApiSuccess(`/PM/project/${projectId}/join-request`, 'POST', 201, response.data);
       return response.data;
     } catch (error: any) {
-      console.error('❌ Request Project Join API Error:', {
-        url: `${this.baseURL}/PM/project/${projectId}/join-request`,
-        status: error.response?.status,
-        data: error.response?.data,
-        message: error.message,
-        projectId
-      });
+      logger.logApiError(`/PM/project/${projectId}/join-request`, 'POST', error, { projectId });
       throw new Error(error.response?.data?.error || 'Failed to request project join');
     }
   }
 
   async processProjectJoinRequest(requestId: number, action: { action: 'approve' | 'reject'; comments?: string }) {
     try {
-      console.log('🔄 Processing project join request:', requestId);
+      logger.logApiRequest(`/PM/project/join-request/${requestId}`, 'PUT', action);
       const response = await this.makeRequest('PUT', `/PM/project/join-request/${requestId}`, action);
-      console.log('✅ Project join request processed successfully');
+      logger.logApiSuccess(`/PM/project/join-request/${requestId}`, 'PUT', 200, response.data);
       return response.data;
     } catch (error: any) {
-      console.error('❌ Process Project Join Request API Error:', {
-        url: `${this.baseURL}/PM/project/join-request/${requestId}`,
-        status: error.response?.status,
-        data: error.response?.data,
-        message: error.message,
-        requestId,
-        action
-      });
+      logger.logApiError(`/PM/project/join-request/${requestId}`, 'PUT', error, { requestId, action });
       throw new Error(error.response?.data?.error || 'Failed to process join request');
     }
   }
@@ -622,7 +466,7 @@ class ApiService {
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     } else {
-      console.warn('⚠️ No token found for authenticated request to:', endpoint);
+      logger.logWarn('No token found for authenticated request', { endpoint });
     }
 
     if (data) {
@@ -633,7 +477,7 @@ class ApiService {
       config.params = params;
     }
 
-    console.log('🔄 Making API request:', {
+    logger.logDebug('Making API request', {
       method,
       url: config.url,
       hasToken: !!token,
