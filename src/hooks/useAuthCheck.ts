@@ -22,11 +22,16 @@ export const useAuthCheck = ({ userToken2, setIsTokenExpiredModalOpen }: UseAuth
     const keepLogin = async () => {
       // Prevent multiple simultaneous calls
       if (isRunningRef.current || hasRunRef.current) {
+        console.log('keepLogin: already running or completed');
         return;
       }
 
-      if (userToken) {
+      // Only run if we have a token and we're not on the login page
+      if (userToken && window.location.pathname !== '/login') {
+        console.log('keepLogin: starting token validation');
         isRunningRef.current = true;
+        hasRunRef.current = true; // Mark as run immediately to prevent re-runs
+        
         try {
           const res = await axios.get(`${API_URL}/hots_auth/keepLogin`, {
             headers: {
@@ -43,25 +48,25 @@ export const useAuthCheck = ({ userToken2, setIsTokenExpiredModalOpen }: UseAuth
               user: userData,
               token: res.data.tokek
             }));
-            hasRunRef.current = true;
+            console.log('keepLogin: token validated successfully');
           }
         } catch (err) {
           console.error('Keep login error:', err);
-          setIsTokenExpiredModalOpen(true);
+          // Only show modal if we're not on login page
+          if (window.location.pathname !== '/login') {
+            setIsTokenExpiredModalOpen(true);
+          }
         } finally {
           isRunningRef.current = false;
         }
       }
     };
 
-    // Only run once when component mounts
-    if (!hasRunRef.current) {
+    // Only run once when component mounts and not on login page
+    if (!hasRunRef.current && window.location.pathname !== '/login') {
       keepLogin();
     }
-  }, []); // Remove dependencies to prevent re-runs
+  }, []); // Remove all dependencies to prevent re-runs
 
-  // Reset when token changes
-  useEffect(() => {
-    hasRunRef.current = false;
-  }, [userToken]);
+  // Don't reset when token changes to prevent loops
 };

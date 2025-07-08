@@ -21,27 +21,26 @@ const Login = () => {
   const [forgotToggle, setForgotToggle] = useState(false);
   const [lockedAccount, setLockedAccount] = useState(false);
   const [hasRedirected, setHasRedirected] = useState(false);
-  const [redirectTimeout, setRedirectTimeout] = useState<NodeJS.Timeout | null>(null);
 
-  // Single redirect logic - only redirect once when authenticated
+  // Clear any existing token validation when entering login page
+  useEffect(() => {
+    console.log('Login page mounted, auth state:', isAuthenticated);
+  }, []);
+
+  // Handle redirect only once when authenticated
   useEffect(() => {
     if (isAuthenticated && !hasRedirected) {
+      console.log('User is authenticated, redirecting to dashboard...');
       setHasRedirected(true);
       
-      // Clear any existing timeout
-      if (redirectTimeout) {
-        clearTimeout(redirectTimeout);
-      }
-      
-      // Use setTimeout to prevent multiple rapid navigation calls
-      const timeout = setTimeout(() => {
-        console.log('Redirecting to dashboard...');
+      // Use a timeout to ensure state is settled before navigation
+      const timeoutId = setTimeout(() => {
         navigate('/', { replace: true });
-      }, 500); // Slightly longer delay to ensure state is settled
-      
-      setRedirectTimeout(timeout);
+      }, 100);
+
+      return () => clearTimeout(timeoutId);
     }
-  }, [isAuthenticated, hasRedirected, navigate, redirectTimeout]);
+  }, [isAuthenticated, hasRedirected, navigate]);
 
   // Reset login attempts when going back to login
   useEffect(() => {
@@ -50,25 +49,12 @@ const Login = () => {
     }
   }, [forgotToggle, lockedAccount, dispatch]);
 
-  // Reset redirect flag when authentication changes
+  // Reset redirect flag when leaving authentication
   useEffect(() => {
     if (!isAuthenticated) {
       setHasRedirected(false);
-      if (redirectTimeout) {
-        clearTimeout(redirectTimeout);
-        setRedirectTimeout(null);
-      }
     }
-  }, [isAuthenticated, redirectTimeout]);
-
-  // Cleanup timeout on unmount
-  useEffect(() => {
-    return () => {
-      if (redirectTimeout) {
-        clearTimeout(redirectTimeout);
-      }
-    };
-  }, [redirectTimeout]);
+  }, [isAuthenticated]);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-0 to-blue-100 flex items-center justify-center p-4">

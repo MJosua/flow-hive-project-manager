@@ -81,12 +81,14 @@ const Loginform = ({
     }
   }, [error, isLoading, toast, setLockedAccount]);
 
-  // Show success toast when login succeeds - but only once
+  // Show success toast when login succeeds - but only once and not if already authenticated
   useEffect(() => {
     if (isAuthenticated && !isLoading && !error && !hasShownSuccessToast) {
+      console.log('Login successful, showing success toast');
       toast({
         title: "Login Successful",
         description: "Welcome back to HOTS",
+        duration: 3000,
       });
       setHasShownSuccessToast(true);
     }
@@ -116,7 +118,8 @@ const Loginform = ({
     e.preventDefault();
     
     // Prevent multiple submissions
-    if (isLoading) {
+    if (isLoading || isAuthenticated) {
+      console.log('Preventing duplicate submission:', { isLoading, isAuthenticated });
       return;
     }
     
@@ -141,7 +144,7 @@ const Loginform = ({
         password: credentials.password,
         asin: credentials.password, // Required for localhost API login
       })).unwrap();
-      console.log("credentials,", credentials);
+      console.log("Login dispatch successful");
     } catch (err) {
       console.error('❌ Login dispatch error:', err);
     }
@@ -223,7 +226,7 @@ const Loginform = ({
           <Button 
             type="submit"
             className="w-full bg-blue-900 hover:bg-blue-800"
-            disabled={isLoading}
+            disabled={isLoading || isAuthenticated}
           >
             {isLoading ? (
               <>
