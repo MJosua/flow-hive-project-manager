@@ -20,6 +20,15 @@ interface CreateTaskModalProps {
   defaultStatus?: string;
 }
 
+interface User {
+  user_id: number;
+  username: string;
+  firstname: string;
+  lastname: string;
+  uid?: string;
+  email?: string;
+}
+
 const CreateTaskModal: React.FC<CreateTaskModalProps> = ({
   isOpen,
   onClose,
@@ -40,7 +49,7 @@ const CreateTaskModal: React.FC<CreateTaskModalProps> = ({
   
   const [newTag, setNewTag] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const [users, setUsers] = useState<Array<{ user_id: number; username: string; firstname: string; lastname: string }>>([]);
+  const [users, setUsers] = useState<User[]>([]);
 
   useEffect(() => {
     if (isOpen) {
@@ -223,10 +232,10 @@ const CreateTaskModal: React.FC<CreateTaskModalProps> = ({
                   <SelectValue placeholder="Select assignee" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="unassigned">Unassigned</SelectItem>
+                  <SelectItem value="">Unassigned</SelectItem>
                   {users.map(user => (
                     <SelectItem key={user.user_id} value={user.user_id.toString()}>
-                      {user.firstname} {user.lastname} ({user.uid || user.username})
+                      {user.firstname} {user.lastname} ({user.username})
                     </SelectItem>
                   ))}
                 </SelectContent>

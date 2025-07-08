@@ -1,13 +1,17 @@
+
 import React, { useState, useEffect } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { Home, FolderOpen, CheckSquare, Users, Building, UserCheck, Settings, Bell } from 'lucide-react';
 import { useAppSelector, useAppDispatch } from '@/hooks/useAppSelector';
 import { selectCurrentUser, logout } from '@/store/slices/authSlice';
 import { apiService } from '@/services/apiService';
-import NotificationCenter from '@/components/notifications/NotificationCenter';
+import { NotificationCenter } from '@/components/notifications/NotificationCenter';
 
 interface AppLayoutNewProps {
   children: React.ReactNode;
+  searchValue?: string;
+  onSearchChange?: (value: string) => void;
+  searchPlaceholder?: string;
 }
 
 interface NavItem {
@@ -23,7 +27,7 @@ interface Notification {
   read: boolean;
 }
 
-const AppLayoutNew: React.FC<AppLayoutNewProps> = ({ children }) => {
+const AppLayoutNew: React.FC<AppLayoutNewProps> = ({ children, searchValue, onSearchChange, searchPlaceholder }) => {
   const user = useAppSelector(selectCurrentUser);
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
@@ -89,6 +93,19 @@ const AppLayoutNew: React.FC<AppLayoutNewProps> = ({ children }) => {
             </div>
 
             <div className="flex items-center space-x-4">
+              {/* Search Bar */}
+              {searchValue !== undefined && onSearchChange && (
+                <div className="hidden md:block">
+                  <input
+                    type="text"
+                    placeholder={searchPlaceholder || "Search..."}
+                    value={searchValue}
+                    onChange={(e) => onSearchChange(e.target.value)}
+                    className="w-64 px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  />
+                </div>
+              )}
+
               {/* Notifications */}
               <button
                 className="relative p-2 text-gray-400 hover:text-gray-500"
