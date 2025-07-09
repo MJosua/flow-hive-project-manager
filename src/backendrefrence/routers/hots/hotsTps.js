@@ -1,10 +1,10 @@
 const express = require('express');
 const route = express.Router();
 
-const { decodeTokenHT } = require('../../config/encrypts');
+const { decodeTokenHT } = require('../config/encrypts');
 const { hotsTps } = require('../../controller');
 
-const { hotsPS } = require('../../config/uploader')
+const { hotsPS } = require('../config/uploader')
 
 //pricing structure uploader
 const uploadFilePS = hotsPS('pricing_structure', 'files').array('file', 10);

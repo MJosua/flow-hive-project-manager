@@ -21,25 +21,7 @@ module.exports = {
           WHERE tm2.team_id = t.team_id AND tm2.team_leader = 1
           LIMIT 1
         ) AS team_leader_name,
-        COUNT(DISTINCT tm.user_id) AS member_count,
-
-        -- Add members list
-        (
-          SELECT JSON_ARRAYAGG(
-            JSON_OBJECT(
-              'member_id', tm3.member_id,
-              'user_id', tm3.user_id,
-              'member_desc', tm3.member_desc,
-              'creation_date', tm3.creation_date,
-              'finished_date', tm3.finished_date,
-              'team_leader', tm3.team_leader,
-              'updated_date', tm3.updated_date,
-              'finished_marker', tm3.finished_marker
-            )
-          )
-          FROM hots.m_team_member tm3
-          WHERE tm3.team_id = t.team_id
-        ) AS members
+        COUNT(DISTINCT tm.user_id) AS member_count
       FROM hots.m_team t
       LEFT JOIN hots.m_department d ON t.department_id = d.department_id
       LEFT JOIN hots.m_team_member tm ON t.team_id = tm.team_id
@@ -69,8 +51,6 @@ module.exports = {
       res.status(500).json({ success: false, error: 'Failed to fetch teams' });
     }
   },
-
-
 
   getTeamDetail: async (req, res) => {
     let date = new Date();

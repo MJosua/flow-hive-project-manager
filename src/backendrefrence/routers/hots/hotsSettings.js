@@ -1,6 +1,6 @@
 const express = require("express");
 const route = express.Router();
-const { generateTokenHT, decodeTokenHT } = require('../../config/encrypts')
+const { generateTokenHT, decodeTokenHT } = require('../config/encrypts')
 const { hotsSettingsController, hotsSRFController } = require('../../controller');
 
 

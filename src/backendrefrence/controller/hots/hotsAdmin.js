@@ -65,7 +65,7 @@ module.exports = {
                         let totalDataLength = results.length
                         let totalPage = Math.round(results.length / limit)
 
-                        res.status(200).send({ success: true, packet, totalPage, totalDataLength, page });
+                        res.status(200).send({ packet, totalPage, totalDataLength, page });
                         console.log(timestamp + " getAccount success !")
 
                     } else {
@@ -74,7 +74,7 @@ module.exports = {
                         let totalDataLength = 0
                         let totalPage = 0
 
-                        res.status(200).send({ success: true, packet, totalPage, totalDataLength, page });
+                        res.status(200).send({ packet, totalPage, totalDataLength, page });
                         console.log(timestamp + " getAccount success no data!")
                     }
                 }
@@ -89,94 +89,8 @@ module.exports = {
         }
 
 
-    },
-
-    getAccountbydepartment: async (req, res) => {
-
-        let date = new Date();
-        let timestamp = redColor + date.toLocaleDateString('id') + ' ' + date.toLocaleTimeString('id') + ' : ' + ' ';
-
-        //untuk pagination
-        let page = parseInt(req.query.page) ? parseInt(req.query.page) : 1;
-        let limit = parseInt(req.query.limit) ? parseInt(req.query.limit) : 9999;
-        let desc = req.query.desc ? `order by u.uid ASC ` : `order by u.uid DESC`;
-        let find = req.query.find ? ` AND u.uid LIKE '%${req.query.find}%'   ` : ''
-
-        let paramGetAccountData = [req.params.department_id]
-
-
-        const startIndex = (page - 1) * limit;
-        const endIndex = page * limit;
-
-        if (req.dataToken.role_id = 4) {
-
-            let queryGetAccount = ` 
-            SELECT
-                u.user_id, 
-                u.firstname,
-                u.lastname,
-                u.uid,
-                u.last_pswd_changed,
-                u.active,
-                u.email,
-                u.nik,
-                u.phone,
-                u.grade_id,
-                r.role_name,
-                d.department_name,  
-                u.superior_id 
-            FROM
-                user u
-            LEFT JOIN m_role r ON
-                u.role_id = r.role_id 
-            LEFT JOIN m_department d ON 
-                u.department_id = d.department_id
-            WHERE r.role_id IN (1,2,4) 
-            and
-            d.department_id = ${paramGetAccountData}           
-            `+ desc + find;
-
-            dbHots.execute(queryGetAccount, (err, results) => {
-
-                if (err) {
-
-                    res.status(500).send({ success: false, message: err });
-                    console.log(timestamp + "Error getAccount !", err)
-
-                } else {
-                    if (results[0]) {
-
-                        let packet = results.slice(startIndex, endIndex)
-                        let totalDataLength = results.length
-                        let totalPage = Math.round(results.length / limit)
-
-                        res.status(200).send({ success: true, packet, totalPage, totalDataLength, page });
-                        console.log(timestamp + " getAccount success !")
-
-                    } else {
-
-                        let packet = []
-                        let totalDataLength = 0
-                        let totalPage = 0
-
-                        res.status(200).send({ success: true, packet, totalPage, totalDataLength, page });
-                        console.log(timestamp + " getAccount success no data!")
-                    }
-                }
-
-            })
-
-        } else {
-            res.status(401).send({
-                success: false,
-                message: "UNATHORIZED ADMIN ONLY"
-            })
-        }
-
-
-    },
-
-    createAccount: async (req, res) => {
+    }
+    , createAccount: async (req, res) => {
 
         let date = new Date();
         let timestamp = redColor + date.toLocaleDateString('id') + ' ' + date.toLocaleTimeString('id') + ' : ' + ' ';
