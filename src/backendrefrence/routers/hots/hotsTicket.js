@@ -1,9 +1,9 @@
 const express = require('express')
 const route = express.Router();
-const { decodeTokenHT } = require('../config/encrypts')
+const { decodeTokenHT } = require('../../config/encrypts')
 
 const { hotsTicket } = require('../../controller');
-const { hotsPS, hotsITSupport, hotsITComment } = require('../config/uploader');
+const { hotsPS, hotsITSupport, hotsITComment } = require('../../config/uploader');
 
 const uploadFileITSupport = hotsITSupport('it_support', 'it_support').array('file', 10);
 const uploadFilePricingStructure = hotsPS('pricing_structure', 'pricing_structure').array('file', 10);

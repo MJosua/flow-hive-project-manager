@@ -416,7 +416,7 @@ class ApiService {
     }
   }
 
-
+  
 
   // Notification methods
   async getNotifications() {

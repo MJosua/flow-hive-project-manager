@@ -129,6 +129,7 @@ const Department = () => {
                 <div>
                   <p className="text-sm font-medium text-gray-600">Department Head</p>
                   <p className="text-lg font-semibold">{department.head_name}</p>
+                  {console.log("department",department)}
                 </div>
               </div>
             </CardContent>

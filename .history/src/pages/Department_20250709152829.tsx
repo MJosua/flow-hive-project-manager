@@ -38,6 +38,7 @@ const Department = () => {
 
       setDepartment(deptResponse.data);
       setTeams(teamsResponse.data || []);
+      console.log("membersResponse.data.packet",membersResponse)
       setMembers(membersResponse || []);
     } catch (error) {
       console.error('Error fetching department info:', error);

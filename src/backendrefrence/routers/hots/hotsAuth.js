@@ -1,8 +1,8 @@
 const express = require("express");
 const router = express.Router();
-const { readToken } = require('../config/encrypts')
+const { readToken } = require('../../config/encrypts')
 const { hotsAuth } = require('../../controller')
-const { decodeTokenHT } = require('../config/encrypts')
+const { decodeTokenHT } = require('../../config/encrypts')
 
 //auth dasar
 router.post('/login', hotsAuth.login);

@@ -404,7 +404,7 @@ class ApiService {
     }
   }
 
-  async getUsersbyDepartment(filters: any = {}, department_id: number) {
+  async getUsersbyDepartment(department_id: any = {}) {
     try {
       logger.logApiRequest(`/hots_admin/account/${department_id}`, 'GET', filters);
       const response = await this.makeRequest('GET', `/hots_admin/account/${department_id}`, null, filters);
@@ -416,7 +416,7 @@ class ApiService {
     }
   }
 
-
+  
 
   // Notification methods
   async getNotifications() {

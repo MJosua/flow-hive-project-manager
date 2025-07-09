@@ -404,20 +404,6 @@ class ApiService {
     }
   }
 
-  async getUsersbyDepartment(filters: any = {}, department_id: number) {
-    try {
-      logger.logApiRequest(`/hots_admin/account/${department_id}`, 'GET', filters);
-      const response = await this.makeRequest('GET', `/hots_admin/account/${department_id}`, null, filters);
-      logger.logApiSuccess(`/hots_admin/account/${department_id}`, 'GET', 200, response.data);
-      return response.data.packet;
-    } catch (error: any) {
-      logger.logApiError(`/hots_admin/account/${department_id}`, 'GET', error, filters);
-      throw new Error(error.response?.data?.error || 'Failed to fetch users');
-    }
-  }
-
-
-
   // Notification methods
   async getNotifications() {
     try {

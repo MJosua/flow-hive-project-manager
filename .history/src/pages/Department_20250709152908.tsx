@@ -38,6 +38,7 @@ const Department = () => {
 
       setDepartment(deptResponse.data);
       setTeams(teamsResponse.data || []);
+      console.log("membersResponse.data.packet",membersResponse)
       setMembers(membersResponse || []);
     } catch (error) {
       console.error('Error fetching department info:', error);
@@ -129,6 +130,7 @@ const Department = () => {
                 <div>
                   <p className="text-sm font-medium text-gray-600">Department Head</p>
                   <p className="text-lg font-semibold">{department.head_name}</p>
+                  {console.log("department",department)}
                 </div>
               </div>
             </CardContent>

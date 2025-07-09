@@ -1,10 +1,11 @@
 const express = require("express");
 const route = express.Router();
-const { generateTokenHT, decodeTokenHT } = require('../config/encrypts')
+const { generateTokenHT, decodeTokenHT } = require('../../config/encrypts')
 const { hotsAdmin } = require('../../controller')
 
 //get data
 route.get("/account", decodeTokenHT, hotsAdmin.getAccount);
+route.get("/account/:department_id", decodeTokenHT, hotsAdmin.getAccountbydepartment);
 route.get("/role", decodeTokenHT, hotsAdmin.getRole);
 route.get("/department", decodeTokenHT, hotsAdmin.getDepartment);
 route.get("/team", decodeTokenHT, hotsAdmin.getTeam);

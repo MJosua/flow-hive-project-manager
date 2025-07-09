@@ -33,12 +33,13 @@ const Department = () => {
       const [deptResponse, teamsResponse, membersResponse] = await Promise.all([
         apiService.getDepartmentDetail(user.department_id.toString()),
         apiService.getTeams({ department_id: user.department_id }),
-        apiService.getUsersbyDepartment({}, user.department_id)
+        apiService.getUsers({ department_id: user.department_id })
       ]);
 
       setDepartment(deptResponse.data);
       setTeams(teamsResponse.data || []);
-      setMembers(membersResponse || []);
+      console.log("membersResponse.data.packet",membersResponse.data)
+      setMembers(membersResponse.data.packet || []);
     } catch (error) {
       console.error('Error fetching department info:', error);
     } finally {
